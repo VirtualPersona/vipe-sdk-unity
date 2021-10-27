@@ -5,9 +5,23 @@ using UnityEngine;
 public class Structs
 {
     [System.Serializable]
-    public struct LoginDto
+    public struct LoginRequestDto
+    {
+        public string email;
+        public string password;
+    }
+
+    [System.Serializable]
+    public struct LoginResponseDto
     {
         public string userId;
+    }
+
+    [System.Serializable]
+    public struct SearchAvatarsDto
+    {
+        public int skip;
+        public int limit;
     }
 
     [System.Serializable]

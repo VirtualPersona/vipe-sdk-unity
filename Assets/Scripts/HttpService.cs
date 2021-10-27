@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using System.Text;
 
 public class HttpService
 {
@@ -15,9 +16,13 @@ public class HttpService
         this.baseUri = baseUri;
     }
 
-    public IEnumerator Post(string resource, WWWForm body, System.Action<string> callbackResult)
+    public IEnumerator Post<T>(string resource, T body, System.Action<string> callbackResult)
     {
-        UnityWebRequest request = UnityWebRequest.Post(this.baseUri + resource, body);
+        string json = JsonUtility.ToJson(body);
+        UnityWebRequest request = new UnityWebRequest(this.baseUri + resource, "POST");
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
         return this.HttpMethod(request, callbackResult);
     }
 
@@ -27,7 +32,8 @@ public class HttpService
         return this.HttpMethod(request, callbackResult);
     }
 
-    public IEnumerator GetSprite(string url, System.Action<Sprite> callbackResult)
+    // Pensar en refactorizar este método para que utilice HttpMethod y evitar duplicar código
+    public IEnumerator GetTexture(string url, System.Action<Texture2D> callbackResult)
     {
         UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
         yield return request.SendWebRequest();
@@ -35,13 +41,13 @@ public class HttpService
             throw new System.Exception("Error requesting to " + request.url + ", error: " + request.error);
 
         Texture2D tex = ((DownloadHandlerTexture) request.downloadHandler).texture;
-        Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(tex.width / 2, tex.height / 2));
-        callbackResult(sprite);
+        callbackResult(tex);
     }
 
     private IEnumerator HttpMethod(UnityWebRequest request, System.Action<string> callbackResult)
     {
         request.SetRequestHeader("API-KEY", apiKey);
+        request.SetRequestHeader("Content-Type", "application/json");
         yield return request.SendWebRequest();
 
         if (request.isNetworkError)

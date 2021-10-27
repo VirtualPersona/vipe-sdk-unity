@@ -12,7 +12,7 @@ public class CryptoAvatars
 
     public CryptoAvatars(string apiKey)
     {
-        const string urlServer = "https://api.cryptoavatars.io/";
+        const string urlServer = "http://localhost:3000/";
         this.httpService = new HttpService(apiKey, urlServer);
         this.userLoggedIn = false;
 
@@ -22,12 +22,12 @@ public class CryptoAvatars
     
     public IEnumerator UserLogin(string email, string password, System.Action<bool> onLoginResult)
     {
-        WWWForm body = new WWWForm();
-        body.AddField("email", email);
-        body.AddField("password", password);
-        return this.httpService.Post("login-pass", body, (string loginResult) => {
-            Debug.Log(loginResult);
-            Structs.LoginDto loginResponse = JsonUtility.FromJson<Structs.LoginDto>(loginResult);
+        Structs.LoginRequestDto loginRequestDto = new Structs.LoginRequestDto();
+        loginRequestDto.email = email;
+        loginRequestDto.password = password;
+
+        return this.httpService.Post<Structs.LoginRequestDto>("login-pass", loginRequestDto, (string loginResult) => {
+            Structs.LoginResponseDto loginResponse = JsonUtility.FromJson<Structs.LoginResponseDto>(loginResult);
             this.userLoggedIn = loginResponse.userId != null;
             this.userId = loginResponse.userId;
             onLoginResult(this.userLoggedIn);
@@ -36,6 +36,7 @@ public class CryptoAvatars
 
     public IEnumerator GetUserAvatars(System.Action<Structs.AvatarsArray> onAvatarsResult)
     {
+        // Mejorar
         if (!userLoggedIn)
             return null;
 
@@ -47,22 +48,27 @@ public class CryptoAvatars
         });
     }
 
-    public IEnumerator GetAvatars(System.Action<Structs.AvatarsArray> onAvatarsResult, int itemsPerPage = 10, int pageNum = 0)
+    public IEnumerator GetAvatars(int skip, int limit, System.Action<Structs.AvatarsArray> onAvatarsResult)
     {
-        WWWForm body = new WWWForm();
-        return this.httpService.Post("avatars/list", body, (string avatarsResult) => {
+        Structs.SearchAvatarsDto searchAvatarsDto = new Structs.SearchAvatarsDto();
+        searchAvatarsDto.skip = skip;
+        searchAvatarsDto.limit = limit;
+
+        return this.httpService.Post<Structs.SearchAvatarsDto>("avatars/list", searchAvatarsDto, (string avatarsResult) => {
             // Unity no soporta jsonArray en la raíz al deserializar, así que lo encapsulamos en un objeto
             string JSONToParse = "{\"avatars\":" + avatarsResult + "}";
+            Debug.Log(JSONToParse);
             Structs.AvatarsArray avatarsResponse = JsonUtility.FromJson<Structs.AvatarsArray>(JSONToParse);
             onAvatarsResult(avatarsResponse);
         });
     }
 
-    IEnumerator GetAvatarImage(string imageUrl, System.Action<Sprite> onSpriteResult)
+    public IEnumerator GetAvatarPreviewImage(string imageUrl, System.Action<Texture2D> onImage)
     {
-        return this.httpService.GetSprite(imageUrl, (sprite) =>
+        imageUrl = imageUrl.Replace("gateway.pinata.cloud", "ipfs.io");
+        return this.httpService.GetTexture(imageUrl, (texture) =>
         {
-            onSpriteResult(sprite);
+            onImage(texture);
         });
     }
 
