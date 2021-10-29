@@ -1,6 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using UniGLTF;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.Networking;
+using VRM;
 
 public class CryptoAvatars
 {
@@ -12,7 +17,7 @@ public class CryptoAvatars
 
     public CryptoAvatars(string apiKey)
     {
-        const string urlServer = "http://localhost:3000/";
+        const string urlServer = "https://api.cryptoavatars.io/";
         this.httpService = new HttpService(apiKey, urlServer);
         this.userLoggedIn = false;
 
@@ -77,4 +82,70 @@ public class CryptoAvatars
         return null;
     }
 
+    public IEnumerator downloadVRM(string url)
+    {
+        UnityWebRequest www = new UnityWebRequest(url);
+        //string path = Path.Combine(Application.dataPath, "test.vrm");
+        www.downloadHandler = new DownloadHandlerBuffer();
+        yield return www.SendWebRequest();
+
+        if (www.isNetworkError || www.isHttpError)
+        {
+            Debug.Log(www.error);
+        }
+        else
+        {
+            // Show results as text
+            Debug.Log(www.downloadHandler.text);
+
+            // Or retrieve results as binary data
+            byte[] results = www.downloadHandler.data;
+
+            File.WriteAllBytes(Path.Combine(Application.dataPath, "test.vrm"), results);
+            if (GameObject.Find("VRM"))
+            {
+                MonoBehaviour.Destroy(GameObject.Find("VRM"));
+            }
+            GameObject avatar = ImportVRM(Path.Combine(Application.dataPath, "test.vrm"));
+
+            avatar.GetComponent<Animator>().runtimeAnimatorController = Resources.Load("Anims/VRM") as RuntimeAnimatorController;
+            avatar.transform.eulerAngles += new Vector3(0, 180, 0);
+            avatar.transform.position += new Vector3(0, GameObject.Find("Cylinder").transform.localScale.y, 0);
+        }
+    }
+    private GameObject ImportVRM(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            return null;
+        }
+
+        if (Application.isPlaying)
+        {
+            return ImportRuntime(path);
+        }
+
+        if (path.StartsWithUnityAssetPath())
+        {
+            Debug.LogWarningFormat("disallow import from folder under the Assets");
+            return null;
+        }
+        return null;
+
+    }
+
+    private GameObject ImportRuntime(string path)
+    {
+        // load into scene
+        var data = new GlbFileParser(path).Parse();
+        // VRM extension を parse します
+        var vrm = new VRMData(data);
+        using (var context = new VRMImporterContext(vrm))
+        {
+            var loaded = context.Load();
+            loaded.EnableUpdateWhenOffscreen();
+            loaded.ShowMeshes();
+            return loaded.gameObject;
+        }
+    }
 }

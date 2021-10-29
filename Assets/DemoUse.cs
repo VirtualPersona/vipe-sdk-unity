@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -93,6 +92,8 @@ public class DemoUse : MonoBehaviour
 
                     Debug.Log(urlVrm);
                     // Cargar VRM en el pedestal, descargarlo y limpiar recursos al cargar otro vrm
+                    IEnumerator downloadVRM = this.cryptoAvatars.downloadVRM(urlVrm);
+                    StartCoroutine(downloadVRM);
 
                 });
 
@@ -107,5 +108,7 @@ public class DemoUse : MonoBehaviour
 
         StartCoroutine(getAvatars);
     }
+
+
 
 }
