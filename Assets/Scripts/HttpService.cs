@@ -1,8 +1,8 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using System.Text;
+using System.IO;
 
 public class HttpService
 {
@@ -44,13 +44,37 @@ public class HttpService
         callbackResult(tex);
     }
 
+    public IEnumerator Download3DModel(string url, System.Action<string> callbackResult)
+    {
+        UnityWebRequest request = new UnityWebRequest(url);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        yield return request.SendWebRequest();
+
+        if (request.isNetworkError || request.isHttpError)
+        {
+            throw new System.Exception("Error requesting to " + request.url + ", error: " + request.error);
+        }
+        else
+        {
+            byte[] results = request.downloadHandler.data;
+            string dirPath = Path.Combine(Application.dataPath, "cryptoavatars");
+            Debug.Log("DIR PATH: " + dirPath);
+            if (!Directory.Exists(dirPath))
+                Directory.CreateDirectory(dirPath);
+            
+            string path = Path.Combine(dirPath, "avatarDownloaded.vrm");
+            File.WriteAllBytes(path, results);
+            callbackResult(path);
+        }
+    }
+
     private IEnumerator HttpMethod(UnityWebRequest request, System.Action<string> callbackResult)
     {
         request.SetRequestHeader("API-KEY", apiKey);
         request.SetRequestHeader("Content-Type", "application/json");
         yield return request.SendWebRequest();
 
-        if (request.isNetworkError)
+        if (request.isNetworkError || request.isHttpError)
             throw new System.Exception("Error requesting to " + request.url + ", error: " + request.error);
 
         callbackResult(request.downloadHandler.text);

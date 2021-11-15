@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class DemoUse : MonoBehaviour
 {
-
+    // TEST API-KEY , request your own api key. Will be disabled soon.
     private const string API_KEY = "1ab2c3d4e5f61ab2c3d4e5f6";
 
     private bool userLoggedIn;
@@ -90,15 +90,21 @@ public class DemoUse : MonoBehaviour
                 CardAvatarController cardAvatarController = cardAvatar.GetComponent<CardAvatarController>();
                 cardAvatarController.SetAvatarData(avatar.metadata.name, avatar.metadata.asset, i, urlVrm => {
 
-                    Debug.Log(urlVrm);
-                    // Cargar VRM en el pedestal, descargarlo y limpiar recursos al cargar otro vrm
-                    IEnumerator downloadVRM = this.cryptoAvatars.downloadVRM(urlVrm);
+                    if (GameObject.Find("VRM"))
+                        Destroy(GameObject.Find("VRM"));
+
+                    IEnumerator downloadVRM = this.cryptoAvatars.GetAvatarVRMModel(urlVrm, (model) =>
+                    {
+                        model.GetComponent<Animator>().runtimeAnimatorController = Resources.Load("Anims/VRM") as RuntimeAnimatorController;
+                        model.transform.eulerAngles += new Vector3(0, 180, 0);
+                        model.transform.position += new Vector3(0, GameObject.Find("Cylinder").transform.localScale.y, 0);
+                    });
+
                     StartCoroutine(downloadVRM);
 
                 });
 
                 IEnumerator loadAvatarPreviewImage = this.cryptoAvatars.GetAvatarPreviewImage(avatar.metadata.image, texture => {
-                    //texture.Resize(250, 350);
                     cardAvatarController.LoadAvatarImage(texture);
                 });
 
