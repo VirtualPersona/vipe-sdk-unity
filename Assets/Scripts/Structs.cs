@@ -47,4 +47,33 @@ public class Structs
             public string[] tags;
         }
     }
+
+    [System.Serializable]
+    public struct NftsArray
+    {
+        public Nft[] nfts;
+        public int total;
+        public int page;
+        public string next;
+    }
+
+    [System.Serializable]
+    public struct Nft
+    {
+        public Metadata metadata;
+
+        [System.Serializable]
+        public struct Metadata
+        {
+            public string name;
+            public string description;
+            public string image;
+            public string asset;
+            public string createdBy;
+            public string createdAt;
+            public string[] tags;
+        }
+    }
+
+
 }

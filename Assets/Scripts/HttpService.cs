@@ -73,9 +73,12 @@ public class HttpService
         request.SetRequestHeader("API-KEY", apiKey);
         request.SetRequestHeader("Content-Type", "application/json");
         yield return request.SendWebRequest();
+        Debug.Log(request.url);
+        Debug.Log(request.isDone);
+        Debug.Log(request.downloadedBytes);
 
         if (request.isNetworkError || request.isHttpError)
-            throw new System.Exception("Error requesting to " + request.url + ", error: " + request.error);
+            throw new System.Exception("Error requesting to " + request.url + ", error: " + request.error + " ");
 
         callbackResult(request.downloadHandler.text);
     }

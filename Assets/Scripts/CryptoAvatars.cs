@@ -45,7 +45,7 @@ public class CryptoAvatars
         if (!userLoggedIn)
             return null;
 
-        return this.httpService.Get("avatars/owner/wallet", (string avatarsResult) => {
+        return this.httpService.Get("nfts/avatars/owner/wallet", (string avatarsResult) => {
             Structs.AvatarsArray avatarsResponse = JsonUtility.FromJson<Structs.AvatarsArray>(avatarsResult);
             onAvatarsResult(avatarsResponse);
         });
@@ -55,16 +55,31 @@ public class CryptoAvatars
      * skip & limit for pagination
      * onAvatarsResult -> callback to get Avatars info
      */
-    public IEnumerator GetAvatars(int skip, int limit, System.Action<Structs.AvatarsArray> onAvatarsResult)
+    public IEnumerator GetAvatars(int skip, int limit, string nexPageUrl, System.Action<Structs.NftsArray> onAvatarsResult)
     {
         Structs.SearchAvatarsDto searchAvatarsDto = new Structs.SearchAvatarsDto();
         searchAvatarsDto.skip = skip;
         searchAvatarsDto.limit = limit;
 
-        return this.httpService.Post<Structs.SearchAvatarsDto>("avatars/list", searchAvatarsDto, (string avatarsResult) => {
+        if(nexPageUrl != "")
+        {
+            return this.httpService.Post<Structs.SearchAvatarsDto>(nexPageUrl, searchAvatarsDto, (string avatarsResult) => {
+                // Unity no soporta jsonArray en la raíz al deserializar, así que lo encapsulamos en un objeto
+                //string JSONToParse = "{\"avatars\":" + avatarsResult + "}";
+
+                Structs.NftsArray avatarsResponse = JsonUtility.FromJson<Structs.NftsArray>(avatarsResult);
+                Debug.Log(avatarsResult);
+                onAvatarsResult(avatarsResponse);
+            });
+
+        }
+
+        return this.httpService.Post<Structs.SearchAvatarsDto>($"nfts/avatars/list?skip={searchAvatarsDto.skip}&limit={searchAvatarsDto.limit}", searchAvatarsDto, (string avatarsResult) => {
             // Unity no soporta jsonArray en la raíz al deserializar, así que lo encapsulamos en un objeto
-            string JSONToParse = "{\"avatars\":" + avatarsResult + "}";
-            Structs.AvatarsArray avatarsResponse = JsonUtility.FromJson<Structs.AvatarsArray>(JSONToParse);
+            //string JSONToParse = "{\"avatars\":" + avatarsResult + "}";
+
+            Structs.NftsArray avatarsResponse = JsonUtility.FromJson<Structs.NftsArray>(avatarsResult);
+            Debug.Log(avatarsResult);
             onAvatarsResult(avatarsResponse);
         });
     }
