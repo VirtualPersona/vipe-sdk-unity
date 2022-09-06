@@ -15,13 +15,20 @@ public class Structs
     public struct LoginResponseDto
     {
         public string userId;
+        public string wallet;
     }
 
     [System.Serializable]
-    public struct SearchAvatarsDto
+    public struct DefaultSearchAvatarsDto
     {
-        public int skip;
-        public int limit;
+        public string collectionAddress;
+        public string license;
+    }
+
+    public struct OwnerAvatarsDto
+    {
+        public string collectionAddress;
+        public string owner;
     }
 
     [System.Serializable]
@@ -52,9 +59,10 @@ public class Structs
     public struct NftsArray
     {
         public Nft[] nfts;
-        public int total;
+        public int totalNfts;
         public int page;
         public string next;
+        public string prev;
     }
 
     [System.Serializable]

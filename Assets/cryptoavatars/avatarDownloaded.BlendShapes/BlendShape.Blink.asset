@@ -15,6 +15,12 @@ MonoBehaviour:
   m_prefab: {fileID: 0}
   BlendShapeName: Blink
   Preset: 7
-  Values: []
+  Values:
+  - RelativePath: Body
+    Index: 15
+    Weight: 100
+  - RelativePath: Body
+    Index: 16
+    Weight: 100
   MaterialValues: []
   IsBinary: 0

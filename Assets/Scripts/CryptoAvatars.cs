@@ -14,7 +14,7 @@ public class CryptoAvatars
 
     public CryptoAvatars(string apiKey)
     {
-        const string urlServer = "https://api.cryptoavatars.io/";
+        const string urlServer = "https://api.cryptoavatars.io/v1/";
         this.httpService = new HttpService(apiKey, urlServer);
         this.userLoggedIn = false;
     }
@@ -22,7 +22,7 @@ public class CryptoAvatars
     /** 
      * onLoginResult -> callback to know if loggin was susscesfully
      */
-    public IEnumerator UserLogin(string email, string password, System.Action<bool> onLoginResult)
+    public IEnumerator UserLogin(string email, string password, System.Action<Structs.LoginResponseDto> onLoginResult)
     {
         Structs.LoginRequestDto loginRequestDto = new Structs.LoginRequestDto();
         loginRequestDto.email = email;
@@ -30,23 +30,29 @@ public class CryptoAvatars
 
         return this.httpService.Post<Structs.LoginRequestDto>("login-pass", loginRequestDto, (string loginResult) => {
             Structs.LoginResponseDto loginResponse = JsonUtility.FromJson<Structs.LoginResponseDto>(loginResult);
-            this.userLoggedIn = loginResponse.userId != null;
-            this.userId = loginResponse.userId;
-            onLoginResult(this.userLoggedIn);
+            Debug.Log("La wallet del pibe");
+            Debug.Log(loginResponse.wallet);
+
+            onLoginResult(loginResponse);
         });
     }
 
     /** 
      * onAvatarsResult -> callback to get Avatars info
      */
-    public IEnumerator GetUserAvatars(System.Action<Structs.AvatarsArray> onAvatarsResult)
+    public IEnumerator GetUserAvatars(string collectionAddress, string owner, string pageUrl,System.Action<Structs.NftsArray> onAvatarsResult)
     {
         // Mejorar
-        if (!userLoggedIn)
-            return null;
+        //if (!userLoggedIn)
+        //    return null;
 
-        return this.httpService.Get("nfts/avatars/owner/wallet", (string avatarsResult) => {
-            Structs.AvatarsArray avatarsResponse = JsonUtility.FromJson<Structs.AvatarsArray>(avatarsResult);
+        Structs.OwnerAvatarsDto searchAvatarsDto = new Structs.OwnerAvatarsDto();
+        searchAvatarsDto.collectionAddress = collectionAddress;
+        searchAvatarsDto.owner = owner;
+
+        return this.httpService.Post<Structs.OwnerAvatarsDto>(pageUrl, searchAvatarsDto, (string avatarsResult) => {
+
+            Structs.NftsArray avatarsResponse = JsonUtility.FromJson<Structs.NftsArray>(avatarsResult);
             onAvatarsResult(avatarsResponse);
         });
     }
@@ -55,33 +61,19 @@ public class CryptoAvatars
      * skip & limit for pagination
      * onAvatarsResult -> callback to get Avatars info
      */
-    public IEnumerator GetAvatars(int skip, int limit, string nexPageUrl, System.Action<Structs.NftsArray> onAvatarsResult)
+    public IEnumerator GetAvatars(string collectionAddress, string licenseType ,string pageUrl, System.Action<Structs.NftsArray> onAvatarsResult)
     {
-        Structs.SearchAvatarsDto searchAvatarsDto = new Structs.SearchAvatarsDto();
-        searchAvatarsDto.skip = skip;
-        searchAvatarsDto.limit = limit;
+        Structs.DefaultSearchAvatarsDto searchAvatarsDto = new Structs.DefaultSearchAvatarsDto();
+        searchAvatarsDto.collectionAddress = collectionAddress;
+        searchAvatarsDto.license = licenseType;
 
-        if(nexPageUrl != "")
-        {
-            return this.httpService.Post<Structs.SearchAvatarsDto>(nexPageUrl, searchAvatarsDto, (string avatarsResult) => {
-                // Unity no soporta jsonArray en la raíz al deserializar, así que lo encapsulamos en un objeto
-                //string JSONToParse = "{\"avatars\":" + avatarsResult + "}";
-
-                Structs.NftsArray avatarsResponse = JsonUtility.FromJson<Structs.NftsArray>(avatarsResult);
-                Debug.Log(avatarsResult);
-                onAvatarsResult(avatarsResponse);
-            });
-
-        }
-
-        return this.httpService.Post<Structs.SearchAvatarsDto>($"nfts/avatars/list?skip={searchAvatarsDto.skip}&limit={searchAvatarsDto.limit}", searchAvatarsDto, (string avatarsResult) => {
-            // Unity no soporta jsonArray en la raíz al deserializar, así que lo encapsulamos en un objeto
-            //string JSONToParse = "{\"avatars\":" + avatarsResult + "}";
+        return this.httpService.Post<Structs.DefaultSearchAvatarsDto>(pageUrl, searchAvatarsDto, (string avatarsResult) => {
 
             Structs.NftsArray avatarsResponse = JsonUtility.FromJson<Structs.NftsArray>(avatarsResult);
-            Debug.Log(avatarsResult);
             onAvatarsResult(avatarsResponse);
         });
+
+
     }
 
     /** 
@@ -90,7 +82,7 @@ public class CryptoAvatars
     public IEnumerator GetAvatarPreviewImage(string imageUrl, System.Action<Texture2D> onImage)
     {
         imageUrl = imageUrl.Replace("gateway.pinata.cloud", "usercollection.mypinata.cloud");
-        return this.httpService.GetTexture(imageUrl, (texture) =>
+        return this.httpService.DownloadImage(imageUrl, (texture) =>
         {
             onImage(texture);
         });

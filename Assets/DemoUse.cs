@@ -2,12 +2,12 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using static Structs;
 
 public class DemoUse : MonoBehaviour
 {
     // TEST API-KEY , request your own api key. Will be disabled soon.
-    //private const string API_KEY = "1ab2c3d4e5f61ab2c3d4e5f6";
-    private const string API_KEY = " $2b$10$cd85DoGHWH4h3tdMi9TAweJlmKWl3cdBuMlYXN16hPXqE4GbJZhcy";
+    private const string API_KEY = "$2b$10$jXmDbzXmgU7YjsshSRuSnOfdlMky/eUX7LPhJ0Y8jAtypyu4vJK1a";
 
     private bool userLoggedIn;
 
@@ -29,6 +29,8 @@ public class DemoUse : MonoBehaviour
     public Button loadMoreBtn;
     public Button loadPreviousBtn;
     public InputField pageInputField;
+    public Dropdown collectionSelector;
+    public Toggle openSourceToggle;
 
     //Configurable
     private int nftPerLoad = 20;
@@ -39,6 +41,13 @@ public class DemoUse : MonoBehaviour
     private int totalPages = 0;
 
     private string nextPage = "";
+    private string previousPage = "";
+
+    private string collectionAddressSelected = "0xc1def47cf1e15ee8c2a92f4e0e968372880d18d1";
+    private string licenseType = "CC0";
+
+    private string userWallet = "";
+    private bool openSource = true;
 
     public void Awake()
     {
@@ -53,15 +62,25 @@ public class DemoUse : MonoBehaviour
         string email = emailField.text;
         string pass = passField.text;
         IEnumerator login = cryptoAvatars.UserLogin(email, pass, onLoginResult => {
-            this.userLoggedIn = onLoginResult;
+            this.userLoggedIn = onLoginResult.userId != null;
+            
             if (this.userLoggedIn)
             {
-                errorLoginTxt.SetActive(false);
+                this.userWallet = onLoginResult.wallet;
+
+                avatarsPanelBtn.GetComponentInChildren<Text>().text = "Back to login";
+                avatarsPanelBtn.onClick.AddListener(backToLogin);
                 loginPanel.SetActive(false);
                 avatarsPanel.SetActive(true);
-                avatarsPanelBtn.GetComponentInChildren<Text>().text = "My avatars";
-                avatarsPanelBtn.onClick.AddListener(downloadAvatarsUsers);
-                this.downloadAvatars(nftsSkipped, nftPerLoad ,"");
+
+                this.downloadAvatarsUsers($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
+
+                loadMoreBtn.onClick.AddListener(loadMoreNfts);
+                loadPreviousBtn.onClick.AddListener(loadPreviousNfts);
+                pageInputField.onValueChanged.AddListener(loadNftsPage);
+                collectionSelector.onValueChanged.AddListener(changeCollection);
+                openSourceToggle.onValueChanged.AddListener(refreshAvatars);
+
                 return;
             }
 
@@ -76,13 +95,52 @@ public class DemoUse : MonoBehaviour
         avatarsPanelBtn.onClick.AddListener(backToLogin);
         loginPanel.SetActive(false);
         avatarsPanel.SetActive(true);
-        this.downloadAvatars(nftsSkipped, nftPerLoad,"");
+        this.downloadAvatars( $"nfts/avatars/list?skip=0&limit={nftPerLoad}");
         loadMoreBtn.onClick.AddListener(loadMoreNfts);
         loadPreviousBtn.onClick.AddListener(loadPreviousNfts);
         pageInputField.onValueChanged.AddListener(loadNftsPage);
+        collectionSelector.onValueChanged.AddListener(changeCollection);
+        openSourceToggle.onValueChanged.AddListener(refreshAvatars);
 
     }
-
+    private void changeCollection(int value)
+    {
+        switch (value)
+        {
+            case 0:
+                this.collectionAddressSelected = "0xc1def47cf1e15ee8c2a92f4e0e968372880d18d1";
+                break;
+            case 1:
+                this.collectionAddressSelected = "0xd047666daea0b7275e8d4f51fcff755aa05c3f0a";
+                break;
+            case 2:
+                this.collectionAddressSelected = "0x28ccbe824455a3b188c155b434e4e628babb6ffa";
+                break;
+        }
+        removeCurrentAvatarsCards();
+        if (this.userWallet != "")
+        {
+            this.downloadAvatarsUsers($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
+        }
+        else
+        {
+            this.downloadAvatars($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
+        }
+            
+    }
+    
+    private void refreshAvatars(bool value)
+    {
+        
+        if (this.userLoggedIn)
+        {
+            this.downloadAvatarsUsers($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
+        }
+        else
+        {
+            this.downloadAvatars($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
+        }
+    }
     private void backToLogin()
     {
         errorLoginTxt.SetActive(false);
@@ -93,11 +151,6 @@ public class DemoUse : MonoBehaviour
         {
             removeCurrentAvatarsCards();
         }
-    }
-
-    private void downloadAvatarsUsers()
-    {
-
     }
 
     private void removeCurrentAvatarsCards()
@@ -132,9 +185,9 @@ public class DemoUse : MonoBehaviour
 
             //Navigate to page
             int toSkip = page * nftPerLoad;
-            this.nftsSkipped = toSkip;
+            //this.nftsSkipped = toSkip;
 
-            downloadAvatars(nftsSkipped, nftPerLoad,"");
+            downloadAvatars($"nfts/avatars/list?skip={toSkip}&limit={this.nftPerLoad}");
 
         }
 
@@ -142,91 +195,139 @@ public class DemoUse : MonoBehaviour
 
     private void loadMoreNfts()
     {
-        //Remove card avatars already loaded
-        removeCurrentAvatarsCards();
+        
         this.nftsSkipped += this.nftPerLoad;
         if (this.nftsSkipped >= (this.totalNfts - this.nftPerLoad))
             this.nftsSkipped = this.totalNfts - this.nftPerLoad;
 
         //Load the new avatars
-        //Aquí si hay que pasar la url de next
-        downloadAvatars(nftsSkipped, nftPerLoad,this.nextPage);
+        if (this.nextPage != "")
+        {
+            //Remove card avatars already loaded
+            removeCurrentAvatarsCards();
+            downloadAvatars(this.nextPage);
+
+        }
 
     }
 
     private void loadPreviousNfts()
     {
-        //Remove card avatars already loaded
-        removeCurrentAvatarsCards();
+        
         
         this.nftsSkipped -= this.nftPerLoad;
         if (this.nftsSkipped < 0)
             this.nftsSkipped = 0;
 
         //Load the new avatars
-        downloadAvatars(nftsSkipped, nftPerLoad, "");
+        if(this.previousPage != "")
+        {
+            //Remove card avatars already loaded
+            downloadAvatars(this.previousPage);
+
+        }
 
     }
 
-    private void downloadAvatars(int skip, int limit, string nextPageUrl)
+    private void displayAndLoadAvatars(NftsArray onAvatarsResult)
     {
-        IEnumerator getAvatars = cryptoAvatars.GetAvatars(skip, limit, nextPageUrl, onAvatarsResult =>
+        Structs.Nft[] nfts = onAvatarsResult.nfts;
+        this.totalNfts = onAvatarsResult.totalNfts;
+        this.totalPages = totalNfts / nftPerLoad;
+
+        const string urlServer = "https://api.cryptoavatars.io/v1/";
+        int pos = urlServer.IndexOf(".io/v1/");
+
+        if (onAvatarsResult.next != null && onAvatarsResult.next != "Null" && onAvatarsResult.next != "")
+            this.nextPage = onAvatarsResult.next.Substring(pos + 7);
+        else
+            this.nextPage = "";
+
+        if (onAvatarsResult.prev != null && onAvatarsResult.prev != "Null" && onAvatarsResult.prev != "")
+            this.previousPage = onAvatarsResult.prev.Substring(pos + 7);
+        else
+            this.previousPage = "";
+
+        for (int i = 0; i < nfts.Length; i++)
         {
-            Structs.Nft[] nfts = onAvatarsResult.nfts;
-            this.totalNfts = onAvatarsResult.total;
-            this.totalPages = totalNfts / nftPerLoad;
+            // Create panel layout for each avatar
+            Structs.Nft nft = nfts[i];
+            GameObject cardAvatar = Instantiate(avatarPreviewLayout);
+            cardAvatar.transform.SetParent(contentScrollView.transform, false);
+            CardAvatarController cardAvatarController = cardAvatar.GetComponent<CardAvatarController>();
+            cardAvatarController.SetAvatarData(nft.metadata.name, nft.metadata.asset, i, urlVrm => {
 
-            int pos = onAvatarsResult.next.IndexOf(".io/");
-            this.nextPage = onAvatarsResult.next.Substring(pos+4);
+                if (GameObject.Find("VRM"))
+                    Destroy(GameObject.Find("VRM"));
 
+                IEnumerator downloadVRM = this.cryptoAvatars.GetAvatarVRMModel(urlVrm, (model) =>
+                {
+                    model.transform.Rotate(new Vector3(0, 180, 0));
+                    model.GetComponent<Animator>().runtimeAnimatorController = Resources.Load("Anims/Animator/ThirdPersonAnimatorController") as RuntimeAnimatorController;
 
-            for (int i = 0; i < nfts.Length; i++)
-            {
-                // Create panel layout for each avatar
-                Structs.Nft nft = nfts[i];
-                GameObject cardAvatar = Instantiate(avatarPreviewLayout);
-                cardAvatar.transform.SetParent(contentScrollView.transform, false);
-                CardAvatarController cardAvatarController = cardAvatar.GetComponent<CardAvatarController>();
-                cardAvatarController.SetAvatarData(nft.metadata.name, nft.metadata.asset, i, urlVrm => {
+                    //Adjust axis (It comes with Y and Z flipped) (Blender)
 
-                    if (GameObject.Find("VRM"))
-                        Destroy(GameObject.Find("VRM"));
+                    float h = Input.GetAxisRaw("Horizontal");
+                    float v = Input.GetAxisRaw("Vertical");
+                    Vector3 dir = new Vector3(h, 0, v);
+                    model.transform.InverseTransformDirection(dir);
 
-                    IEnumerator downloadVRM = this.cryptoAvatars.GetAvatarVRMModel(urlVrm, (model) =>
-                    {
-                        model.transform.Rotate(new Vector3(0, 180, 0));
-                        model.GetComponent<Animator>().runtimeAnimatorController = Resources.Load("Anims/Pruebas") as RuntimeAnimatorController;
-                        //
-                        //model.transform.eulerAngles = new Vector3(0.0f, -180.0f, 0.0f);
-                        //model.transform.eulerAngles += new Vector3(0, 180, 0);
-                        //model.transform.localScale.Scale(new Vector3(1, -1, 1));
-                        float h = Input.GetAxisRaw("Horizontal");
-                        float v = Input.GetAxisRaw("Vertical");
-                        Vector3 dir = new Vector3(h, 0, v);
-                        model.transform.InverseTransformDirection(dir);
+                    //model.transform.position += new Vector3(0, GameObject.Find("Cylinder").transform.localScale.y, 0);
 
-                        
-                        model.GetComponent<Animator>().stabilizeFeet = true;
-                        //model.transform.forward = new Vector3(0.0f, 0.0f, 1.0f);
-                        
-                        model.transform.position += new Vector3(0, GameObject.Find("Cylinder").transform.localScale.y, 0);
-                    });
+                    ////STANDARD ASSETS
 
-                    StartCoroutine(downloadVRM);
+                    Vector3 avatarSize = model.GetComponentInChildren<SkinnedMeshRenderer>().bounds.size;
+                    Debug.Log(avatarSize);
+
+                    model.AddComponent<CapsuleCollider>();
+                    model.GetComponent<CapsuleCollider>().height = avatarSize.y;
+                    model.GetComponent<CapsuleCollider>().center = new Vector3(0.0f, avatarSize.y / 2.0f, 0.0f);
+
+                    model.AddComponent<Rigidbody>().useGravity = true;
+
+                    model.AddComponent<UnityStandardAssets.Characters.ThirdPerson.ThirdPersonCharacter>();
+                    model.GetComponent<UnityStandardAssets.Characters.ThirdPerson.ThirdPersonCharacter>().m_JumpPower = 5.5f;
+                    model.GetComponent<UnityStandardAssets.Characters.ThirdPerson.ThirdPersonCharacter>().m_GroundCheckDistance = 0.4f;
+                    model.AddComponent<UnityStandardAssets.Characters.ThirdPerson.ThirdPersonUserControl>();
 
                 });
 
-                IEnumerator loadAvatarPreviewImage = this.cryptoAvatars.GetAvatarPreviewImage(nft.metadata.image, texture => {
-                    cardAvatarController.LoadAvatarImage(texture);
-                });
+                StartCoroutine(downloadVRM);
+                this.avatarsPanel.SetActive(false);
 
-                StartCoroutine(loadAvatarPreviewImage);
-            }
+            });
 
+            IEnumerator loadAvatarPreviewImage = this.cryptoAvatars.GetAvatarPreviewImage(nft.metadata.image, texture => {
+                cardAvatarController.LoadAvatarImage(texture);
+            });
 
-        });
+            StartCoroutine(loadAvatarPreviewImage);
+        }
+
+    }
+
+    private void downloadAvatars(string pageUrl)
+    {
+        removeCurrentAvatarsCards();
+        IEnumerator getAvatars = cryptoAvatars.GetAvatars(this.collectionAddressSelected,this.licenseType,pageUrl, onAvatarsResult => displayAndLoadAvatars(onAvatarsResult));
 
         StartCoroutine(getAvatars);
+    }
+
+    private void downloadAvatarsUsers(string pageUrl)
+    {
+        removeCurrentAvatarsCards();
+        Debug.Log(openSourceToggle.isOn);
+        if (openSourceToggle.isOn)
+        {
+            IEnumerator getAvatars = cryptoAvatars.GetAvatars(this.collectionAddressSelected, this.licenseType, pageUrl, onAvatarsResult => displayAndLoadAvatars(onAvatarsResult));
+            StartCoroutine(getAvatars);
+        }
+
+        //Use userWallet
+        IEnumerator getAvatarsUser = cryptoAvatars.GetUserAvatars(this.collectionAddressSelected, "0x607e7eca4d2bbc2e09a7b93a0b739eb7e4eabc90", pageUrl, onAvatarsResult => displayAndLoadAvatars(onAvatarsResult));
+        StartCoroutine(getAvatarsUser);
+
     }
 
 }

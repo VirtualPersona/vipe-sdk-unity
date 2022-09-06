@@ -33,13 +33,13 @@ public class HttpService
     }
 
     // Pensar en refactorizar este método para que utilice HttpMethod y evitar duplicar código
-    public IEnumerator GetTexture(string url, System.Action<Texture2D> callbackResult)
+    public IEnumerator DownloadImage(string url, System.Action<Texture2D> callbackResult)
     {
         UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
         yield return request.SendWebRequest();
         if (request.isNetworkError || request.isHttpError)
             throw new System.Exception("Error requesting to " + request.url + ", error: " + request.error);
-
+            
         Texture2D tex = ((DownloadHandlerTexture) request.downloadHandler).texture;
         callbackResult(tex);
     }
@@ -48,7 +48,7 @@ public class HttpService
     {
         UnityWebRequest request = new UnityWebRequest(url);
         request.downloadHandler = new DownloadHandlerBuffer();
-        yield return request.SendWebRequest();
+        yield return request.Send();
 
         if (request.isNetworkError || request.isHttpError)
         {
@@ -73,9 +73,6 @@ public class HttpService
         request.SetRequestHeader("API-KEY", apiKey);
         request.SetRequestHeader("Content-Type", "application/json");
         yield return request.SendWebRequest();
-        Debug.Log(request.url);
-        Debug.Log(request.isDone);
-        Debug.Log(request.downloadedBytes);
 
         if (request.isNetworkError || request.isHttpError)
             throw new System.Exception("Error requesting to " + request.url + ", error: " + request.error + " ");
