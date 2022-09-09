@@ -37,7 +37,7 @@ public class DemoUse : MonoBehaviour
     //Configurable
     private int nftPerLoad = 20;
     private int nftsSkipped = 0;
-
+    private int pageCount = 1;
     //
     private int totalNfts = 0;
     private int totalPages = 0;
@@ -80,9 +80,12 @@ public class DemoUse : MonoBehaviour
                 loadMoreBtn.onClick.AddListener(loadMoreNfts);
                 loadPreviousBtn.onClick.AddListener(loadPreviousNfts);
                 //pageInputField.onValueChanged.AddListener(loadNftsPage);
+                pageCount = 1;
+                pageInputField.text = pageCount.ToString();
                 collectionSelector.onValueChanged.AddListener(changeCollection);
                 openSourceToggle.onValueChanged.AddListener(refreshAvatars);
 
+                totalPagesField.text = (totalNfts / nftPerLoad).ToString();
                 return;
             }
 
@@ -101,7 +104,8 @@ public class DemoUse : MonoBehaviour
         loadMoreBtn.onClick.AddListener(loadMoreNfts);
         loadPreviousBtn.onClick.AddListener(loadPreviousNfts);
         //pageInputField.onValueChanged.AddListener(loadNftsPage);
-        pageInputField.text = "1";
+        pageCount = 1;
+        pageInputField.text = pageCount.ToString();
         collectionSelector.onValueChanged.AddListener(changeCollection);
         openSourceToggle.onValueChanged.AddListener(refreshAvatars);
 
@@ -129,7 +133,6 @@ public class DemoUse : MonoBehaviour
         {
             this.downloadAvatars($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
         }
-            
     }
     
     private void refreshAvatars(bool value)
@@ -198,7 +201,6 @@ public class DemoUse : MonoBehaviour
 
     private void loadMoreNfts() 
     {
-        
         this.nftsSkipped += this.nftPerLoad;
         if (this.nftsSkipped >= (this.totalNfts - this.nftPerLoad))
             this.nftsSkipped = this.totalNfts - this.nftPerLoad;
@@ -208,16 +210,14 @@ public class DemoUse : MonoBehaviour
         {
             //Remove card avatars already loaded
             downloadAvatars(this.nextPage);
-            StartCoroutine(disableLoadMore(1));
-
-            pageInputField.text = (Int32.Parse(pageInputField.text) + 1).ToString();
+            pageCount++;
+            pageInputField.text = pageCount.ToString();
+            StartCoroutine(disablePageButton(1.25f));
         }
     }
 
     private void loadPreviousNfts()
     {
-        
-        
         this.nftsSkipped -= this.nftPerLoad;
         if (this.nftsSkipped < 0)
             this.nftsSkipped = 0;
@@ -227,9 +227,9 @@ public class DemoUse : MonoBehaviour
         {
             //Remove card avatars already loaded
             downloadAvatars(this.previousPage);
-            StartCoroutine(disableLoadPrev(1));
-
-            pageInputField.text = (Int32.Parse(pageInputField.text) - 1).ToString();
+            pageCount--;
+            pageInputField.text = pageCount.ToString();
+            StartCoroutine(disablePageButton(1.25f));
         }
 
     }
@@ -239,7 +239,6 @@ public class DemoUse : MonoBehaviour
         Structs.Nft[] nfts = onAvatarsResult.nfts;
         this.totalNfts = onAvatarsResult.totalNfts;
         this.totalPages = totalNfts / nftPerLoad;
-        totalPagesField.text = this.totalPages.ToString();
 
         const string urlServer = "https://api.cryptoavatars.io/v1/";
         int pos = urlServer.IndexOf(".io/v1/");
@@ -304,7 +303,15 @@ public class DemoUse : MonoBehaviour
                     model.AddComponent<UnityStandardAssets.Characters.ThirdPerson.ThirdPersonUserControl>();
 
                     //si ya esta el VRM en escena, lo seleccionamos como target de nuestro follow script que se encuentra en la camara
-                    GameObject.Find("Main Camera").GetComponent<SmoothFollow>().target = model.transform;
+                    if (GameObject.Find("Main Camera"))
+                    {
+                        var child = new GameObject();
+                        child.name = "VRM_Child";
+                        child.transform.localPosition = new Vector3(0, 1, 0);
+                        child.transform.localRotation = Quaternion.Euler(0,-180,0);
+                        child.transform.parent = model.transform;
+                        GameObject.Find("Main Camera").GetComponent<SmoothFollow>().target = child.transform;
+                    }
                 });
 
                 StartCoroutine(downloadVRM);
@@ -319,16 +326,14 @@ public class DemoUse : MonoBehaviour
         }
 
     }
-    IEnumerator disableLoadMore(float seconds)
+    IEnumerator disablePageButton(float seconds)
     {
+        avatarsPanelBtn.onClick.RemoveListener(backToLogin);
+        loadPreviousBtn.onClick.RemoveListener(loadPreviousNfts);
         loadMoreBtn.onClick.RemoveListener(loadMoreNfts);
         yield return new WaitForSeconds(seconds);
+        avatarsPanelBtn.onClick.AddListener(backToLogin);
         loadMoreBtn.onClick.AddListener(loadMoreNfts);
-    }
-    IEnumerator disableLoadPrev(float seconds)
-    {
-        loadPreviousBtn.onClick.RemoveListener(loadPreviousNfts);
-        yield return new WaitForSeconds(seconds);
         loadPreviousBtn.onClick.AddListener(loadPreviousNfts);
     }
 
