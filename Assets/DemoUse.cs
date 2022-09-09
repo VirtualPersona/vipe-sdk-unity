@@ -25,6 +25,8 @@ public class DemoUse : MonoBehaviour
     // Avatars panel
     public GameObject avatarsPanel;
     public Button avatarsPanelBtn;
+    public GameObject playingPanel;
+    public Button playingPanelBtn;
     public GameObject contentScrollView;
     public GameObject avatarPreviewLayout;
     public Button loadMoreBtn;
@@ -38,6 +40,11 @@ public class DemoUse : MonoBehaviour
     private int nftPerLoad = 20;
     private int nftsSkipped = 0;
     private int pageCount = 1;
+    //
+    private GameObject Vrm;
+    private GameObject Vrm_Target;
+    private GameObject Cam;
+    private GameObject camTarget;
     //
     private int totalNfts = 0;
     private int totalPages = 0;
@@ -57,6 +64,11 @@ public class DemoUse : MonoBehaviour
         this.cryptoAvatars = new CryptoAvatars(API_KEY);
         loginBtn.onClick.AddListener(OnLoginClick);
         enterAsGuestBtn.onClick.AddListener(onGuestEnterClick);
+
+        this.Vrm = GameObject.Find("VRM");
+        this.Vrm_Target = GameObject.Find("VRM_Target");
+        this.Cam = GameObject.Find("Main Camera");
+        this.camTarget = GameObject.Find("Camera_Target");
     }
 
     private void OnLoginClick()
@@ -164,6 +176,29 @@ public class DemoUse : MonoBehaviour
         {
             removeCurrentAvatarsCards();
         }
+        this.Vrm = GameObject.Find("VRM"); 
+        if (Vrm)
+        {
+            this.Vrm.transform.position = this.Vrm_Target.transform.position;
+            this.Vrm.transform.rotation = this.Vrm_Target.transform.rotation;
+            Destroy(this.Vrm.GetComponent<CharacterController>());
+
+            this.Cam.transform.position = this.camTarget.transform.position;
+            this.Cam.transform.rotation = this.camTarget.transform.rotation;
+
+            this.Cam.GetComponent<SmoothFollow>().target = null;
+        }
+    }
+
+    private void backToAvatars()
+    {
+        errorLoginTxt.SetActive(false);
+        loginPanel.SetActive(false);
+        playingPanel.SetActive(false);
+
+        avatarsPanel.SetActive(true);
+
+        playingPanelBtn.onClick.RemoveListener(backToAvatars);
     }
 
     private void removeCurrentAvatarsCards()
@@ -319,19 +354,21 @@ public class DemoUse : MonoBehaviour
                     model.AddComponent<UnityStandardAssets.Characters.ThirdPerson.ThirdPersonUserControl>();
 
                     //si ya esta el VRM en escena, lo seleccionamos como target de nuestro follow script que se encuentra en la camara
-                    if (GameObject.Find("Main Camera"))
+                    if (this.Cam)
                     {
                         var child = new GameObject();
                         child.name = "VRM_Child";
                         child.transform.localPosition = new Vector3(0, 1, 0);
                         child.transform.localRotation = Quaternion.Euler(0,-180,0);
                         child.transform.parent = model.transform;
-                        GameObject.Find("Main Camera").GetComponent<SmoothFollow>().target = child.transform;
+                        this.Cam.GetComponent<SmoothFollow>().target = child.transform;
                     }
                 });
 
                 StartCoroutine(downloadVRM);
                 this.avatarsPanel.SetActive(false);
+                this.playingPanel.SetActive(true);
+                this.playingPanelBtn.onClick.AddListener(backToAvatars);
             });
 
             IEnumerator loadAvatarPreviewImage = this.cryptoAvatars.GetAvatarPreviewImage(nft.metadata.image, texture => {
