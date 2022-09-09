@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using UnityStandardAssets.Utility;
 using static Structs;
 
 public class DemoUse : MonoBehaviour
@@ -28,7 +29,8 @@ public class DemoUse : MonoBehaviour
     public GameObject avatarPreviewLayout;
     public Button loadMoreBtn;
     public Button loadPreviousBtn;
-    public InputField pageInputField;
+    public Text pageInputField; //public InputField pageInputField;
+    public Text totalPagesField;
     public Dropdown collectionSelector;
     public Toggle openSourceToggle;
 
@@ -77,7 +79,7 @@ public class DemoUse : MonoBehaviour
 
                 loadMoreBtn.onClick.AddListener(loadMoreNfts);
                 loadPreviousBtn.onClick.AddListener(loadPreviousNfts);
-                pageInputField.onValueChanged.AddListener(loadNftsPage);
+                //pageInputField.onValueChanged.AddListener(loadNftsPage);
                 collectionSelector.onValueChanged.AddListener(changeCollection);
                 openSourceToggle.onValueChanged.AddListener(refreshAvatars);
 
@@ -98,7 +100,8 @@ public class DemoUse : MonoBehaviour
         this.downloadAvatars( $"nfts/avatars/list?skip=0&limit={nftPerLoad}");
         loadMoreBtn.onClick.AddListener(loadMoreNfts);
         loadPreviousBtn.onClick.AddListener(loadPreviousNfts);
-        pageInputField.onValueChanged.AddListener(loadNftsPage);
+        //pageInputField.onValueChanged.AddListener(loadNftsPage);
+        pageInputField.text = "1";
         collectionSelector.onValueChanged.AddListener(changeCollection);
         openSourceToggle.onValueChanged.AddListener(refreshAvatars);
 
@@ -193,22 +196,22 @@ public class DemoUse : MonoBehaviour
 
     }
 
-    private void loadMoreNfts()
+    private void loadMoreNfts() 
     {
         
         this.nftsSkipped += this.nftPerLoad;
         if (this.nftsSkipped >= (this.totalNfts - this.nftPerLoad))
             this.nftsSkipped = this.totalNfts - this.nftPerLoad;
 
-        //Load the new avatars
+        //Load the new avatars with a corroutine
         if (this.nextPage != "")
         {
             //Remove card avatars already loaded
-            removeCurrentAvatarsCards();
             downloadAvatars(this.nextPage);
+            StartCoroutine(disableLoadMore(1));
 
+            pageInputField.text = (Int32.Parse(pageInputField.text) + 1).ToString();
         }
-
     }
 
     private void loadPreviousNfts()
@@ -224,7 +227,9 @@ public class DemoUse : MonoBehaviour
         {
             //Remove card avatars already loaded
             downloadAvatars(this.previousPage);
+            StartCoroutine(disableLoadPrev(1));
 
+            pageInputField.text = (Int32.Parse(pageInputField.text) - 1).ToString();
         }
 
     }
@@ -234,6 +239,7 @@ public class DemoUse : MonoBehaviour
         Structs.Nft[] nfts = onAvatarsResult.nfts;
         this.totalNfts = onAvatarsResult.totalNfts;
         this.totalPages = totalNfts / nftPerLoad;
+        totalPagesField.text = this.totalPages.ToString();
 
         const string urlServer = "https://api.cryptoavatars.io/v1/";
         int pos = urlServer.IndexOf(".io/v1/");
@@ -276,12 +282,19 @@ public class DemoUse : MonoBehaviour
 
                     ////STANDARD ASSETS
 
-                    Vector3 avatarSize = model.GetComponentInChildren<SkinnedMeshRenderer>().bounds.size;
-                    Debug.Log(avatarSize);
+                    SkinnedMeshRenderer[] comps = model.GetComponentsInChildren<SkinnedMeshRenderer>();
+                    Vector3 totalSize = new Vector3(0, 0, 0);
+                    for (int j = 0; j < comps.Length; j++)
+                    {
+                        totalSize += comps[j].bounds.size;
+                    }
+                    Debug.Log("Avatar Size: ");
+                    Debug.Log(totalSize);
 
                     model.AddComponent<CapsuleCollider>();
-                    model.GetComponent<CapsuleCollider>().height = avatarSize.y;
-                    model.GetComponent<CapsuleCollider>().center = new Vector3(0.0f, avatarSize.y / 2.0f, 0.0f);
+                    model.GetComponent<CapsuleCollider>().radius = 0.2f;
+                    model.GetComponent<CapsuleCollider>().height = totalSize.y;
+                    model.GetComponent<CapsuleCollider>().center = new Vector3(0.0f, totalSize.y / 2.0f, 0.0f);
 
                     model.AddComponent<Rigidbody>().useGravity = true;
 
@@ -290,11 +303,12 @@ public class DemoUse : MonoBehaviour
                     model.GetComponent<UnityStandardAssets.Characters.ThirdPerson.ThirdPersonCharacter>().m_GroundCheckDistance = 0.4f;
                     model.AddComponent<UnityStandardAssets.Characters.ThirdPerson.ThirdPersonUserControl>();
 
+                    //si ya esta el VRM en escena, lo seleccionamos como target de nuestro follow script que se encuentra en la camara
+                    GameObject.Find("Main Camera").GetComponent<SmoothFollow>().target = model.transform;
                 });
 
                 StartCoroutine(downloadVRM);
                 this.avatarsPanel.SetActive(false);
-
             });
 
             IEnumerator loadAvatarPreviewImage = this.cryptoAvatars.GetAvatarPreviewImage(nft.metadata.image, texture => {
@@ -304,6 +318,18 @@ public class DemoUse : MonoBehaviour
             StartCoroutine(loadAvatarPreviewImage);
         }
 
+    }
+    IEnumerator disableLoadMore(float seconds)
+    {
+        loadMoreBtn.onClick.RemoveListener(loadMoreNfts);
+        yield return new WaitForSeconds(seconds);
+        loadMoreBtn.onClick.AddListener(loadMoreNfts);
+    }
+    IEnumerator disableLoadPrev(float seconds)
+    {
+        loadPreviousBtn.onClick.RemoveListener(loadPreviousNfts);
+        yield return new WaitForSeconds(seconds);
+        loadPreviousBtn.onClick.AddListener(loadPreviousNfts);
     }
 
     private void downloadAvatars(string pageUrl)
@@ -325,9 +351,9 @@ public class DemoUse : MonoBehaviour
         }
 
         //Use userWallet
-        IEnumerator getAvatarsUser = cryptoAvatars.GetUserAvatars(this.collectionAddressSelected, "0x607e7eca4d2bbc2e09a7b93a0b739eb7e4eabc90", pageUrl, onAvatarsResult => displayAndLoadAvatars(onAvatarsResult));
+        IEnumerator getAvatarsUser = cryptoAvatars.GetUserAvatars(this.collectionAddressSelected, "0x50341eD1a365c71D0859F98F784F45872ffdfA3D", pageUrl, onAvatarsResult => displayAndLoadAvatars(onAvatarsResult));
         StartCoroutine(getAvatarsUser);
 
-    }
+    }//0x607e7eca4d2bbc2e09a7b93a0b739eb7e4eabc90
 
 }
