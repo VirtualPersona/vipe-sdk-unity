@@ -63,29 +63,28 @@ public class DemoUse : MonoBehaviour
     {
         string email = emailField.text;
         string pass = passField.text;
+        this.pageCount = 1;
+        this.pageInputField.text = this.pageCount.ToString();
+
         IEnumerator login = cryptoAvatars.UserLogin(email, pass, onLoginResult => {
             this.userLoggedIn = onLoginResult.userId != null;
             
             if (this.userLoggedIn)
             {
+
                 this.userWallet = onLoginResult.wallet;
 
                 avatarsPanelBtn.GetComponentInChildren<Text>().text = "Back to login";
                 avatarsPanelBtn.onClick.AddListener(backToLogin);
                 loginPanel.SetActive(false);
                 avatarsPanel.SetActive(true);
-
                 this.downloadAvatarsUsers($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
-
                 loadMoreBtn.onClick.AddListener(loadMoreNfts);
                 loadPreviousBtn.onClick.AddListener(loadPreviousNfts);
                 //pageInputField.onValueChanged.AddListener(loadNftsPage);
-                pageCount = 1;
-                pageInputField.text = pageCount.ToString();
                 collectionSelector.onValueChanged.AddListener(changeCollection);
                 openSourceToggle.onValueChanged.AddListener(refreshAvatars);
 
-                totalPagesField.text = (totalNfts / nftPerLoad).ToString();
                 return;
             }
 
@@ -96,6 +95,9 @@ public class DemoUse : MonoBehaviour
 
     private void onGuestEnterClick()
     {
+        this.pageCount = 1;
+        this.pageInputField.text = this.pageCount.ToString();
+        
         avatarsPanelBtn.GetComponentInChildren<Text>().text = "Back to login";
         avatarsPanelBtn.onClick.AddListener(backToLogin);
         loginPanel.SetActive(false);
@@ -104,8 +106,6 @@ public class DemoUse : MonoBehaviour
         loadMoreBtn.onClick.AddListener(loadMoreNfts);
         loadPreviousBtn.onClick.AddListener(loadPreviousNfts);
         //pageInputField.onValueChanged.AddListener(loadNftsPage);
-        pageCount = 1;
-        pageInputField.text = pageCount.ToString();
         collectionSelector.onValueChanged.AddListener(changeCollection);
         openSourceToggle.onValueChanged.AddListener(refreshAvatars);
 
@@ -153,7 +153,14 @@ public class DemoUse : MonoBehaviour
         loginPanel.SetActive(true);
         avatarsPanel.SetActive(false);
 
-        if(contentScrollView.transform.childCount > 0)
+        //Remove Listeners because they will keep adding and stakking them when clicking 'login' or 'Enter as guest'
+        loadMoreBtn.onClick.RemoveListener(loadMoreNfts);
+        loadPreviousBtn.onClick.RemoveListener(loadPreviousNfts);
+        collectionSelector.onValueChanged.RemoveListener(changeCollection);
+        openSourceToggle.onValueChanged.RemoveListener(refreshAvatars);
+        avatarsPanelBtn.onClick.RemoveListener(backToLogin);
+
+        if (contentScrollView.transform.childCount > 0)
         {
             removeCurrentAvatarsCards();
         }
@@ -205,14 +212,18 @@ public class DemoUse : MonoBehaviour
         if (this.nftsSkipped >= (this.totalNfts - this.nftPerLoad))
             this.nftsSkipped = this.totalNfts - this.nftPerLoad;
 
+        if (this.pageCount > this.totalPages)
+            this.pageCount = this.totalPages;
+
         //Load the new avatars with a corroutine
         if (this.nextPage != "")
         {
+            this.pageCount += 1;
+            this.pageInputField.text = this.pageCount.ToString();
+
             //Remove card avatars already loaded
+            StartCoroutine(disablePageButton(1.3f));
             downloadAvatars(this.nextPage);
-            pageCount++;
-            pageInputField.text = pageCount.ToString();
-            StartCoroutine(disablePageButton(1.25f));
         }
     }
 
@@ -221,15 +232,18 @@ public class DemoUse : MonoBehaviour
         this.nftsSkipped -= this.nftPerLoad;
         if (this.nftsSkipped < 0)
             this.nftsSkipped = 0;
+        if(this.pageCount < 0)
+            this.pageCount = 0;
 
         //Load the new avatars
         if(this.previousPage != "")
         {
+            this.pageCount -= 1;
+            this.pageInputField.text = this.pageCount.ToString();
+
             //Remove card avatars already loaded
+            StartCoroutine(disablePageButton(1.3f));
             downloadAvatars(this.previousPage);
-            pageCount--;
-            pageInputField.text = pageCount.ToString();
-            StartCoroutine(disablePageButton(1.25f));
         }
 
     }
@@ -239,6 +253,8 @@ public class DemoUse : MonoBehaviour
         Structs.Nft[] nfts = onAvatarsResult.nfts;
         this.totalNfts = onAvatarsResult.totalNfts;
         this.totalPages = totalNfts / nftPerLoad;
+        totalPagesField.text = this.totalPages.ToString();
+
 
         const string urlServer = "https://api.cryptoavatars.io/v1/";
         int pos = urlServer.IndexOf(".io/v1/");
