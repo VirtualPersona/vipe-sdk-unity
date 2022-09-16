@@ -48,7 +48,7 @@ public class HttpService
     {
         UnityWebRequest request = new UnityWebRequest(url);
         request.downloadHandler = new DownloadHandlerBuffer();
-        yield return request.Send();
+        yield return request.SendWebRequest();
 
         if (request.isNetworkError || request.isHttpError)
         {
@@ -58,7 +58,7 @@ public class HttpService
         {
             byte[] results = request.downloadHandler.data;
             string dirPath = Path.Combine(Application.dataPath, "cryptoavatars");
-            Debug.Log("DIR PATH: " + dirPath);
+            //Debug.Log("DIR PATH: " + dirPath);
             if (!Directory.Exists(dirPath))
                 Directory.CreateDirectory(dirPath);
             

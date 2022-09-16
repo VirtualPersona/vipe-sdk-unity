@@ -9,14 +9,14 @@ public class CryptoAvatars
 
     private HttpService httpService;
 
-    private bool userLoggedIn;
+    //private bool userLoggedIn;
     private string userId;
 
     public CryptoAvatars(string apiKey)
     {
         const string urlServer = "https://api.cryptoavatars.io/v1/";
         this.httpService = new HttpService(apiKey, urlServer);
-        this.userLoggedIn = false;
+        //this.userLoggedIn = false;
     }
 
     /** 
@@ -30,8 +30,8 @@ public class CryptoAvatars
 
         return this.httpService.Post<Structs.LoginRequestDto>("login-pass", loginRequestDto, (string loginResult) => {
             Structs.LoginResponseDto loginResponse = JsonUtility.FromJson<Structs.LoginResponseDto>(loginResult);
-            Debug.Log("La wallet del pibe");
-            Debug.Log(loginResponse.wallet);
+            //Debug.Log("La wallet del pibe");
+            //Debug.Log(loginResponse.wallet);
 
             onLoginResult(loginResponse);
         });

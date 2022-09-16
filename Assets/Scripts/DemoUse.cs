@@ -56,7 +56,7 @@ public class DemoUse : MonoBehaviour
     private string licenseType = "CC0";
 
     private string userWallet = "";
-    private bool openSource = true;
+    //private bool openSource = true;
 
     public void Awake()
     {
@@ -338,8 +338,8 @@ public class DemoUse : MonoBehaviour
                     {
                         totalSize += comps[j].bounds.size;
                     }
-                    Debug.Log("Avatar Size: ");
-                    Debug.Log(totalSize);
+                    //Debug.Log("Avatar Size: ");
+                    //Debug.Log(totalSize);
 
                     model.AddComponent<CapsuleCollider>();
                     model.GetComponent<CapsuleCollider>().radius = 0.2f;
@@ -401,7 +401,7 @@ public class DemoUse : MonoBehaviour
     private void downloadAvatarsUsers(string pageUrl)
     {
         removeCurrentAvatarsCards();
-        Debug.Log(openSourceToggle.isOn);
+        //Debug.Log(openSourceToggle.isOn);
         if (openSourceToggle.isOn)
         {
             IEnumerator getAvatars = cryptoAvatars.GetAvatars(this.collectionAddressSelected, this.licenseType, pageUrl, onAvatarsResult => displayAndLoadAvatars(onAvatarsResult));
@@ -409,9 +409,9 @@ public class DemoUse : MonoBehaviour
         }
 
         //Use userWallet
-        IEnumerator getAvatarsUser = cryptoAvatars.GetUserAvatars(this.collectionAddressSelected, "0x50341eD1a365c71D0859F98F784F45872ffdfA3D", pageUrl, onAvatarsResult => displayAndLoadAvatars(onAvatarsResult));
+        IEnumerator getAvatarsUser = cryptoAvatars.GetUserAvatars(this.collectionAddressSelected, this.userWallet , pageUrl, onAvatarsResult => displayAndLoadAvatars(onAvatarsResult));
         StartCoroutine(getAvatarsUser);
 
     }//0x607e7eca4d2bbc2e09a7b93a0b739eb7e4eabc90
-
+    //"0x50341eD1a365c71D0859F98F784F45872ffdfA3D"
 }
