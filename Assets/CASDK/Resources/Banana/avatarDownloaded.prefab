@@ -207,7 +207,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 8cd6024ec21eac74bbb61ee07d3e4843, type: 2}
+  - {fileID: 2100000, guid: 277bb33d7793f0d4d901548d9c33c0c8, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -232,7 +232,7 @@ SkinnedMeshRenderer:
   m_Quality: 0
   m_UpdateWhenOffscreen: 0
   m_SkinnedMotionVectors: 1
-  m_Mesh: {fileID: 4300000, guid: 1f92633c1b974a944b349c808c2af87a, type: 2}
+  m_Mesh: {fileID: 4300000, guid: 1863fd900fee4944a840bdbce91eecfe, type: 2}
   m_Bones:
   - {fileID: 5543031965568802542}
   - {fileID: 3434342535385442182}
@@ -976,7 +976,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 690ea0146224b8b4694a1925dddeb352, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Meta: {fileID: 11400000, guid: b98cf1ba5f891334c98009836fe57c58, type: 2}
+  Meta: {fileID: 11400000, guid: cf6d399140ceefc4f82cc463196ee4a2, type: 2}
 --- !u!114 &8413089800316304104
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -989,8 +989,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3869812175467a143ab9cd865752b4a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Avatar: {fileID: 9000000, guid: 9fdaff48a838ce54fa6e6a73c20fc761, type: 2}
-  Description: {fileID: 11400000, guid: 138b746a064aae94da40b636986feef6, type: 2}
+  Avatar: {fileID: 9000000, guid: e213f8751ae2aec42b350b71cbea17a1, type: 2}
+  Description: {fileID: 11400000, guid: 4186b4479c43d1c4e94322961fb8edfa, type: 2}
 --- !u!95 &5881855531937584579
 Animator:
   serializedVersion: 3
@@ -1000,7 +1000,7 @@ Animator:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3522624882918410422}
   m_Enabled: 1
-  m_Avatar: {fileID: 9000000, guid: 9fdaff48a838ce54fa6e6a73c20fc761, type: 2}
+  m_Avatar: {fileID: 9000000, guid: e213f8751ae2aec42b350b71cbea17a1, type: 2}
   m_Controller: {fileID: 0}
   m_CullingMode: 0
   m_UpdateMode: 0
@@ -1022,7 +1022,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b678c1df50cfb547990db24a32856da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BlendShapeAvatar: {fileID: 11400000, guid: d896c7ee9710edb40baeeee1c1131b9e, type: 2}
+  BlendShapeAvatar: {fileID: 11400000, guid: e259b15b4e5b5594b8666771da86f3d1, type: 2}
 --- !u!114 &2040931464620631646
 MonoBehaviour:
   m_ObjectHideFlags: 0

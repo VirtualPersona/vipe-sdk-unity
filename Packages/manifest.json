@@ -1,5 +1,9 @@
 {
   "dependencies": {
+    "com.vrmc.vrmshaders": "https://github.com/vrm-c/UniVRM.git?path=/Assets/VRMShaders#v0.87.0",
+    "com.vrmc.gltf": "https://github.com/vrm-c/UniVRM.git?path=/Assets/UniGLTF#v0.87.0",
+    "com.vrmc.univrm": "https://github.com/vrm-c/UniVRM.git?path=/Assets/VRM#v0.87.0",
+    "com.vrmc.vrm": "https://github.com/vrm-c/UniVRM.git?path=/Assets/VRM10#v0.87.0",
     "com.unity.collab-proxy": "1.14.18",
     "com.unity.entities": "0.11.2-preview.1",
     "com.unity.ide.rider": "1.2.1",
