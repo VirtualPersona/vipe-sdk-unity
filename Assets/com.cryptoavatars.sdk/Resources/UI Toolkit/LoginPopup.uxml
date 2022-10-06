@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="Styles/DefaultLoginStyle.uss" />
+    <ui:VisualElement name="VisualElement" style="height: 271px; width: 743px;">
+        <ui:VisualElement name="VisualElement">
+            <ui:TextField picking-mode="Ignore" label="Password" value="Password" name="Password-ThirdParty" password="true" tooltip="Password" usage-hints="DynamicTransform" style="width: 520px; height: 43px; font-size: 24px;" />
+            <ui:TextField picking-mode="Ignore" label="Email" name="Email-ThirdParty" tooltip="Email" usage-hints="DynamicTransform" view-data-key="Email" style="width: 520px; height: 43px; font-size: 24px;" />
+            <ui:ListView focusable="true" />
+        </ui:VisualElement>
+        <ui:VisualElement name="VisualElement" style="justify-content: center; align-items: center; width: 726px; height: 170px; flex-direction: column;">
+            <ui:Button text="Login" display-tooltip-when-elided="true" tooltip="Login" name="Login_Button" style="width: 187px; align-items: auto; justify-content: center;" />
+            <ui:Button text="Enter as guest" display-tooltip-when-elided="true" tooltip="Guest" name="Guest_Button" style="width: 187px; align-items: auto; justify-content: center;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
