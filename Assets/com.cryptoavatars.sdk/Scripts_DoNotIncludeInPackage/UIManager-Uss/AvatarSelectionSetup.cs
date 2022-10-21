@@ -8,8 +8,10 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem.HID;
 using UnityEngine.UIElements;
+using UnityStandardAssets.Characters.ThirdPerson;
 using UnityStandardAssets.Utility;
 using static Structs;
+using static UnityEngine.GraphicsBuffer;
 
 public class AvatarSelectionSetup : MonoBehaviour
 {
@@ -19,6 +21,7 @@ public class AvatarSelectionSetup : MonoBehaviour
 
     private CryptoAvatars cryptoAvatars;
     private AvatarSelectionWindow avatarSelectionWindow;
+    private AvatarPlayableWindow playableAvatarWindow;
     //Configurable
     private int nftPerLoad = 20;
     private int nftsSkipped = 0;
@@ -49,11 +52,10 @@ public class AvatarSelectionSetup : MonoBehaviour
 
     public void ShowAvatarSelection()
     {
+        if(playableAvatarWindow.visible)
+            HidePlayableWindow();
+        DisableAvatarMovement();
         root.Add(avatarSelectionWindow);
-        this.Vrm = GameObject.Find("VRM");
-        this.Vrm_Target = GameObject.Find("VRM_Target");
-        this.Cam = GameObject.Find("Main Camera");
-        this.camTarget = GameObject.Find("Camera_Target");
         refreshAvatars();
     }
     public void HideAvatarSelection()
@@ -67,7 +69,6 @@ public class AvatarSelectionSetup : MonoBehaviour
         this.Vrm_Target = GameObject.Find("VRM_Target");
         this.Cam = GameObject.Find("Main Camera");
         this.camTarget = GameObject.Find("Camera_Target");
-        //ModelLoaded += AsignCameraToModelVRM;
     }
 
     private void OnEnable()
@@ -77,6 +78,8 @@ public class AvatarSelectionSetup : MonoBehaviour
         this.downloadCollections($"collections/list?skip=0&limit={nftPerLoad}");
         this.downloadAvatars($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
         avatarSelectionWindow = new AvatarSelectionWindow();
+        playableAvatarWindow = new AvatarPlayableWindow();
+        playableAvatarWindow.BackToAvatarSelectionRequested += () => ShowAvatarSelection();
         avatarSelectionWindow.BackToLoginRequested += backToLogin;
         avatarSelectionWindow.LoadMoreRequested += loadMoreNfts;
         avatarSelectionWindow.LoadPreviousRequested += loadPreviousNfts;
@@ -119,15 +122,46 @@ public class AvatarSelectionSetup : MonoBehaviour
         {
             removeCurrentAvatarsCards();
         }
+        DisableAvatarMovement();
+    }
+
+    private void DisableAvatarMovement()
+    {
         this.Vrm = GameObject.Find("VRM");
         if (Vrm)
         {
             this.Vrm.transform.position = this.Vrm_Target.transform.position;
             this.Vrm.transform.rotation = this.Vrm_Target.transform.rotation;
+            this.Vrm.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
             Destroy(this.Vrm.GetComponent<CharacterController>());
-
+            Destroy(this.Vrm.GetComponent<ThirdPersonUserControl>());
+            Destroy(this.Vrm.GetComponent<ThirdPersonCharacter>());
+            this.Vrm.GetComponent<Animator>().SetBool("OnGround", true);
+            this.Vrm.GetComponent<Animator>().SetBool("Crouch", false);
+            this.Vrm.GetComponent<Animator>().SetFloat("Forward", 0);
+            this.Vrm.GetComponent<Animator>().SetFloat("Turn", 0);
+            this.Vrm.GetComponent<Animator>().SetFloat("Jump", 0);
+            this.Vrm.GetComponent<Animator>().SetFloat("JumpLeg", 0);
             this.Cam.transform.position = this.camTarget.transform.position;
             this.Cam.transform.rotation = this.camTarget.transform.rotation;
+            this.Cam.GetComponent<SmoothFollow>().target = null;
+        }
+    }
+    private IEnumerator MoveCameraPosition(Transform initialCameraTransform, Transform destinationCameraTransform, float speed)
+    {
+        // check the distance and see if we still need to move towards the destination ?
+        while (Vector3.Distance(initialCameraTransform.position, destinationCameraTransform.transform.position) > 1.0f)
+        {
+            initialCameraTransform.position = Vector3.Lerp(initialCameraTransform.position, destinationCameraTransform.position, Time.deltaTime * speed);
+            yield return null;
+        }
+    }    
+    private IEnumerator MoveCameraRotation(Transform initialCameraTransform, Transform destinationCameraTransform, float speed)
+    {
+        while (Quaternion.Angle(initialCameraTransform.rotation, destinationCameraTransform.transform.rotation) > Mathf.Epsilon)
+        {
+            initialCameraTransform.rotation = Quaternion.Slerp(initialCameraTransform.rotation, destinationCameraTransform.rotation, speed * Time.deltaTime);
+            yield return null;
         }
     }
 
@@ -170,9 +204,6 @@ public class AvatarSelectionSetup : MonoBehaviour
         {
             this.pageCount -= 1;
             avatarSelectionWindow.paginationTextField.SetValueWithoutNotify(this.pageCount.ToString());
-
-            //Remove card avatars already loaded
-            // StartCoroutine(disablePageButton(1.3f));
             downloadAvatars(this.previousPage);
         }
 
@@ -261,6 +292,7 @@ public class AvatarSelectionSetup : MonoBehaviour
                 });
                 StartCoroutine(downloadVRM);
                 HideAvatarSelection();
+                ShowPlayableWindow();
             });
 
             IEnumerator loadAvatarPreviewImage = this.cryptoAvatars.GetAvatarPreviewImage(nft.metadata.image, texture =>
@@ -282,7 +314,14 @@ public class AvatarSelectionSetup : MonoBehaviour
         avatarSelectionWindow.LoadPreviousRequested += loadPreviousNfts;
         avatarSelectionWindow.LoadMoreRequested += loadMoreNfts;
     }
-
+    private void ShowPlayableWindow()
+    {
+        root.Add(playableAvatarWindow);
+    }
+    private void HidePlayableWindow()
+    {
+        root.Remove(playableAvatarWindow);
+    }
     private void downloadAvatars(string pageUrl)
     {
         removeCurrentAvatarsCards();

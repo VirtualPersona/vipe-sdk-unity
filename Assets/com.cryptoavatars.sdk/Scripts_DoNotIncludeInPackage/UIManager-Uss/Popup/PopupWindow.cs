@@ -57,8 +57,14 @@ using UnityEngine.UIElements;
             hierarchy.Add(LoginButton);
             hierarchy.Add(GuestButton);
             LoginButton.clicked += OnLoginButtonClicked;
+            LoginButton.clicked += ResetButtonEventClicked;
             GuestButton.clicked += OnGuestButtonClicked;
-
+            GuestButton.clicked += ResetButtonEventClicked;
+        }
+        private void ResetButtonEventClicked()
+        {
+            LoginRequested = null;
+            GuestRequested = null;
         }
         private void OnLoginButtonClicked()
         {
