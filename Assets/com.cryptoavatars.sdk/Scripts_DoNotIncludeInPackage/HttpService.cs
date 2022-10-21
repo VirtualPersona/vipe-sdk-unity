@@ -72,6 +72,7 @@ public class HttpService
     {
         request.SetRequestHeader("API-KEY", apiKey);
         request.SetRequestHeader("Content-Type", "application/json");
+        
         yield return request.SendWebRequest();
 
         if (request.isNetworkError || request.isHttpError)

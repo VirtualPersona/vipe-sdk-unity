@@ -1,0 +1,353 @@
+using BloodUI;
+using CA;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using Unity.Transforms;
+using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.InputSystem.HID;
+using UnityEngine.UIElements;
+using UnityStandardAssets.Utility;
+using static Structs;
+
+public class AvatarSelectionSetup : MonoBehaviour
+{
+
+    private string collectionNameSelected = "CryptoAvatars";
+    private bool userLoggedIn;
+
+    private CryptoAvatars cryptoAvatars;
+    private AvatarSelectionWindow avatarSelectionWindow;
+    //Configurable
+    private int nftPerLoad = 20;
+    private int nftsSkipped = 0;
+    private int pageCount = 1;
+    // 
+    private int totalNfts = 0;
+    private int totalPages = 0;
+
+    private string nextPage = "";
+    private string previousPage = "";
+    //
+    private GameObject Vrm;
+    private GameObject Vrm_Target;
+    private GameObject Cam;
+    private GameObject camTarget;
+    //
+    private string licenseType = "CC0";
+
+    private string userWallet = "";
+    const string urlServer = "https://api.cryptoavatars.io/v1/";
+
+    private const string API_KEY = "$2b$10$jXmDbzXmgU7YjsshSRuSnOfdlMky/eUX7LPhJ0Y8jAtypyu4vJK1a";
+    // UI Toolkit 
+    private UIDocument doc;
+    private VisualElement root;
+    [SerializeField]
+    private GameObject LoginPanelUIDoc;
+    [SerializeField]
+    public delegate IEnumerator ModelLoadedEventHandler();
+    public static event ModelLoadedEventHandler ModelLoaded;
+
+    public void ShowAvatarSelection()
+    {
+        root.Add(avatarSelectionWindow);
+        this.Vrm = GameObject.Find("VRM");
+        this.Vrm_Target = GameObject.Find("VRM_Target");
+        this.Cam = GameObject.Find("Main Camera");
+        this.camTarget = GameObject.Find("Camera_Target");
+        refreshAvatars();
+    }
+    public void HideAvatarSelection()
+    {
+        root.Remove(avatarSelectionWindow);
+    }
+    private void Awake()
+    {
+        this.cryptoAvatars = new CryptoAvatars(API_KEY);
+        this.Vrm = GameObject.Find("VRM");
+        this.Vrm_Target = GameObject.Find("VRM_Target");
+        this.Cam = GameObject.Find("Main Camera");
+        this.camTarget = GameObject.Find("Camera_Target");
+        ModelLoaded += AsignCameraToModelVRM;
+    }
+
+    private void OnEnable()
+    {
+        TryGetComponent(out doc);
+        root = doc.rootVisualElement;
+        this.downloadCollections($"collections/list?skip=0&limit={nftPerLoad}");
+        this.downloadAvatars($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
+        avatarSelectionWindow = new AvatarSelectionWindow();
+        avatarSelectionWindow.BackToLoginRequested += backToLogin;
+        avatarSelectionWindow.LoadMoreRequested += loadMoreNfts;
+        avatarSelectionWindow.LoadPreviousRequested += loadPreviousNfts;
+        avatarSelectionWindow.OnLoadCollectionsRequested += changeCollection;
+        avatarSelectionWindow.OnLoadOpenSourceRequested += refreshAvatars;
+        root.Add(avatarSelectionWindow);
+    }
+
+    private void changeCollection(string value)
+    {
+        this.collectionNameSelected = value;
+        removeCurrentAvatarsCards();
+        if (this.userWallet != "")
+        {
+            this.downloadAvatarsUsers($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
+        }
+        else
+        {
+            this.downloadAvatars($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
+        }
+    }
+
+    private void refreshAvatars()
+    {
+        if (this.userLoggedIn)
+        {
+            this.downloadAvatarsUsers($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
+        }
+        else
+        {
+            this.downloadAvatars($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
+        }
+    }
+
+    private void backToLogin()
+    {
+        HideAvatarSelection();
+        LoginPanelUIDoc.GetComponent<LoginPanelSetup>().LoginShow();
+        if (avatarSelectionWindow.scrollView.contentViewport.childCount > 0)
+        {
+            removeCurrentAvatarsCards();
+        }
+        this.Vrm = GameObject.Find("VRM");
+        if (Vrm)
+        {
+            this.Vrm.transform.position = this.Vrm_Target.transform.position;
+            this.Vrm.transform.rotation = this.Vrm_Target.transform.rotation;
+            Destroy(this.Vrm.GetComponent<CharacterController>());
+
+            this.Cam.transform.position = this.camTarget.transform.position;
+            this.Cam.transform.rotation = this.camTarget.transform.rotation;
+        }
+    }
+
+    private void removeCurrentAvatarsCards()
+    {
+        if (avatarSelectionWindow != null)
+            avatarSelectionWindow.scrollView.Clear();
+    }
+
+    private void loadMoreNfts()
+    {
+        this.nftsSkipped += this.nftPerLoad;
+        if (this.nftsSkipped >= (this.totalNfts - this.nftPerLoad))
+            this.nftsSkipped = this.totalNfts - this.nftPerLoad;
+
+        if (this.pageCount > this.totalPages)
+            this.pageCount = this.totalPages;
+
+        //Load the new avatars with a corroutine
+        if (this.nextPage != "")
+        {
+            this.pageCount += 1;
+            avatarSelectionWindow.paginationTextField.SetValueWithoutNotify(this.pageCount.ToString());
+
+            //Remove card avatars already loaded
+            // StartCoroutine(disablePageButton(1.3f));
+            downloadAvatars(this.nextPage);
+        }
+    }
+    private void loadPreviousNfts()
+    {
+        this.nftsSkipped -= this.nftPerLoad;
+        if (this.nftsSkipped < 0)
+            this.nftsSkipped = 0;
+        if (this.pageCount < 0)
+            this.pageCount = 0;
+
+        //Load the new avatars
+        if (this.previousPage != "")
+        {
+            this.pageCount -= 1;
+            avatarSelectionWindow.paginationTextField.SetValueWithoutNotify(this.pageCount.ToString());
+
+            //Remove card avatars already loaded
+            // StartCoroutine(disablePageButton(1.3f));
+            downloadAvatars(this.previousPage);
+        }
+
+    }
+
+    private void displayAndLoadAvatars(NftsArray onAvatarsResult)
+    {
+        Structs.Nft[] nfts = onAvatarsResult.nfts;
+        this.totalNfts = onAvatarsResult.totalNfts;
+        this.totalPages = totalNfts / nftPerLoad;
+        avatarSelectionWindow.paginationTextField.value = $"{pageCount.ToString()}/{this.totalPages.ToString()}";
+
+        int pos = urlServer.IndexOf(".io/v1/");
+
+        if (onAvatarsResult.next != null && onAvatarsResult.next != "Null" && onAvatarsResult.next != "")
+            this.nextPage = onAvatarsResult.next.Substring(pos + 7);
+        else
+            this.nextPage = "";
+
+        if (onAvatarsResult.prev != null && onAvatarsResult.prev != "Null" && onAvatarsResult.prev != "")
+            this.previousPage = onAvatarsResult.prev.Substring(pos + 7);
+        else
+            this.previousPage = "";
+
+        for (int i = 0; i < nfts.Length; i++)
+        {
+            // Create panel layout for each avatar
+            Structs.Nft nft = nfts[i];
+            // Crear UI Elements para cada carta
+            AvatarWindow cardAvatar = new AvatarWindow();
+            avatarSelectionWindow.scrollView.Add(cardAvatar);
+
+            cardAvatar.SetAvatarData(nft.metadata.name, nft.metadata.asset, i, urlVrm =>
+            {
+
+                if (GameObject.Find("VRM"))
+                    Destroy(GameObject.Find("VRM"));
+
+                IEnumerator downloadVRM = this.cryptoAvatars.GetAvatarVRMModel(urlVrm, (model) =>
+                {
+                    model.transform.Rotate(new Vector3(0, 180, 0));
+                    model.GetComponent<Animator>().runtimeAnimatorController = Resources.Load("Anims/Animator/ThirdPersonAnimatorController") as RuntimeAnimatorController;
+
+                    //Adjust axis (It comes with Y and Z flipped) (Blender)
+
+                    float h = Input.GetAxisRaw("Horizontal");
+                    float v = Input.GetAxisRaw("Vertical");
+                    Vector3 dir = new Vector3(h, 0, v);
+                    model.transform.InverseTransformDirection(dir);
+
+                    //model.transform.position += new Vector3(0, GameObject.Find("Cylinder").transform.localScale.y, 0);
+
+                    ////STANDARD ASSETS
+
+                    SkinnedMeshRenderer[] comps = model.GetComponentsInChildren<SkinnedMeshRenderer>();
+                    Vector3 totalSize = new Vector3(0, 0, 0);
+                    for (int j = 0; j < comps.Length; j++)
+                    {
+                        totalSize += comps[j].bounds.size;
+                    }
+                    //Debug.Log("Avatar Size: ");
+                    //Debug.Log(totalSize);
+
+                    model.AddComponent<CapsuleCollider>();
+                    model.GetComponent<CapsuleCollider>().radius = 0.2f;
+                    model.GetComponent<CapsuleCollider>().height = totalSize.y;
+                    model.GetComponent<CapsuleCollider>().center = new Vector3(0.0f, totalSize.y / 2.0f, 0.0f);
+
+                    model.AddComponent<Rigidbody>().useGravity = true;
+
+                    model.AddComponent<UnityStandardAssets.Characters.ThirdPerson.ThirdPersonCharacter>();
+                    model.GetComponent<UnityStandardAssets.Characters.ThirdPerson.ThirdPersonCharacter>().m_JumpPower = 5.5f;
+                    model.GetComponent<UnityStandardAssets.Characters.ThirdPerson.ThirdPersonCharacter>().m_GroundCheckDistance = 0.4f;
+                    model.AddComponent<UnityStandardAssets.Characters.ThirdPerson.ThirdPersonUserControl>();
+
+                    var child = new GameObject();
+                    child.name = "VRM_Child";
+                    child.transform.localPosition = new Vector3(0, 1, 0);
+                    child.transform.localRotation = Quaternion.Euler(0, -180, 0);
+                    child.transform.parent = model.transform;
+
+                    // Asign to Cam
+                    ModelLoadedEventHandler asignToCamera = ModelLoaded;
+                    if (asignToCamera != null)
+                        StartCoroutine(asignToCamera());
+                });
+                StartCoroutine(downloadVRM);
+                HideAvatarSelection();
+            });
+
+            IEnumerator loadAvatarPreviewImage = this.cryptoAvatars.GetAvatarPreviewImage(nft.metadata.image, texture =>
+            {
+                cardAvatar.LoadAvatarImage(texture);
+            });
+
+            StartCoroutine(loadAvatarPreviewImage);
+        }
+
+    }
+    private IEnumerator AsignCameraToModelVRM()
+    {
+        this.Vrm = GameObject.Find("VRM");
+        this.Cam = GameObject.Find("Main Camera");
+        if (Vrm != null)
+        {
+            var followComponent = this.Cam.GetComponent<SmoothFollow>();
+            if (followComponent != null)
+            {
+                Debug.Log("Follow Component Found");
+            }
+            else
+            {
+                Debug.Log("Follow Component not obtainable");
+            }
+        }
+        else
+        {
+            Debug.Log("VRM IS NULL");
+        }
+        yield return null;
+
+        //yield return new WaitForSeconds(10);
+    }
+    IEnumerator disablePageButton(float seconds)
+    {
+        avatarSelectionWindow.BackToLoginRequested -= backToLogin;
+        avatarSelectionWindow.LoadPreviousRequested -= loadPreviousNfts;
+        avatarSelectionWindow.LoadMoreRequested -= loadMoreNfts;
+        yield return new WaitForSeconds(seconds);
+        avatarSelectionWindow.BackToLoginRequested += backToLogin;
+        avatarSelectionWindow.LoadPreviousRequested += loadPreviousNfts;
+        avatarSelectionWindow.LoadMoreRequested += loadMoreNfts;
+    }
+
+    private void downloadAvatars(string pageUrl)
+    {
+        removeCurrentAvatarsCards();
+        IEnumerator getAvatars = cryptoAvatars.GetAvatarsByCollectionName(this.collectionNameSelected, this.licenseType, pageUrl, onAvatarsResult => displayAndLoadAvatars(onAvatarsResult));
+        StartCoroutine(getAvatars);
+    }
+    private void downloadCollections(string pageUrl)
+    {
+        // Get Collections and Generate Options based on that
+        IEnumerator getCollections = cryptoAvatars.GetNFTsCollections(onCollectionsResult => displayAndLoadCollections(onCollectionsResult), pageUrl);
+        StartCoroutine(getCollections);
+    }
+
+    private void displayAndLoadCollections(NftsCollectionsArray onCollectionsResult)
+    {
+        List<string> choices = new List<string>();
+        foreach (NftsCollection collection in onCollectionsResult.nftsCollections)
+        {
+            Debug.Log("Collection: " + $"{collection.name}");
+            choices.Add(collection.name);
+        }
+        avatarSelectionWindow.collectionSelector.choices = choices;
+        //downloadAvatars("");
+    }
+
+    private void downloadAvatarsUsers(string pageUrl)
+    {
+        removeCurrentAvatarsCards();
+        if (avatarSelectionWindow.openSourceToggle.value)
+        {
+            IEnumerator getAvatars = cryptoAvatars.GetAvatarsByCollectionName(this.collectionNameSelected, this.licenseType, pageUrl, onAvatarsResult => displayAndLoadAvatars(onAvatarsResult));
+            StartCoroutine(getAvatars);
+        }
+
+        //Use userWallet
+        IEnumerator getAvatarsUser = cryptoAvatars.GetUserAvatarsByCollectionName(this.collectionNameSelected, this.userWallet, pageUrl, onAvatarsResult => displayAndLoadAvatars(onAvatarsResult));
+        StartCoroutine(getAvatarsUser);
+
+    }
+
+}

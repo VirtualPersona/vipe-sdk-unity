@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 
 using UniGLTF;
 using UnityEngine;
@@ -32,9 +33,6 @@ namespace CA
 
             return this.httpService.Post<Structs.LoginRequestDto>("login-pass", loginRequestDto, (string loginResult) => {
                 Structs.LoginResponseDto loginResponse = JsonUtility.FromJson<Structs.LoginResponseDto>(loginResult);
-                //Debug.Log("La wallet del pibe");
-                //Debug.Log(loginResponse.wallet);
-
                 onLoginResult(loginResponse);
             });
         }
@@ -58,7 +56,6 @@ namespace CA
                 onAvatarsResult(avatarsResponse);
             });
         }
-
         /** 
          * skip & limit for pagination
          * onAvatarsResult -> callback to get Avatars info
@@ -74,10 +71,36 @@ namespace CA
                 Structs.NftsArray avatarsResponse = JsonUtility.FromJson<Structs.NftsArray>(avatarsResult);
                 onAvatarsResult(avatarsResponse);
             });
-
-
         }
+    
+        public IEnumerator GetAvatarsByCollectionName(string collectionName, string licenseType, string pageUrl, System.Action<Structs.NftsArray> onAvatarsResult)
+        {
+            Structs.DefaultSearchAvatarsDtoCollectionName searchAvatarsDto = new Structs.DefaultSearchAvatarsDtoCollectionName();
+            searchAvatarsDto.collectionName = collectionName;
+            searchAvatarsDto.license = licenseType;
+            return this.httpService.Post<Structs.DefaultSearchAvatarsDtoCollectionName>(pageUrl, searchAvatarsDto, (string avatarsResult) =>
+            {
+                Structs.NftsArray avatarsResponse = JsonUtility.FromJson<Structs.NftsArray>(avatarsResult);
+                
+                onAvatarsResult(avatarsResponse);
+            });
+        }
+        public IEnumerator GetUserAvatarsByCollectionName(string collectionName,string owner, string pageUrl, System.Action<Structs.NftsArray> onAvatarsResult)
+        {
+            // Mejorar
+            //if (!userLoggedIn)
+            //    return null;
+            Debug.Log("Entro");
+            Structs.OwnerAvatarsDtoCollectionName searchAvatarsDto = new Structs.OwnerAvatarsDtoCollectionName();
+            searchAvatarsDto.collectionName = collectionName;
+            searchAvatarsDto.owner = owner;
 
+            return this.httpService.Post<Structs.OwnerAvatarsDtoCollectionName>(pageUrl, searchAvatarsDto, (string avatarsResult) =>
+            {
+                Structs.NftsArray avatarsResponse = JsonUtility.FromJson<Structs.NftsArray>(avatarsResult);
+                onAvatarsResult(avatarsResponse);
+            });
+        }
         /** 
         * onImage -> callback to get Avatar thumbnail
         */
@@ -134,6 +157,18 @@ namespace CA
                 return loaded.gameObject;
             }
         }
-
+        /** 
+        * GetNFTsCollections -> callback to get dynamically all the collections
+        */
+        public IEnumerator GetNFTsCollections(System.Action<Structs.NftsCollectionsArray> onCollectionsResult, string pageUrl)
+        {
+            string body = "{}";
+            return this.httpService.Post(pageUrl, body, (string collectionsResult) =>
+            {
+                Debug.Log("STRING -> " + collectionsResult);
+                Structs.NftsCollectionsArray collectionsResponse = JsonUtility.FromJson<Structs.NftsCollectionsArray>("{\"nftsCollections\":" + collectionsResult + "}");
+                onCollectionsResult(collectionsResponse);
+            });
+        }
     }
 }

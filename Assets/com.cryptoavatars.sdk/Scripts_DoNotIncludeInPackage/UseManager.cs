@@ -84,9 +84,7 @@ public class UseManager : MonoBehaviour
             
             if (this.userLoggedIn)
             {
-
                 this.userWallet = onLoginResult.wallet;
-
                 avatarsPanelBtn.GetComponentInChildren<Text>().text = "Back to login";
                 avatarsPanelBtn.onClick.AddListener(backToLogin);
                 loginPanel.SetActive(false);

@@ -1,0 +1,118 @@
+VisualElement {
+    padding-top: 20px;
+    padding-left: 20px;
+	position: relative;
+    --unity--selection-color: white;
+}
+
+TextField {
+	margin-top: 1px;
+	margin-bottom: 1px;
+	margin-left:3px;
+	margin-right: 3px;
+	width: 520px;
+	height: 50px;
+	font-size: 24px;
+    background-color: rgb(111, 66, 193);
+    border-radius: 8px;
+    border-left-color: rgba(255, 255, 255, 0.15);
+    border-right-color: rgba(255, 255, 255, 0.15);
+    border-top-color: rgba(255, 255, 255, 0.15);
+    border-bottom-color: rgba(255, 255, 255, 0.15);
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    color: white;
+    --unity--selection-color: white;
+}
+
+TextField :selected {
+    color: white;
+    -unity-text-outline-color: white;
+    background-color: rgb(255, 255, 255);
+    --unity--selection-color: white;
+}
+
+Button {
+    width: 280px;
+    height: 55px;
+    min-width: 280px;
+    min-height: 55px;
+    background-color: rgb(0, 0, 0);
+    border-radius: 26px;
+    padding-right: 20px;
+    font-size: 24px;
+    color: white;
+    border-color: rgba(0, 0, 0, 0);
+    background-image: resource('UIElements/gradient');
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+Text {
+    color: white;
+    --unity--selection-color: white;
+}
+
+.popup_container {
+    width: 550px;
+    height: 300px;
+    background-color: rgb(59, 38, 93);
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    border-radius: 8px;
+    border-left-color: rgba(255, 255, 255, 0.15);
+    border-right-color: rgba(255, 255, 255, 0.15);
+    border-top-color: rgba(255, 255, 255, 0.15);
+    border-bottom-color: rgba(255, 255, 255, 0.15);
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+}
+
+.popup_window {
+	padding-right: 20px;
+    width: 550px;
+    height: 300px;
+    background-image: none;
+    background-color: rgb(59, 38, 93);
+    border-radius: 8px;
+    border-left-color: rgba(255, 255, 255, 0.15);
+    border-right-color: rgba(255, 255, 255, 0.15);
+    border-top-color: rgba(255, 255, 255, 0.15);
+    border-bottom-color: rgba(255, 255, 255, 0.15);
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    color: white;
+}
+
+.horizontal_container {
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.popup_msg {
+    font-size: 28px;
+    -unity-font-style: normal;
+    color: rgba(255, 255, 255, 255);
+}
+
+.unity-base-field__input {
+    background-color: rgb(71, 16, 105);
+    color: rgba(255, 255, 255, 255);
+}
+
+.unity-base-field {
+    color: white;
+}
+.unity-label{
+	color:white;
+}
+.unity-base-text-field {
+    color: white;
+    --unity--selection-color: white;
+}
