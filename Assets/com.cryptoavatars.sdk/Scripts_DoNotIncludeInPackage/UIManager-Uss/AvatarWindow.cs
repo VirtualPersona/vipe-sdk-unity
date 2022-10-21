@@ -27,6 +27,11 @@ namespace BloodUI
             this.index = index;
             avatarName.text = name;
             preview3DButton.clicked += () => previewAvatarRequested?.Invoke(this.vrmUrl);
+            preview3DButton.clicked += ResetButtonClick;
+        }
+        private void ResetButtonClick()
+        {
+            previewAvatarRequested = null;
         }
         public void LoadAvatarImage(Texture2D texture)
         {

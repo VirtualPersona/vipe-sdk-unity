@@ -46,9 +46,6 @@ public class AvatarSelectionSetup : MonoBehaviour
     private VisualElement root;
     [SerializeField]
     private GameObject LoginPanelUIDoc;
-    [SerializeField]
-    public delegate IEnumerator ModelLoadedEventHandler();
-    public static event ModelLoadedEventHandler ModelLoaded;
 
     public void ShowAvatarSelection()
     {
@@ -70,7 +67,7 @@ public class AvatarSelectionSetup : MonoBehaviour
         this.Vrm_Target = GameObject.Find("VRM_Target");
         this.Cam = GameObject.Find("Main Camera");
         this.camTarget = GameObject.Find("Camera_Target");
-        ModelLoaded += AsignCameraToModelVRM;
+        //ModelLoaded += AsignCameraToModelVRM;
     }
 
     private void OnEnable()
@@ -251,16 +248,16 @@ public class AvatarSelectionSetup : MonoBehaviour
                     model.GetComponent<UnityStandardAssets.Characters.ThirdPerson.ThirdPersonCharacter>().m_GroundCheckDistance = 0.4f;
                     model.AddComponent<UnityStandardAssets.Characters.ThirdPerson.ThirdPersonUserControl>();
 
-                    var child = new GameObject();
-                    child.name = "VRM_Child";
-                    child.transform.localPosition = new Vector3(0, 1, 0);
-                    child.transform.localRotation = Quaternion.Euler(0, -180, 0);
-                    child.transform.parent = model.transform;
-
-                    // Asign to Cam
-                    ModelLoadedEventHandler asignToCamera = ModelLoaded;
-                    if (asignToCamera != null)
-                        StartCoroutine(asignToCamera());
+                    //si ya esta el VRM en escena, lo seleccionamos como target de nuestro follow script que se encuentra en la camara
+                    if (this.Cam)
+                    {
+                        var child = new GameObject();
+                        child.name = "VRM_Child";
+                        child.transform.localPosition = new Vector3(0, 1, 0);
+                        child.transform.localRotation = Quaternion.Euler(0, -180, 0);
+                        child.transform.parent = model.transform;
+                        this.Cam.GetComponent<SmoothFollow>().target = child.transform;
+                    }
                 });
                 StartCoroutine(downloadVRM);
                 HideAvatarSelection();
@@ -274,30 +271,6 @@ public class AvatarSelectionSetup : MonoBehaviour
             StartCoroutine(loadAvatarPreviewImage);
         }
 
-    }
-    private IEnumerator AsignCameraToModelVRM()
-    {
-        this.Vrm = GameObject.Find("VRM");
-        this.Cam = GameObject.Find("Main Camera");
-        if (Vrm != null)
-        {
-            var followComponent = this.Cam.GetComponent<SmoothFollow>();
-            if (followComponent != null)
-            {
-                Debug.Log("Follow Component Found");
-            }
-            else
-            {
-                Debug.Log("Follow Component not obtainable");
-            }
-        }
-        else
-        {
-            Debug.Log("VRM IS NULL");
-        }
-        yield return null;
-
-        //yield return new WaitForSeconds(10);
     }
     IEnumerator disablePageButton(float seconds)
     {
