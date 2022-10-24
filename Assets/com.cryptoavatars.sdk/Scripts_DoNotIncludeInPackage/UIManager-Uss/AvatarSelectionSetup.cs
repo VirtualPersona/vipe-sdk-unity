@@ -1,24 +1,18 @@
 using BloodUI;
 using CA;
-using System;
+using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.Transforms;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.InputSystem.HID;
 using UnityEngine.UIElements;
 using UnityStandardAssets.Characters.ThirdPerson;
 using UnityStandardAssets.Utility;
 using static Structs;
-using static UnityEngine.GraphicsBuffer;
 
 public class AvatarSelectionSetup : MonoBehaviour
 {
-
     private string collectionNameSelected = "CryptoAvatars";
     private bool userLoggedIn;
-
     private CryptoAvatars cryptoAvatars;
     private AvatarSelectionWindow avatarSelectionWindow;
     private AvatarPlayableWindow playableAvatarWindow;
@@ -52,9 +46,6 @@ public class AvatarSelectionSetup : MonoBehaviour
 
     public void ShowAvatarSelection()
     {
-        if(playableAvatarWindow.visible)
-            HidePlayableWindow();
-        DisableAvatarMovement();
         root.Add(avatarSelectionWindow);
         refreshAvatars();
     }
@@ -79,6 +70,8 @@ public class AvatarSelectionSetup : MonoBehaviour
         this.downloadAvatars($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
         avatarSelectionWindow = new AvatarSelectionWindow();
         playableAvatarWindow = new AvatarPlayableWindow();
+        playableAvatarWindow.BackToAvatarSelectionRequested += () => HidePlayableWindow();
+        playableAvatarWindow.BackToAvatarSelectionRequested += () => DisableAvatarMovement();
         playableAvatarWindow.BackToAvatarSelectionRequested += () => ShowAvatarSelection();
         avatarSelectionWindow.BackToLoginRequested += backToLogin;
         avatarSelectionWindow.LoadMoreRequested += loadMoreNfts;
@@ -104,6 +97,7 @@ public class AvatarSelectionSetup : MonoBehaviour
 
     private void refreshAvatars()
     {
+        this.pageCount = 1;
         if (this.userLoggedIn)
         {
             this.downloadAvatarsUsers($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
@@ -155,7 +149,7 @@ public class AvatarSelectionSetup : MonoBehaviour
             initialCameraTransform.position = Vector3.Lerp(initialCameraTransform.position, destinationCameraTransform.position, Time.deltaTime * speed);
             yield return null;
         }
-    }    
+    }
     private IEnumerator MoveCameraRotation(Transform initialCameraTransform, Transform destinationCameraTransform, float speed)
     {
         while (Quaternion.Angle(initialCameraTransform.rotation, destinationCameraTransform.transform.rotation) > Mathf.Epsilon)
@@ -184,10 +178,7 @@ public class AvatarSelectionSetup : MonoBehaviour
         if (this.nextPage != "")
         {
             this.pageCount += 1;
-            avatarSelectionWindow.paginationTextField.SetValueWithoutNotify(this.pageCount.ToString());
-
-            //Remove card avatars already loaded
-            // StartCoroutine(disablePageButton(1.3f));
+            avatarSelectionWindow.paginationTextField.value = (this.pageCount.ToString());
             downloadAvatars(this.nextPage);
         }
     }
@@ -203,7 +194,7 @@ public class AvatarSelectionSetup : MonoBehaviour
         if (this.previousPage != "")
         {
             this.pageCount -= 1;
-            avatarSelectionWindow.paginationTextField.SetValueWithoutNotify(this.pageCount.ToString());
+            avatarSelectionWindow.paginationTextField.value = (this.pageCount.ToString());
             downloadAvatars(this.previousPage);
         }
 
@@ -213,7 +204,7 @@ public class AvatarSelectionSetup : MonoBehaviour
     {
         Structs.Nft[] nfts = onAvatarsResult.nfts;
         this.totalNfts = onAvatarsResult.totalNfts;
-        this.totalPages = totalNfts / nftPerLoad;
+        this.totalPages = (totalNfts / nftPerLoad)+1;
         avatarSelectionWindow.paginationTextField.value = $"{pageCount.ToString()}/{this.totalPages.ToString()}";
 
         int pos = urlServer.IndexOf(".io/v1/");
@@ -355,11 +346,9 @@ public class AvatarSelectionSetup : MonoBehaviour
             IEnumerator getAvatars = cryptoAvatars.GetAvatarsByCollectionName(this.collectionNameSelected, this.licenseType, pageUrl, onAvatarsResult => displayAndLoadAvatars(onAvatarsResult));
             StartCoroutine(getAvatars);
         }
-
         //Use userWallet
         IEnumerator getAvatarsUser = cryptoAvatars.GetUserAvatarsByCollectionName(this.collectionNameSelected, this.userWallet, pageUrl, onAvatarsResult => displayAndLoadAvatars(onAvatarsResult));
         StartCoroutine(getAvatarsUser);
 
     }
-
 }
