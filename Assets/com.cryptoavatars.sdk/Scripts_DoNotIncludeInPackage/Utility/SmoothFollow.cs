@@ -9,6 +9,8 @@ namespace UnityStandardAssets.Utility
 		// The target we are following
 		[SerializeField]
 		public Transform target;
+		[SerializeField]
+		public bool previewMode = false;
 		// The distance in the x-z plane to the target
 		[SerializeField]
 		private float distance = 10.0f;
@@ -21,9 +23,13 @@ namespace UnityStandardAssets.Utility
 		[SerializeField]
 		private float heightDamping;
 
-		// Use this for initialization
-		void Start() { }
-
+        // Use this for initialization
+        void Start() { }
+		private void Update()
+		{
+            if (previewMode)
+                this.transform.position = this.transform.position + new Vector3(0, -Input.mouseScrollDelta.y, 0);
+        }
 		// Update is called once per frame
 		void LateUpdate()
 		{
