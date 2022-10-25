@@ -1,8 +1,8 @@
 AvatarWindow {
 background-color: #2f2b77;
 border-radius: 12px;
-width: 270px;
-height: 400px;
+width: 320px;
+height: 410px;
 align-items: center;
 margin-top: 20px;
 }
@@ -18,13 +18,18 @@ Label{
 	font-size: 26px;
 	align-self: center;
 }
-Button {
-	width: 80%;
-	height: 13%;
+.avatar_window_buttons_container{
 	align-self:center;
-	margin-bottom:10px;
-	font-size: 26px;
-	border-radius: 24px;
+	flex-direction: row;
+}
+Button {
+	border-color: rgba(0,0,0,0);
+	width: 140px;
+	height: 30px;
+	align-self:center;
+	margin-bottom: 20px;
+	font-size: 16px;
+	border-radius: 14px;
     color: white;
     background-image: resource('UIElements/gradient');
     -unity-background-scale-mode: stretch-to-fill;

@@ -21,6 +21,7 @@ Label{
 	justify-content: space-between;
 }
 Button {
+	border-color: rgba(0,0,0,0);
 	margin-top: 10px;	
 	width: 250px;
 	height: 55px;
