@@ -46,6 +46,7 @@ public class AvatarSelectionSetup : MonoBehaviour
 
     public void ShowAvatarSelection()
     {
+        this.Cam.GetComponent<SmoothFollow>().previewMode = false;
         root.Add(avatarSelectionWindow);
         refreshAvatars();
     }
@@ -204,7 +205,7 @@ public class AvatarSelectionSetup : MonoBehaviour
     {
         Structs.Nft[] nfts = onAvatarsResult.nfts;
         this.totalNfts = onAvatarsResult.totalNfts;
-        this.totalPages = (totalNfts / nftPerLoad)+1;
+        this.totalPages = (totalNfts / nftPerLoad) + 1;
         avatarSelectionWindow.paginationTextField.value = $"{pageCount.ToString()}/{this.totalPages.ToString()}";
 
         int pos = urlServer.IndexOf(".io/v1/");
@@ -235,40 +236,8 @@ public class AvatarSelectionSetup : MonoBehaviour
 
                 IEnumerator downloadVRM = this.cryptoAvatars.GetAvatarVRMModel(urlVrm, (model) =>
                 {
-                    model.transform.Rotate(new Vector3(0, 180, 0));
-                    model.GetComponent<Animator>().runtimeAnimatorController = Resources.Load("Anims/Animator/ThirdPersonAnimatorController") as RuntimeAnimatorController;
-
-                    //Adjust axis (It comes with Y and Z flipped) (Blender)
-
-                    float h = Input.GetAxisRaw("Horizontal");
-                    float v = Input.GetAxisRaw("Vertical");
-                    Vector3 dir = new Vector3(h, 0, v);
-                    model.transform.InverseTransformDirection(dir);
-
-                    //model.transform.position += new Vector3(0, GameObject.Find("Cylinder").transform.localScale.y, 0);
-
-                    ////STANDARD ASSETS
-
-                    SkinnedMeshRenderer[] comps = model.GetComponentsInChildren<SkinnedMeshRenderer>();
-                    Vector3 totalSize = new Vector3(0, 0, 0);
-                    for (int j = 0; j < comps.Length; j++)
-                    {
-                        totalSize += comps[j].bounds.size;
-                    }
-                    //Debug.Log("Avatar Size: ");
-                    //Debug.Log(totalSize);
-
-                    model.AddComponent<CapsuleCollider>();
-                    model.GetComponent<CapsuleCollider>().radius = 0.2f;
-                    model.GetComponent<CapsuleCollider>().height = totalSize.y;
-                    model.GetComponent<CapsuleCollider>().center = new Vector3(0.0f, totalSize.y / 2.0f, 0.0f);
-
-                    model.AddComponent<Rigidbody>().useGravity = true;
-
-                    model.AddComponent<UnityStandardAssets.Characters.ThirdPerson.ThirdPersonCharacter>();
-                    model.GetComponent<UnityStandardAssets.Characters.ThirdPerson.ThirdPersonCharacter>().m_JumpPower = 5.5f;
-                    model.GetComponent<UnityStandardAssets.Characters.ThirdPerson.ThirdPersonCharacter>().m_GroundCheckDistance = 0.4f;
-                    model.AddComponent<UnityStandardAssets.Characters.ThirdPerson.ThirdPersonUserControl>();
+                    SetupModelAnimations(model);
+                    SetupAvatarController(model);
 
                     //si ya esta el VRM en escena, lo seleccionamos como target de nuestro follow script que se encuentra en la camara
                     if (this.Cam)
@@ -284,6 +253,20 @@ public class AvatarSelectionSetup : MonoBehaviour
                 StartCoroutine(downloadVRM);
                 HideAvatarSelection();
                 ShowPlayableWindow();
+            }, urlVrm =>
+            {
+                if (GameObject.Find("VRM"))
+                    Destroy(GameObject.Find("VRM"));
+                IEnumerator downloadVRM = this.cryptoAvatars.GetAvatarVRMModel(urlVrm, (model) =>
+                {
+                    SetupModelAnimations(model);
+                    this.Cam.transform.position = new Vector3(this.Cam.transform.position.x, this.Cam.transform.position.y + 2, this.Cam.transform.position.z);
+                    this.Cam.GetComponent<SmoothFollow>().previewMode = true;
+                    StartCoroutine(RotateAroundAvatar(model, 40f));
+                });
+                StartCoroutine(downloadVRM);
+                HideAvatarSelection();
+                ShowPlayableWindow();
             });
 
             IEnumerator loadAvatarPreviewImage = this.cryptoAvatars.GetAvatarPreviewImage(nft.metadata.image, texture =>
@@ -295,6 +278,47 @@ public class AvatarSelectionSetup : MonoBehaviour
         }
 
     }
+
+    private static void SetupAvatarController(GameObject model)
+    {
+        model.AddComponent<ThirdPersonCharacter>();
+        model.GetComponent<ThirdPersonCharacter>().m_JumpPower = 5.5f;
+        model.GetComponent<ThirdPersonCharacter>().m_GroundCheckDistance = 0.4f;
+        model.AddComponent<ThirdPersonUserControl>();
+    }
+
+    private static void SetupModelAnimations(GameObject model)
+    {
+        model.transform.Rotate(new Vector3(0, 180, 0));
+        model.GetComponent<Animator>().runtimeAnimatorController = Resources.Load("Anims/Animator/ThirdPersonAnimatorController") as RuntimeAnimatorController;
+
+        //Adjust axis (It comes with Y and Z flipped) (Blender)
+
+        float h = Input.GetAxisRaw("Horizontal");
+        float v = Input.GetAxisRaw("Vertical");
+        Vector3 dir = new Vector3(h, 0, v);
+        model.transform.InverseTransformDirection(dir);
+
+        //model.transform.position += new Vector3(0, GameObject.Find("Cylinder").transform.localScale.y, 0);
+
+        ////STANDARD ASSETS
+
+        SkinnedMeshRenderer[] comps = model.GetComponentsInChildren<SkinnedMeshRenderer>();
+        Vector3 totalSize = new Vector3(0, 0, 0);
+        for (int j = 0; j < comps.Length; j++)
+        {
+            totalSize += comps[j].bounds.size;
+        }
+        //Debug.Log("Avatar Size: ");
+        //Debug.Log(totalSize);
+
+        model.AddComponent<CapsuleCollider>();
+        model.GetComponent<CapsuleCollider>().radius = 0.2f;
+        model.GetComponent<CapsuleCollider>().height = totalSize.y;
+        model.GetComponent<CapsuleCollider>().center = new Vector3(0.0f, totalSize.y / 2.0f, 0.0f);
+        model.AddComponent<Rigidbody>().useGravity = true;
+    }
+
     IEnumerator disablePageButton(float seconds)
     {
         avatarSelectionWindow.BackToLoginRequested -= backToLogin;
@@ -304,6 +328,15 @@ public class AvatarSelectionSetup : MonoBehaviour
         avatarSelectionWindow.BackToLoginRequested += backToLogin;
         avatarSelectionWindow.LoadPreviousRequested += loadPreviousNfts;
         avatarSelectionWindow.LoadMoreRequested += loadMoreNfts;
+    }
+    private IEnumerator RotateAroundAvatar(GameObject model, float speed)
+    {
+        for (; ; )
+        {
+            Cam.transform.LookAt(model.transform);
+            Cam.transform.RotateAround(model.transform.position, Vector3.up, speed * Time.deltaTime);
+            yield return new WaitForEndOfFrame();
+        }
     }
     private void ShowPlayableWindow()
     {

@@ -9,9 +9,11 @@ namespace BloodUI
         [UnityEngine.Scripting.Preserve]
         public new class UxmlFactory : UxmlFactory<AvatarWindow, UxmlTraits> { };
         public event Action<string> previewAvatarRequested;
+        public event Action<string> playWithAvatarRequested;
         // Elements
         public Label avatarName; // 160x30
-        public Button preview3DButton; // 160x40
+        public Button previewButton;
+        public Button playWithAvatarButton; // 160x40
         public Image avatarImage; // Image - 250x350
         // Data
         private string vrmUrl;
@@ -19,19 +21,24 @@ namespace BloodUI
         private Texture2D textureAvatar;
         // Style Values Path
         private const string styleResourcePATH = "UI Toolkit/Styles/AvatarViewStyle";
-
-        public void SetAvatarData(string name, string vrmUrl, int index, Action<string> onClickCardBtn)
+        private const string ussButtonsContainer = "avatar_window_buttons_container";
+        public void SetAvatarData(string name, string vrmUrl, int index, Action<string> onClickPlayWithAvatarButton, Action<string> onClickPreviewButton)
         {
-            this.previewAvatarRequested = onClickCardBtn;
+            this.playWithAvatarRequested = onClickPlayWithAvatarButton;
+            this.previewAvatarRequested = onClickPreviewButton;
             this.vrmUrl = vrmUrl;
             this.index = index;
             avatarName.text = name;
-            preview3DButton.clicked += () => previewAvatarRequested?.Invoke(this.vrmUrl);
-            preview3DButton.clicked += ResetButtonClick;
+            playWithAvatarButton.clicked += () => playWithAvatarRequested?.Invoke(this.vrmUrl);
+            previewButton.clicked += () => previewAvatarRequested?.Invoke(this.vrmUrl);
+            playWithAvatarButton.clicked += ResetButtonsClick;
+            previewButton.clicked += ResetButtonsClick;
         }
-        private void ResetButtonClick()
+
+        private void ResetButtonsClick()
         {
             previewAvatarRequested = null;
+            playWithAvatarRequested = null;
         }
         public void LoadAvatarImage(Texture2D texture)
         {
@@ -43,13 +50,18 @@ namespace BloodUI
             styleSheets.Add(Resources.Load<StyleSheet>(styleResourcePATH));
             avatarName = new Label(text:"Avatar Name");
             avatarImage = new Image();
-            preview3DButton = new Button() { text = "Preview 3D" };
+            playWithAvatarButton = new Button() { text = "Play with Avatar" };
+            previewButton = new Button() { text = "Preview 3D" };
             VisualElement cardContainer = new VisualElement();
             // Add to hierarchy
             hierarchy.Add(cardContainer);
             cardContainer.Add(avatarImage);
             cardContainer.Add(avatarName);
-            cardContainer.Add(preview3DButton);
+            VisualElement buttonsContainer = new VisualElement { name = "buttonsContainer" };
+            buttonsContainer.AddToClassList(ussButtonsContainer);
+            buttonsContainer.Add(playWithAvatarButton);
+            buttonsContainer.Add(previewButton);
+            cardContainer.Add(buttonsContainer);
         }
     }
 }
