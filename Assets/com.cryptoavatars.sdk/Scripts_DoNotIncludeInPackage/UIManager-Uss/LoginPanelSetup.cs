@@ -67,6 +67,12 @@ public class LoginPanelSetup : MonoBehaviour
             if (this.userLoggedIn)
             {
                 this.userWallet = onLoginResult.wallet;
+                if (AvatarsUIDoc.activeSelf)
+                    AvatarsUIDoc.GetComponent<AvatarSelectionSetup>().ShowAvatarSelection();
+                
+                AvatarsUIDoc.SetActive(true);
+                AvatarsUIDoc.GetComponent<AvatarSelectionSetup>().UserLoggedIn = userLoggedIn;
+                AvatarsUIDoc.GetComponent<AvatarSelectionSetup>().UserWallet = userWallet;
                 LoginHide();
                 // Show Error
                 return;

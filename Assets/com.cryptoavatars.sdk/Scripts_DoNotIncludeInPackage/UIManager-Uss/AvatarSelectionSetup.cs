@@ -33,7 +33,7 @@ public class AvatarSelectionSetup : MonoBehaviour
     private GameObject camTarget;
     //
     private string licenseType = "CC0";
-
+    
     private string userWallet = "";
     const string urlServer = "https://api.cryptoavatars.io/v1/";
 
@@ -43,6 +43,9 @@ public class AvatarSelectionSetup : MonoBehaviour
     private VisualElement root;
     [SerializeField]
     private GameObject LoginPanelUIDoc;
+
+    public bool UserLoggedIn { get => userLoggedIn; set => userLoggedIn = value; }
+    public string UserWallet { get => userWallet; set => userWallet = value; }
 
     public void ShowAvatarSelection()
     {
@@ -86,7 +89,7 @@ public class AvatarSelectionSetup : MonoBehaviour
     {
         this.collectionNameSelected = value;
         removeCurrentAvatarsCards();
-        if (this.userWallet != "")
+        if (this.UserWallet != "")
         {
             this.downloadAvatarsUsers($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
         }
@@ -99,7 +102,7 @@ public class AvatarSelectionSetup : MonoBehaviour
     private void refreshAvatars()
     {
         this.pageCount = 1;
-        if (this.userLoggedIn)
+        if (this.UserLoggedIn)
         {
             this.downloadAvatarsUsers($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
         }
@@ -331,12 +334,13 @@ public class AvatarSelectionSetup : MonoBehaviour
     }
     private IEnumerator RotateAroundAvatar(GameObject model, float speed)
     {
-        for (; ; )
+        while (this.Cam.GetComponent<SmoothFollow>().previewMode)
         {
             Cam.transform.LookAt(model.transform);
             Cam.transform.RotateAround(model.transform.position, Vector3.up, speed * Time.deltaTime);
             yield return new WaitForEndOfFrame();
         }
+        DisableAvatarMovement();
     }
     private void ShowPlayableWindow()
     {
@@ -380,7 +384,7 @@ public class AvatarSelectionSetup : MonoBehaviour
             StartCoroutine(getAvatars);
         }
         //Use userWallet
-        IEnumerator getAvatarsUser = cryptoAvatars.GetUserAvatarsByCollectionName(this.collectionNameSelected, this.userWallet, pageUrl, onAvatarsResult => displayAndLoadAvatars(onAvatarsResult));
+        IEnumerator getAvatarsUser = cryptoAvatars.GetUserAvatarsByCollectionName(this.collectionNameSelected, this.UserWallet, pageUrl, onAvatarsResult => displayAndLoadAvatars(onAvatarsResult));
         StartCoroutine(getAvatarsUser);
 
     }

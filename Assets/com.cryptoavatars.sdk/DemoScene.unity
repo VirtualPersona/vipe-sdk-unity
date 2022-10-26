@@ -8963,8 +8963,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 0}
+  previewMode: 0
   distance: 3
   height: 1.3
+  maxCameraDistance: 20
+  minCameraDistance: 0
   rotationDamping: 0.9
   heightDamping: 0.9
 --- !u!81 &2054917565
@@ -9026,7 +9029,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2054917563}
   m_LocalRotation: {x: -0.014648101, y: -0.040650677, z: -0.00059601205, w: 0.9990658}
-  m_LocalPosition: {x: -1.931, y: -0.15, z: -3.177}
+  m_LocalPosition: {x: -1.56, y: -0.15, z: -3.177}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

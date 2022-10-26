@@ -17,18 +17,28 @@ namespace UnityStandardAssets.Utility
 		// the height we want the camera to be above the target
 		[SerializeField]
 		private float height = 5.0f;
-
+		[SerializeField]
+		private float maxCameraDistance = 20.0f;
+		[SerializeField]
+		private float minCameraDistance = 0.0f;
 		[SerializeField]
 		private float rotationDamping;
 		[SerializeField]
-		private float heightDamping;
+		private float heightDamping; // 0.9
 
+		private float currentHeight;
+		private float wantedHeight;
         // Use this for initialization
         void Start() { }
 		private void Update()
 		{
             if (previewMode)
-                this.transform.position = this.transform.position + new Vector3(0, -Input.mouseScrollDelta.y, 0);
+			{
+                //this.transform.position = this.transform.position + new Vector3(0, -Input.mouseScrollDelta.y, 0);
+				this.transform.position = Vector3.Lerp(transform.position, this.transform.position + new Vector3(0,-Input.mouseScrollDelta.y, 0), Time.deltaTime * 35);
+
+                this.transform.position = new Vector3(this.transform.position.x,Mathf.Clamp(this.transform.position.y, minCameraDistance, maxCameraDistance), this.transform.position.z);
+            }
         }
 		// Update is called once per frame
 		void LateUpdate()
@@ -39,10 +49,10 @@ namespace UnityStandardAssets.Utility
 
 			// Calculate the current rotation angles
 			var wantedRotationAngle = target.eulerAngles.y;
-			var wantedHeight = target.position.y + height;
+			wantedHeight = target.position.y + height;
 
 			var currentRotationAngle = transform.eulerAngles.y;
-			var currentHeight = transform.position.y;
+			currentHeight = transform.position.y;
 
 			// Damp the rotation around the y-axis
 			currentRotationAngle = Mathf.LerpAngle(currentRotationAngle, wantedRotationAngle, rotationDamping * Time.deltaTime);
