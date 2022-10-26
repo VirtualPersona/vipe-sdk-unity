@@ -3,6 +3,7 @@ using CA;
 using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityStandardAssets.Characters.ThirdPerson;
@@ -130,10 +131,15 @@ public class AvatarSelectionSetup : MonoBehaviour
         {
             this.Vrm.transform.position = this.Vrm_Target.transform.position;
             this.Vrm.transform.rotation = this.Vrm_Target.transform.rotation;
-            this.Vrm.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
-            Destroy(this.Vrm.GetComponent<CharacterController>());
+            this.Vrm.TryGetComponent(out Rigidbody rb);
+            rb.constraints = RigidbodyConstraints.FreezeAll;
+            this.Vrm.TryGetComponent(out CharacterController CharacterControllerComponent);
+            { Destroy(CharacterControllerComponent); }
             Destroy(this.Vrm.GetComponent<ThirdPersonUserControl>());
-            Destroy(this.Vrm.GetComponent<ThirdPersonCharacter>());
+            this.Vrm.TryGetComponent(out ThirdPersonUserControl ThirdPersonUserControlComponent);
+            { Destroy(ThirdPersonUserControlComponent); }
+            this.Vrm.TryGetComponent(out ThirdPersonCharacter ThirdPersonCharacterComponent);
+            { Destroy(ThirdPersonCharacterComponent); }
             this.Vrm.GetComponent<Animator>().SetBool("OnGround", true);
             this.Vrm.GetComponent<Animator>().SetBool("Crouch", false);
             this.Vrm.GetComponent<Animator>().SetFloat("Forward", 0);
