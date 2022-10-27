@@ -5,6 +5,7 @@ Label{
 .back_to_login_container{
 	flex-direction: column;
 	margin-top: 40px;
+	margin-left: 80px;
 }
 .header_container{
 	background-color: rgba(71, 16, 106,0.90);
@@ -17,7 +18,8 @@ Label{
 .selector_container{
 		flex-direction: row;
 		justify-content:center;
-		margin-top: 40px;
+		margin-top: 18px;
+		margin-left: 40px;
 		color: white;
 }
 .pagination_container{
