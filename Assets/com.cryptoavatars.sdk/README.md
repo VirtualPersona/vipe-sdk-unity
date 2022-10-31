@@ -1,6 +1,6 @@
 # CASDK
 
-* Unity-Supports 2019.4 and later
+* Unity-Supports 2020.3.40f1 and later
 * You can download OpenSource Avatars or get yours if they are in your wallet as an NFT.
 
 ## Log-In
