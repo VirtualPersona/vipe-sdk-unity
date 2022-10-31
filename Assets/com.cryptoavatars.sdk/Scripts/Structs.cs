@@ -87,6 +87,7 @@ public class Structs
     [System.Serializable]
     public struct Nft
     {
+        public string owner;
         public Metadata metadata;
 
         [System.Serializable]
@@ -94,7 +95,6 @@ public class Structs
         {
             public string name;
             public string description;
-            public string owner;
             public string image;
             public string asset;
             public string createdBy;

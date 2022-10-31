@@ -9,7 +9,6 @@ using UnityEngine.UIElements;
 using UnityStandardAssets.Characters.ThirdPerson;
 using UnityStandardAssets.Utility;
 using static Structs;
-//public enum SourceFilter { All, Owned, Not_Owned}
 public class AvatarSelectionSetup : MonoBehaviour
 {
     private string collectionNameSelected = "CryptoAvatars";
@@ -106,7 +105,7 @@ public class AvatarSelectionSetup : MonoBehaviour
         switch (value)
         {
             case "Owned":
-                if(userWallet!= null)
+                if (userWallet != null)
                     this.downloadAvatarsUsers($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
                 else
                     this.downloadAvatars($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
@@ -276,49 +275,54 @@ public class AvatarSelectionSetup : MonoBehaviour
             // Crear UI Elements para cada carta
             AvatarWindow cardAvatar = new AvatarWindow();
             avatarSelectionWindow.scrollView.Add(cardAvatar);
-
-            cardAvatar.SetAvatarData(nft.metadata.name, nft.metadata.asset, i, urlVrm =>
-            {
-
-                if (GameObject.Find("VRM"))
-                    Destroy(GameObject.Find("VRM"));
-          
-                IEnumerator downloadVRM = this.cryptoAvatars.GetAvatarVRMModel(urlVrm, (model) =>
+                cardAvatar.SetAvatarData(nft.metadata.name, nft.metadata.asset, i, urlVrm =>
                 {
-                    SetupModelAnimations(model);
-                    SetupAvatarController(model);
-
-                    //si ya esta el VRM en escena, lo seleccionamos como target de nuestro follow script que se encuentra en la camara
-                    if (this.Cam)
+                    if (nft.owner == UserWallet || licenseType == "CC0")
                     {
-                        AdaptCameraHeightToModelHeight(model);
-                        var child = new GameObject();
-                        child.name = "VRM_Child";
-                        child.transform.localPosition = new Vector3(0, 1, 0);
-                        child.transform.localRotation = Quaternion.Euler(0, -180, 0);
-                        child.transform.parent = model.transform;
-                        child.transform.position = VRM_Camera_Offset * Vector3.up;
-                        this.Cam.GetComponent<SmoothFollow>().target = child.transform;
+                        if (GameObject.Find("VRM"))
+                            Destroy(GameObject.Find("VRM"));
+
+                        IEnumerator downloadVRM = this.cryptoAvatars.GetAvatarVRMModel(urlVrm, (model) =>
+                        {
+                            SetupModelAnimations(model);
+                            SetupAvatarController(model);
+
+                            //si ya esta el VRM en escena, lo seleccionamos como target de nuestro follow script que se encuentra en la camara
+                            if (this.Cam)
+                            {
+                                AdaptCameraHeightToModelHeight(model);
+                                var child = new GameObject();
+                                child.name = "VRM_Child";
+                                child.transform.localPosition = new Vector3(0, 1, 0);
+                                child.transform.localRotation = Quaternion.Euler(0, -180, 0);
+                                child.transform.parent = model.transform;
+                                child.transform.position = VRM_Camera_Offset * Vector3.up;
+                                this.Cam.GetComponent<SmoothFollow>().target = child.transform;
+                            }
+                        });
+                        StartCoroutine(downloadVRM);
+                        HideAvatarSelection();
+                        ShowPlayableWindow();
+                    }
+                      
+                }, urlVrm =>
+                {
+                    if (nft.owner == UserWallet || licenseType == "CC0")
+                    {
+                        if (GameObject.Find("VRM"))
+                            Destroy(GameObject.Find("VRM"));
+                        IEnumerator downloadVRM = this.cryptoAvatars.GetAvatarVRMModel(urlVrm, (model) =>
+                        {
+                            SetupModelAnimations(model);
+                            AdaptCameraHeightToModelHeight(model);
+                            this.Cam.GetComponent<SmoothFollow>().previewMode = true;
+                            StartCoroutine(RotateAroundAvatar(model, 40f));
+                        });
+                        StartCoroutine(downloadVRM);
+                        HideAvatarSelection();
+                        ShowPlayableWindow();
                     }
                 });
-                StartCoroutine(downloadVRM);
-                HideAvatarSelection();
-                ShowPlayableWindow();
-            }, urlVrm =>
-            {
-                if (GameObject.Find("VRM"))
-                    Destroy(GameObject.Find("VRM"));
-                IEnumerator downloadVRM = this.cryptoAvatars.GetAvatarVRMModel(urlVrm, (model) =>
-                {
-                    SetupModelAnimations(model);
-                    AdaptCameraHeightToModelHeight(model);
-                    this.Cam.GetComponent<SmoothFollow>().previewMode = true;
-                    StartCoroutine(RotateAroundAvatar(model, 40f));
-                });
-                StartCoroutine(downloadVRM);
-                HideAvatarSelection();
-                ShowPlayableWindow();
-            });
 
             IEnumerator loadAvatarPreviewImage = this.cryptoAvatars.GetAvatarPreviewImage(nft.metadata.image, texture =>
             {
@@ -375,8 +379,9 @@ public class AvatarSelectionSetup : MonoBehaviour
             avatarSelectionWindow.scrollView.Add(cardAvatar);
 
             cardAvatar.SetAvatarData(nft.metadata.name, nft.metadata.asset, i, urlVrm =>
+        {
+            if (nft.owner == UserWallet || licenseType == "CC0")
             {
-
                 if (GameObject.Find("VRM"))
                     Destroy(GameObject.Find("VRM"));
 
@@ -399,7 +404,10 @@ public class AvatarSelectionSetup : MonoBehaviour
                 StartCoroutine(downloadVRM);
                 HideAvatarSelection();
                 ShowPlayableWindow();
-            }, urlVrm =>
+            }
+        }, urlVrm =>
+        {
+            if (nft.owner == UserWallet || licenseType == "CC0")
             {
                 if (GameObject.Find("VRM"))
                     Destroy(GameObject.Find("VRM"));
@@ -413,7 +421,8 @@ public class AvatarSelectionSetup : MonoBehaviour
                 StartCoroutine(downloadVRM);
                 HideAvatarSelection();
                 ShowPlayableWindow();
-            });
+            }
+        });
 
             IEnumerator loadAvatarPreviewImage = this.cryptoAvatars.GetAvatarPreviewImage(nft.metadata.image, texture =>
             {

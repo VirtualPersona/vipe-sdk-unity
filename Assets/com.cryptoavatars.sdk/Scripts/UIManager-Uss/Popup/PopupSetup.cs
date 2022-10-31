@@ -26,14 +26,12 @@ namespace BloodUI
                 popup.LoginRequested += () => Debug.Log("Login in");
                 popup.GuestRequested += () => Debug.Log("Enter as guest");
             }
-            Debug.Log("Enter");
             root.Add(popup);
             cryptoAvatarsImage.color = new Color(0,0,0,0);
         }
 
         public void Popup_Hide()
         {
-            Debug.Log("EXit");
             if (popup != null)
                 root.Remove(popup);
             
