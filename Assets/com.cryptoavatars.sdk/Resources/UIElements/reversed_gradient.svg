@@ -1,1 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1250.67 537.33"><defs><style>.e{fill:url(#d);}</style><linearGradient id="d" x1="0" y1="268.67" x2="1250.67" y2="268.67" gradientTransform="matrix(1, 0, 0, 1, 0, 0)" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="aqua"/><stop offset=".9" stop-color="#ba46e1" stop-opacity=".9"/></linearGradient></defs><g id="a"/><g id="b"><g id="c"><rect class="e" width="1250.67" height="537.33"/></g></g></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Capa_2" data-name="Capa 2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1250.67 537.33">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: url(#Degradado_sin_nombre);
+      }
+    </style>
+    <linearGradient id="Degradado_sin_nombre" data-name="Degradado sin nombre" x1="0" y1="-911.3" x2="1250.67" y2="-911.3" gradientTransform="translate(1250.67 1179.97) rotate(-180) scale(1 -1)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="aqua"/>
+      <stop offset=".9" stop-color="#ba46e1" stop-opacity=".9"/>
+    </linearGradient>
+  </defs>
+  <g id="Capa_1-2" data-name="Capa 1">
+    <g id="b">
+      <g id="c">
+        <rect class="cls-1" width="1250.67" height="537.33"/>
+      </g>
+    </g>
+  </g>
+</svg>

@@ -40,12 +40,9 @@ namespace CA
         /** 
          * onAvatarsResult -> callback to get Avatars info
          */
+        [Obsolete("GetUserAvatars using collectionAddress is deprecated, please use GetUserAvatarsByCollectionName instead.")]
         public IEnumerator GetUserAvatars(string collectionAddress, string owner, string pageUrl, System.Action<Structs.NftsArray> onAvatarsResult)
         {
-            // Mejorar
-            //if (!userLoggedIn)
-            //    return null;
-
             Structs.OwnerAvatarsDto searchAvatarsDto = new Structs.OwnerAvatarsDto();
             searchAvatarsDto.collectionAddress = collectionAddress;
             searchAvatarsDto.owner = owner;
@@ -60,6 +57,7 @@ namespace CA
          * skip & limit for pagination
          * onAvatarsResult -> callback to get Avatars info
          */
+        [Obsolete("GetAvatars using collectionAddress is deprecated, please use GetAvatarsByCollectionName instead.")]
         public IEnumerator GetAvatars(string collectionAddress, string licenseType, string pageUrl, System.Action<Structs.NftsArray> onAvatarsResult)
         {
             Structs.DefaultSearchAvatarsDto searchAvatarsDto = new Structs.DefaultSearchAvatarsDto();
@@ -97,10 +95,6 @@ namespace CA
         }
         public IEnumerator GetUserAvatarsByCollectionName(string collectionName,string owner, string pageUrl, System.Action<Structs.NftsArray> onAvatarsResult)
         {
-            // Mejorar
-            //if (!userLoggedIn)
-            //    return null;
-            Debug.Log("Entro");
             Structs.OwnerAvatarsDtoCollectionName searchAvatarsDto = new Structs.OwnerAvatarsDtoCollectionName();
             searchAvatarsDto.collectionName = collectionName;
             searchAvatarsDto.owner = owner;

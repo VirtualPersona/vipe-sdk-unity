@@ -45,7 +45,7 @@ Button {
     font-size: 24px;
     color: white;
     border-color: rgba(0, 0, 0, 0);
-    background-image: resource('UIElements/gradient');
+    background-image: resource('UIElements/reversed_gradient');
     -unity-background-scale-mode: stretch-to-fill;
 }
 
