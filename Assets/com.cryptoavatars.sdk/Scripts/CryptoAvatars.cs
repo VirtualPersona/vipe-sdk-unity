@@ -87,7 +87,7 @@ namespace CA
         {
             Structs.DefaultSearchAvatarsDtoCollectionName searchAvatarsDto = new Structs.DefaultSearchAvatarsDtoCollectionName();
             searchAvatarsDto.collectionName = collectionName;
-            //searchAvatarsDto.license = licenseType;
+            searchAvatarsDto.license = licenseType;
             return this.httpService.Post<Structs.DefaultSearchAvatarsDtoCollectionName>(pageUrl, searchAvatarsDto, (string avatarsResult) =>
             {
                 Structs.NftsArray avatarsResponse = JsonUtility.FromJson<Structs.NftsArray>(avatarsResult);

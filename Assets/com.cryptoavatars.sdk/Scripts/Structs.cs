@@ -94,6 +94,7 @@ public class Structs
         {
             public string name;
             public string description;
+            public string owner;
             public string image;
             public string asset;
             public string createdBy;

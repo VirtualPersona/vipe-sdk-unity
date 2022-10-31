@@ -12,8 +12,8 @@ namespace BloodUI
         public event Action LoadMoreRequested;
         public event Action LoadPreviousRequested;
         public event Action<string> OnLoadCollectionsRequested;
-        public event Action OnLoadAvatarsRequested;
         public event Action<string> OnSearchAvatarRequested;
+        public event Action<string> OnSourceSelectorRequested;
         // Style Path
         private const string styleResourcePATH = "UI Toolkit/Styles/CardAvatarListStyle";
         private const string imageResourcePATH = "Logos/logo";
@@ -47,7 +47,7 @@ namespace BloodUI
             sourceSelector = new DropdownField()
             {
                 label = "Source",
-                choices = new System.Collections.Generic.List<string>() { "All", "Owned", "Not Owned" },
+                choices = new System.Collections.Generic.List<string>() { "All", "Owned", "Open Source" },
                 value = "All"
             };
             
@@ -114,8 +114,10 @@ namespace BloodUI
             backToLoginButton.clicked += OnBackToLoginButtonClicked;
             loadMoreButton.clicked += OnLoadMoreButtonClicked;
             loadPreviousButton.clicked += OnLoadPreviousButtonClicked;
-            // Dropdown
+            // Dropdown Collection
             collectionSelector.RegisterValueChangedCallback(x => OnLoadCollectionsRequested?.Invoke(collectionSelector.value));
+            // Dropdown License
+            sourceSelector.RegisterValueChangedCallback(x => OnSourceSelectorRequested?.Invoke(sourceSelector.value));
             // Search Bar
             searchAvatarTextField.RegisterValueChangedCallback(x => OnSearchAvatarRequested?.Invoke(searchAvatarTextField.value));
         }

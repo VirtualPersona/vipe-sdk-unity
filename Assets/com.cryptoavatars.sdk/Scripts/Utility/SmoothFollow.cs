@@ -28,6 +28,10 @@ namespace UnityStandardAssets.Utility
 
 		private float currentHeight;
 		private float wantedHeight;
+
+        public float Height { get => height; set => height = value; }
+        public float Distance { get => distance; set => distance = value; }
+
         // Use this for initialization
         void Start() { }
 		private void Update()
@@ -49,7 +53,7 @@ namespace UnityStandardAssets.Utility
 
 			// Calculate the current rotation angles
 			var wantedRotationAngle = target.eulerAngles.y;
-			wantedHeight = target.position.y + height;
+			wantedHeight = target.position.y + Height;
 
 			var currentRotationAngle = transform.eulerAngles.y;
 			currentHeight = transform.position.y;
@@ -66,7 +70,7 @@ namespace UnityStandardAssets.Utility
 			// Set the position of the camera on the x-z plane to:
 			// distance meters behind the target
 			transform.position = target.position;
-			transform.position -= currentRotation * Vector3.forward * distance;
+			transform.position -= currentRotation * Vector3.forward * Distance;
 
 			// Set the height of the camera
 			transform.position = new Vector3(transform.position.x, currentHeight, transform.position.z);

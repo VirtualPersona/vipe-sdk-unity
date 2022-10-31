@@ -15,6 +15,7 @@ namespace BloodUI
         public Button previewButton;
         public Button playWithAvatarButton; // 160x40
         public Image avatarImage; // Image - 250x350
+        public Image avatarOwnedFilter;
         // Data
         private string vrmUrl;
         private int index;
@@ -44,6 +45,13 @@ namespace BloodUI
         {
             this.textureAvatar = texture;
             avatarImage.image = this.textureAvatar;
+        }
+        public void LoadAvatarImage(Texture2D texture, bool owned)
+        {
+            this.textureAvatar = texture;
+            avatarImage.image = this.textureAvatar;
+            if (!owned)
+                avatarImage.tintColor = new Color(0, 0, 0, 0.4f);
         }
         public AvatarWindow()
         {

@@ -9,7 +9,7 @@ using UnityEngine.UIElements;
 using UnityStandardAssets.Characters.ThirdPerson;
 using UnityStandardAssets.Utility;
 using static Structs;
-
+//public enum SourceFilter { All, Owned, Not_Owned}
 public class AvatarSelectionSetup : MonoBehaviour
 {
     private string collectionNameSelected = "CryptoAvatars";
@@ -33,7 +33,7 @@ public class AvatarSelectionSetup : MonoBehaviour
     private GameObject Cam;
     private GameObject camTarget;
     //
-    private string licenseType = "CC0";
+    private string licenseType = "";
 
     private string userWallet = "";
     const string urlServer = "https://api.cryptoavatars.io/v1/";
@@ -47,7 +47,7 @@ public class AvatarSelectionSetup : MonoBehaviour
 
     public bool UserLoggedIn { get => userLoggedIn; set => userLoggedIn = value; }
     public string UserWallet { get => userWallet; set => userWallet = value; }
-
+    private float VRM_Camera_Offset;
     public void ShowAvatarSelection()
     {
         this.Cam.GetComponent<SmoothFollow>().previewMode = false;
@@ -82,6 +82,7 @@ public class AvatarSelectionSetup : MonoBehaviour
         avatarSelectionWindow.LoadMoreRequested += loadMoreNfts;
         avatarSelectionWindow.LoadPreviousRequested += loadPreviousNfts;
         avatarSelectionWindow.OnLoadCollectionsRequested += changeCollection;
+        avatarSelectionWindow.OnSourceSelectorRequested += changeSource;
         avatarSelectionWindow.OnSearchAvatarRequested += refreshAvatars;
         root.Add(avatarSelectionWindow);
     }
@@ -97,6 +98,27 @@ public class AvatarSelectionSetup : MonoBehaviour
         else
         {
             this.downloadAvatars($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
+        }
+    }
+    private void changeSource(string value)
+    {
+        removeCurrentAvatarsCards();
+        switch (value)
+        {
+            case "Owned":
+                if(userWallet!= null)
+                    this.downloadAvatarsUsers($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
+                else
+                    this.downloadAvatars($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
+                break;
+            case "Open Source":
+                this.licenseType = "CC0";
+                this.downloadAvatars($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
+                break;
+            case "All":
+                this.licenseType = "";
+                this.downloadAvatars($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
+                break;
         }
     }
 
@@ -152,17 +174,23 @@ public class AvatarSelectionSetup : MonoBehaviour
             { Destroy(ThirdPersonUserControlComponent); }
             this.Vrm.TryGetComponent(out ThirdPersonCharacter ThirdPersonCharacterComponent);
             { Destroy(ThirdPersonCharacterComponent); }
-            this.Vrm.GetComponent<Animator>().SetBool("OnGround", true);
-            this.Vrm.GetComponent<Animator>().SetBool("Crouch", false);
-            this.Vrm.GetComponent<Animator>().SetFloat("Forward", 0);
-            this.Vrm.GetComponent<Animator>().SetFloat("Turn", 0);
-            this.Vrm.GetComponent<Animator>().SetFloat("Jump", 0);
-            this.Vrm.GetComponent<Animator>().SetFloat("JumpLeg", 0);
-            this.Cam.transform.position = this.camTarget.transform.position;
+            SetIddleAnimation();
+            this.Cam.transform.position += VRM_Camera_Offset * this.camTarget.transform.up;
             this.Cam.transform.rotation = this.camTarget.transform.rotation;
             this.Cam.GetComponent<SmoothFollow>().target = null;
         }
     }
+
+    private void SetIddleAnimation()
+    {
+        this.Vrm.GetComponent<Animator>().SetBool("OnGround", true);
+        this.Vrm.GetComponent<Animator>().SetBool("Crouch", false);
+        this.Vrm.GetComponent<Animator>().SetFloat("Forward", 0);
+        this.Vrm.GetComponent<Animator>().SetFloat("Turn", 0);
+        this.Vrm.GetComponent<Animator>().SetFloat("Jump", 0);
+        this.Vrm.GetComponent<Animator>().SetFloat("JumpLeg", 0);
+    }
+
     private IEnumerator MoveCameraPosition(Transform initialCameraTransform, Transform destinationCameraTransform, float speed)
     {
         // check the distance and see if we still need to move towards the destination ?
@@ -254,7 +282,7 @@ public class AvatarSelectionSetup : MonoBehaviour
 
                 if (GameObject.Find("VRM"))
                     Destroy(GameObject.Find("VRM"));
-
+          
                 IEnumerator downloadVRM = this.cryptoAvatars.GetAvatarVRMModel(urlVrm, (model) =>
                 {
                     SetupModelAnimations(model);
@@ -263,11 +291,13 @@ public class AvatarSelectionSetup : MonoBehaviour
                     //si ya esta el VRM en escena, lo seleccionamos como target de nuestro follow script que se encuentra en la camara
                     if (this.Cam)
                     {
+                        AdaptCameraHeightToModelHeight(model);
                         var child = new GameObject();
                         child.name = "VRM_Child";
                         child.transform.localPosition = new Vector3(0, 1, 0);
                         child.transform.localRotation = Quaternion.Euler(0, -180, 0);
                         child.transform.parent = model.transform;
+                        child.transform.position = VRM_Camera_Offset * Vector3.up;
                         this.Cam.GetComponent<SmoothFollow>().target = child.transform;
                     }
                 });
@@ -281,7 +311,7 @@ public class AvatarSelectionSetup : MonoBehaviour
                 IEnumerator downloadVRM = this.cryptoAvatars.GetAvatarVRMModel(urlVrm, (model) =>
                 {
                     SetupModelAnimations(model);
-                    this.Cam.transform.position = new Vector3(this.Cam.transform.position.x, this.Cam.transform.position.y + 2, this.Cam.transform.position.z);
+                    AdaptCameraHeightToModelHeight(model);
                     this.Cam.GetComponent<SmoothFollow>().previewMode = true;
                     StartCoroutine(RotateAroundAvatar(model, 40f));
                 });
@@ -298,7 +328,18 @@ public class AvatarSelectionSetup : MonoBehaviour
             StartCoroutine(loadAvatarPreviewImage);
         }
 
-    }private void displayAndLoadAvatarsByNameFilter(NftsArray onAvatarsResult, string filterName)
+    }
+
+    private void AdaptCameraHeightToModelHeight(GameObject model)
+    {
+        float modelHeight = model.GetComponent<CapsuleCollider>().height;
+        VRM_Camera_Offset = modelHeight / 2;
+        this.Cam.transform.position = new Vector3(this.Cam.transform.position.x, this.Cam.transform.position.y + modelHeight, this.Cam.transform.position.z);
+        this.Cam.GetComponent<SmoothFollow>().Height = modelHeight;
+        this.Cam.GetComponent<SmoothFollow>().Distance = modelHeight;
+    }
+
+    private void displayAndLoadAvatarsByNameFilter(NftsArray onAvatarsResult, string filterName)
     {
         Structs.Nft[] nfts = onAvatarsResult.nfts;
         List<Nft> nftsFiltered = new List<Nft>();
@@ -349,7 +390,7 @@ public class AvatarSelectionSetup : MonoBehaviour
                     {
                         var child = new GameObject();
                         child.name = "VRM_Child";
-                        child.transform.localPosition = new Vector3(0, 1, 0);
+                        child.transform.localPosition = new Vector3(0, VRM_Camera_Offset, 0);
                         child.transform.localRotation = Quaternion.Euler(0, -180, 0);
                         child.transform.parent = model.transform;
                         this.Cam.GetComponent<SmoothFollow>().target = child.transform;
@@ -463,7 +504,7 @@ public class AvatarSelectionSetup : MonoBehaviour
         removeCurrentAvatarsCards();
         IEnumerator getAvatars = cryptoAvatars.GetAvatarsByName(this.collectionNameSelected, this.licenseType, pageUrl, name, onAvatarsResult => displayAndLoadAvatars(onAvatarsResult));
         StartCoroutine(getAvatars);
-    }  
+    }
 
     private void downloadCollections(string pageUrl)
     {
@@ -481,7 +522,6 @@ public class AvatarSelectionSetup : MonoBehaviour
             choices.Add(collection.name);
         }
         avatarSelectionWindow.collectionSelector.choices = choices;
-        //downloadAvatars("");
     }
 
     private void downloadAvatarsUsers(string pageUrl)
