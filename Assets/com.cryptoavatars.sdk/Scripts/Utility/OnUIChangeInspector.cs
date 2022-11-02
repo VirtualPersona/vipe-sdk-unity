@@ -13,7 +13,6 @@ public class OnUIChangeInspector : Editor
         base.OnInspectorGUI();
         UIModeSelector myScript = (UIModeSelector)target;
         myScript.LoginUIMode = (LoginUIModes)EditorGUILayout.EnumPopup("UI Modes:", (LoginUIModes)myScript.LoginUIMode);
-        //serializedObject.ApplyModifiedProperties();
     }
 
     

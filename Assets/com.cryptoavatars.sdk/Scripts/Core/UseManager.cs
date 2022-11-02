@@ -8,8 +8,9 @@ using CA;
 
 public class UseManager : MonoBehaviour
 {
-    // TEST API-KEY , request your own api key. Will be disabled soon.
-    private const string API_KEY = "$2b$10$jXmDbzXmgU7YjsshSRuSnOfdlMky/eUX7LPhJ0Y8jAtypyu4vJK1a";
+    [Header("API KEY IS REQUIRED TO PERFORM HTTP REQUESTS")]
+    [SerializeField]
+    private const string API_KEY = "";
 
     private bool userLoggedIn;
 
@@ -53,7 +54,7 @@ public class UseManager : MonoBehaviour
     private string nextPage = "";
     private string previousPage = "";
 
-    private string collectionAddressSelected = "0xc1def47cf1e15ee8c2a92f4e0e968372880d18d1";
+    private string collectionAddressSelected = "";
     private string licenseType = "CC0";
 
     private string userWallet = "";

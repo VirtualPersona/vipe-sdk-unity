@@ -5,10 +5,8 @@
   <xs:import schemaLocation="Unity.Cloud.Collaborate.Views.xsd" namespace="Unity.Cloud.Collaborate.Views" />
   <xs:import schemaLocation="Unity.Cloud.Collaborate.Components.xsd" namespace="Unity.Cloud.Collaborate.Components" />
   <xs:import schemaLocation="Unity.Cloud.Collaborate.Components.ChangeListEntries.xsd" namespace="Unity.Cloud.Collaborate.Components.ChangeListEntries" />
-  <xs:import schemaLocation="Unity.Properties.UI.xsd" namespace="Unity.Properties.UI" />
-  <xs:import schemaLocation="Unity.UI.Builder.xsd" namespace="Unity.UI.Builder" />
-  <xs:include schemaLocation="GlobalNamespace.xsd" />
   <xs:import schemaLocation="BloodUI.xsd" namespace="BloodUI" />
+  <xs:import schemaLocation="Unity.UI.Builder.xsd" namespace="Unity.UI.Builder" />
   <xs:import schemaLocation="UnityEditor.ShortcutManagement.xsd" namespace="UnityEditor.ShortcutManagement" />
   <xs:import schemaLocation="UnityEditor.UIElements.Debugger.xsd" namespace="UnityEditor.UIElements.Debugger" />
   <xs:import schemaLocation="UnityEditor.PackageManager.UI.xsd" namespace="UnityEditor.PackageManager.UI" />

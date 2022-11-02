@@ -29,6 +29,7 @@ public class Structs
     {
         public string name;
         public string license;
+        public string collectionName;
     }
     [System.Serializable]
 

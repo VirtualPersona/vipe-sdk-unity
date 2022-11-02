@@ -12,20 +12,18 @@ namespace CA
 
         private HttpService httpService;
 
-        //private bool userLoggedIn;
         private string userId;
 
         public CryptoAvatars(string apiKey)
         {
             const string urlServer = "https://api.cryptoavatars.io/v1/";
             this.httpService = new HttpService(apiKey, urlServer);
-            //this.userLoggedIn = false;
         }
 
         /** 
          * onLoginResult -> callback to know if loggin was susscesfully
          */
-        public IEnumerator UserLogin(string email, string password, System.Action<Structs.LoginResponseDto> onLoginResult)
+        public IEnumerator UserLogin(string email, string password, Action<Structs.LoginResponseDto> onLoginResult)
         {
             Structs.LoginRequestDto loginRequestDto = new Structs.LoginRequestDto();
             loginRequestDto.email = email;
@@ -75,13 +73,14 @@ namespace CA
             Structs.SearchAvatarByNameDto searchAvatarsDto = new Structs.SearchAvatarByNameDto();
             searchAvatarsDto.name = name;
             searchAvatarsDto.license = licenseType;
+            searchAvatarsDto.collectionName = collectionNameSelected;
             return this.httpService.Post(pageUrl, searchAvatarsDto, (string avatarsResult) => {
 
                 Structs.NftsArray avatarsResponse = JsonUtility.FromJson<Structs.NftsArray>(avatarsResult);
                 onAvatarsResult(avatarsResponse);
             });
         }
-        public IEnumerator GetAvatarsByCollectionName(string collectionName, string licenseType, string pageUrl, System.Action<Structs.NftsArray> onAvatarsResult)
+        public IEnumerator GetAvatarsByCollectionName(string collectionName, string licenseType, string pageUrl, Action<Structs.NftsArray> onAvatarsResult)
         {
             Structs.DefaultSearchAvatarsDtoCollectionName searchAvatarsDto = new Structs.DefaultSearchAvatarsDtoCollectionName();
             searchAvatarsDto.collectionName = collectionName;
@@ -93,7 +92,7 @@ namespace CA
                 onAvatarsResult(avatarsResponse);
             });
         }
-        public IEnumerator GetUserAvatarsByCollectionName(string collectionName,string owner, string pageUrl, System.Action<Structs.NftsArray> onAvatarsResult)
+        public IEnumerator GetUserAvatarsByCollectionName(string collectionName,string owner, string pageUrl, Action<Structs.NftsArray> onAvatarsResult)
         {
             Structs.OwnerAvatarsDtoCollectionName searchAvatarsDto = new Structs.OwnerAvatarsDtoCollectionName();
             searchAvatarsDto.collectionName = collectionName;
@@ -120,7 +119,7 @@ namespace CA
         /** 
         * onImage -> callback to get Avatar thumbnail
         */
-        public IEnumerator GetAvatarVRMModel(string urlVrm, System.Action<GameObject> onModelResult)
+        public IEnumerator GetAvatarVRMModel(string urlVrm, Action<GameObject> onModelResult)
         {
             urlVrm = urlVrm.Replace("gateway.pinata.cloud", "usercollection.mypinata.cloud");
             return this.httpService.Download3DModel(urlVrm, (localPath) =>
@@ -164,12 +163,11 @@ namespace CA
         /** 
         * GetNFTsCollections -> callback to get dynamically all the collections
         */
-        public IEnumerator GetNFTsCollections(System.Action<Structs.NftsCollectionsArray> onCollectionsResult, string pageUrl)
+        public IEnumerator GetNFTsCollections(Action<Structs.NftsCollectionsArray> onCollectionsResult, string pageUrl)
         {
             string body = "{}";
             return this.httpService.Post(pageUrl, body, (string collectionsResult) =>
             {
-                Debug.Log("STRING -> " + collectionsResult);
                 Structs.NftsCollectionsArray collectionsResponse = JsonUtility.FromJson<Structs.NftsCollectionsArray>("{\"nftsCollections\":" + collectionsResult + "}");
                 onCollectionsResult(collectionsResponse);
             });
