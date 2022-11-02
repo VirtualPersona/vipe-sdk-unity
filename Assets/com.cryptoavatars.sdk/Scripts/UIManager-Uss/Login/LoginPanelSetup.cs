@@ -8,7 +8,7 @@ public class LoginPanelSetup : MonoBehaviour
 {
     [Header("API KEY IS REQUIRED TO PERFORM HTTP REQUESTS")]
     [SerializeField]
-    private const string API_KEY = "";
+    private string API_KEY = "";
 
     private bool userLoggedIn;
     private string userWallet = "";

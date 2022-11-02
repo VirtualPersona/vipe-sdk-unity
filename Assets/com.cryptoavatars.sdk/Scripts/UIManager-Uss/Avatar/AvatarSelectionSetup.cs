@@ -38,7 +38,7 @@ public class AvatarSelectionSetup : MonoBehaviour
     const string urlServer = "https://api.cryptoavatars.io/v1/";
     [Header("API KEY IS REQUIRED TO PERFORM HTTP REQUESTS")]
     [SerializeField]
-    private const string API_KEY = "";
+    private string API_KEY = "";
     // UI Toolkit 
     private UIDocument doc;
     private VisualElement root;

@@ -10,7 +10,7 @@ public class UseManager : MonoBehaviour
 {
     [Header("API KEY IS REQUIRED TO PERFORM HTTP REQUESTS")]
     [SerializeField]
-    private const string API_KEY = "";
+    private string API_KEY = "";
 
     private bool userLoggedIn;
 
@@ -58,7 +58,6 @@ public class UseManager : MonoBehaviour
     private string licenseType = "CC0";
 
     private string userWallet = "";
-    //private bool openSource = true;
 
     public void Awake()
     {
