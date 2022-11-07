@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum LoginUIModes { Popup, Window };
+public enum LoginUIModes { Window, Popup };
 public class UIModeSelector : MonoBehaviour
 {
 

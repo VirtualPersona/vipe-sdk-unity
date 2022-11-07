@@ -50,7 +50,7 @@ namespace BloodUI
                 choices = new System.Collections.Generic.List<string>() { "All", "Owned", "Open Source" },
                 value = "All"
             };
-            
+            sourceSelector.value = "All";
             searchAvatarTextField = new TextField() { value = "Search Avatar name here" };
             paginationTextField = new TextField();
             scrollView = new ScrollView();

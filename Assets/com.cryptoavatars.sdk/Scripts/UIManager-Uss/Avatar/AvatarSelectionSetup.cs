@@ -34,7 +34,7 @@ public class AvatarSelectionSetup : MonoBehaviour
     //
     private string licenseType = "";
 
-    private string userWallet = "";
+    private string userWallet = null;
     const string urlServer = "https://api.cryptoavatars.io/v1/";
     [Header("API KEY IS REQUIRED TO PERFORM HTTP REQUESTS")]
     [SerializeField]
@@ -44,13 +44,15 @@ public class AvatarSelectionSetup : MonoBehaviour
     private VisualElement root;
     [SerializeField]
     private GameObject LoginPanelUIDoc;
-
+    private string LastLoadedSourceFilter = "All";
     public bool UserLoggedIn { get => userLoggedIn; set => userLoggedIn = value; }
     public string UserWallet { get => userWallet; set => userWallet = value; }
     private float VRM_Camera_Offset;
     public void ShowAvatarSelection()
     {
+        this.avatarSelectionWindow.sourceSelector.value = LastLoadedSourceFilter;
         this.Cam.GetComponent<SmoothFollow>().previewMode = false;
+        this.Cam.GetComponent<SmoothFollow>().gameMode = false;
         root.Add(avatarSelectionWindow);
         refreshAvatars();
     }
@@ -109,7 +111,13 @@ public class AvatarSelectionSetup : MonoBehaviour
                 if (userWallet != null)
                     this.downloadAvatarsUsers($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
                 else
-                    this.downloadAvatars($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
+                {
+                    removeCurrentAvatarsCards();
+                    this.pageCount = 1;
+                    this.totalPages = 1;
+                    this.totalNfts = 0;
+                    RefreshPagesUI();
+                }
                 break;
             case "Open Source":
                 this.licenseType = "CC0";
@@ -146,9 +154,17 @@ public class AvatarSelectionSetup : MonoBehaviour
             this.downloadAvatarsByName($"nfts/avatars/list?skip=0&limit={nftPerLoad}", avatarName);
         }
     }
-
+    private void RefreshPagesUI()
+    {
+        avatarSelectionWindow.paginationTextField.value = $"{pageCount.ToString()}/{this.totalPages.ToString()}";
+    }
     private void backToLogin()
     {
+        if (userWallet != null)
+            LastLoadedSourceFilter = this.avatarSelectionWindow.sourceSelector.value;
+        else if (!(this.avatarSelectionWindow.sourceSelector.value == "Owned"))
+            LastLoadedSourceFilter = this.avatarSelectionWindow.sourceSelector.value;
+
         HideAvatarSelection();
         LoginPanelUIDoc.GetComponent<LoginPanelSetup>().LoginShow();
         if (avatarSelectionWindow.scrollView.contentViewport.childCount > 0)
@@ -175,6 +191,7 @@ public class AvatarSelectionSetup : MonoBehaviour
             this.Vrm.TryGetComponent(out ThirdPersonCharacter ThirdPersonCharacterComponent);
             { Destroy(ThirdPersonCharacterComponent); }
             SetIddleAnimation();
+            this.Cam.transform.position = this.camTarget.transform.position;
             this.Cam.transform.position += VRM_Camera_Offset * this.camTarget.transform.up;
             this.Cam.transform.rotation = this.camTarget.transform.rotation;
             this.Cam.GetComponent<SmoothFollow>().target = null;
@@ -292,6 +309,7 @@ public class AvatarSelectionSetup : MonoBehaviour
                             if (this.Cam)
                             {
                                 AdaptCameraHeightToModelHeight(model);
+                                this.Cam.GetComponent<SmoothFollow>().gameMode = true;
                                 var child = new GameObject();
                                 child.name = "VRM_Child";
                                 child.transform.localPosition = new Vector3(0, 1, 0);
@@ -329,10 +347,8 @@ public class AvatarSelectionSetup : MonoBehaviour
             {
                 cardAvatar.LoadAvatarImage(texture);
             });
-
             StartCoroutine(loadAvatarPreviewImage);
         }
-
     }
 
     private void AdaptCameraHeightToModelHeight(GameObject model)
@@ -341,7 +357,7 @@ public class AvatarSelectionSetup : MonoBehaviour
         VRM_Camera_Offset = modelHeight / 2;
         this.Cam.transform.position = new Vector3(this.Cam.transform.position.x, this.Cam.transform.position.y + modelHeight, this.Cam.transform.position.z);
         this.Cam.GetComponent<SmoothFollow>().Height = modelHeight;
-        this.Cam.GetComponent<SmoothFollow>().Distance = modelHeight;
+        this.Cam.GetComponent<SmoothFollow>().Distance = modelHeight + VRM_Camera_Offset;
     }
 
     private void displayAndLoadAvatarsByNameFilter(NftsArray onAvatarsResult, string filterName)
