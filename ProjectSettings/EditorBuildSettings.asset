@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/com.cryptoavatars.sdk/DemoScene.unity
+    guid: 305b97a197c463f4eae21f9d9e05f648
   m_configObjects: {}

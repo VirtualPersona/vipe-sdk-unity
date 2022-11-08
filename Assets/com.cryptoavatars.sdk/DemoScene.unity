@@ -2930,6 +2930,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1c6d5e210940ba40b6862c877933d8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  API_KEY: $2b$10$wALfJ1MWFDYPjY9bUXfDx...fSlCDZitoMHreevC/2a9E6cUxt5CS
   AvatarsUIDoc: {fileID: 1708812221}
 --- !u!114 &1410172542
 MonoBehaviour:
@@ -3847,6 +3848,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ff3daed4e8dfd8488b1bd1e94890d19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  API_KEY: $2b$10$wALfJ1MWFDYPjY9bUXfDx...fSlCDZitoMHreevC/2a9E6cUxt5CS
+  loading_spinner: {fileID: 3420616119289732690, guid: 52dbebaf25ce3c647a925b1d37795979,
+    type: 3}
   LoginPanelUIDoc: {fileID: 1410172540}
 --- !u!114 &1708812224
 MonoBehaviour:
@@ -4560,6 +4564,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 0}
   previewMode: 0
+  gameMode: 0
   distance: 3
   height: 1.3
   maxCameraDistance: 20
@@ -4640,7 +4645,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2102780765}
-  - component: {fileID: 2102780766}
   m_Layer: 0
   m_Name: UIManager
   m_TagString: Untagged
@@ -4662,22 +4666,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2102780766
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2102780763}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b60055524d43b244b7a9156032480e1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  popupUIGameObjects:
-  - {fileID: 129092750}
-  windowUIGameObjects:
-  - {fileID: 1410172540}
 --- !u!1 &2103882371
 GameObject:
   m_ObjectHideFlags: 0

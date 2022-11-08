@@ -7,7 +7,8 @@
         "UniGLTF",
         "Unity.VectorGraphics",
         "VRMShaders.GLTF.IO.Editor",
-        "VRMShaders.GLTF.IO.Runtime"
+        "VRMShaders.GLTF.IO.Runtime",
+        "UnityEditor.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

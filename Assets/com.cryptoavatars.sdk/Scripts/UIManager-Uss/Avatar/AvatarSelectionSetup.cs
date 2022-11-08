@@ -39,6 +39,8 @@ public class AvatarSelectionSetup : MonoBehaviour
     [Header("API KEY IS REQUIRED TO PERFORM HTTP REQUESTS")]
     [SerializeField]
     private string API_KEY = "";
+    [SerializeField]
+    private GameObject loading_spinner;
     // UI Toolkit 
     private UIDocument doc;
     private VisualElement root;
@@ -48,6 +50,7 @@ public class AvatarSelectionSetup : MonoBehaviour
     public bool UserLoggedIn { get => userLoggedIn; set => userLoggedIn = value; }
     public string UserWallet { get => userWallet; set => userWallet = value; }
     private float VRM_Camera_Offset;
+    private GameObject MainCanvas;
     public void ShowAvatarSelection()
     {
         this.avatarSelectionWindow.sourceSelector.value = LastLoadedSourceFilter;
@@ -62,6 +65,7 @@ public class AvatarSelectionSetup : MonoBehaviour
     }
     private void Awake()
     {
+        this.MainCanvas = GameObject.Find("Canvas");
         this.cryptoAvatars = new CryptoAvatars(API_KEY);
         this.Vrm = GameObject.Find("VRM");
         this.Vrm_Target = GameObject.Find("VRM_Target");
@@ -299,7 +303,7 @@ public class AvatarSelectionSetup : MonoBehaviour
                     {
                         if (GameObject.Find("VRM"))
                             Destroy(GameObject.Find("VRM"));
-
+                        var loading_spin = Instantiate(loading_spinner, MainCanvas.transform);
                         IEnumerator downloadVRM = this.cryptoAvatars.GetAvatarVRMModel(urlVrm, (model) =>
                         {
                             SetupModelAnimations(model);
@@ -318,6 +322,7 @@ public class AvatarSelectionSetup : MonoBehaviour
                                 child.transform.position = VRM_Camera_Offset * Vector3.up;
                                 this.Cam.GetComponent<SmoothFollow>().target = child.transform;
                             }
+                            Destroy(loading_spin);
                         });
                         StartCoroutine(downloadVRM);
                         HideAvatarSelection();

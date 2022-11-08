@@ -183,4 +183,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49fed439194cd2a4081f4c27b02c4437, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cryptoAvatarsImage: {fileID: 6077370571126965686}
