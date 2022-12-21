@@ -128,7 +128,7 @@ public class AvatarSelectionSetup : MonoBehaviour
                 this.downloadAvatars($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
                 break;
             case "All":
-                this.licenseType = "";
+                this.licenseType = "Redistribution_Prohibited";
                 this.downloadAvatars($"nfts/avatars/list?skip=0&limit={nftPerLoad}");
                 break;
         }
@@ -274,8 +274,9 @@ public class AvatarSelectionSetup : MonoBehaviour
     private void displayAndLoadAvatars(NftsArray onAvatarsResult)
     {
         Structs.Nft[] nfts = onAvatarsResult.nfts;
-        this.totalNfts = onAvatarsResult.totalNfts;
-        this.totalPages = (totalNfts / nftPerLoad) + 1;
+        this.pageCount = onAvatarsResult.currentPage;
+        this.totalNfts = onAvatarsResult.totalItemsCount;
+        this.totalPages = onAvatarsResult.totalPages;
         avatarSelectionWindow.paginationTextField.value = $"{pageCount.ToString()}/{this.totalPages.ToString()}";
 
         int pos = urlServer.IndexOf(".io/v1/");
@@ -376,7 +377,7 @@ public class AvatarSelectionSetup : MonoBehaviour
                 nftsFiltered.Add(nft);
         }
 
-        this.totalNfts = onAvatarsResult.totalNfts;
+        this.totalNfts = onAvatarsResult.totalPages;
         this.totalPages = (totalNfts / nftPerLoad) + 1;
         avatarSelectionWindow.paginationTextField.value = $"{pageCount.ToString()}/{this.totalPages.ToString()}";
 
@@ -547,7 +548,7 @@ public class AvatarSelectionSetup : MonoBehaviour
     private void displayAndLoadCollections(NftsCollectionsArray onCollectionsResult)
     {
         List<string> choices = new List<string>();
-        foreach (NftsCollection collection in onCollectionsResult.nftsCollections)
+        foreach (NftCollections collection in onCollectionsResult.nftCollections)
         {
             Debug.Log("Collection: " + $"{collection.name}");
             choices.Add(collection.name);

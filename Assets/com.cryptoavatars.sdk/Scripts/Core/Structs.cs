@@ -79,8 +79,9 @@ public class Structs
     public struct NftsArray
     {
         public Nft[] nfts;
-        public int totalNfts;
-        public int page;
+        public int totalItemsCount;
+        public int totalPages;
+        public int currentPage;
         public string next;
         public string prev;
     }
@@ -105,7 +106,7 @@ public class Structs
     }
   
     [System.Serializable]
-    public struct NftsCollection
+    public struct NftCollections
     {
         public bool isEnabled;
         public string logoImage;
@@ -141,6 +142,9 @@ public class Structs
     [System.Serializable]
     public struct NftsCollectionsArray
     {
-        public NftsCollection[] nftsCollections;
+        public NftCollections[] nftCollections;
+        public int currentPage;
+        public int totalPages;
+        public int totalItemsCount;
     }
 }

@@ -22,6 +22,8 @@ public class HttpService
         UnityWebRequest request = new UnityWebRequest(this.baseUri + resource, "POST");
         byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+
+
         request.downloadHandler = new DownloadHandlerBuffer();
         return this.HttpMethod(request, callbackResult);
     }

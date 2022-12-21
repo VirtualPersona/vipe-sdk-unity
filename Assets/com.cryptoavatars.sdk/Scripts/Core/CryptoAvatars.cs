@@ -168,7 +168,7 @@ namespace CA
             string body = "{}";
             return this.httpService.Post(pageUrl, body, (string collectionsResult) =>
             {
-                Structs.NftsCollectionsArray collectionsResponse = JsonUtility.FromJson<Structs.NftsCollectionsArray>("{\"nftsCollections\":" + collectionsResult + "}");
+                Structs.NftsCollectionsArray collectionsResponse = JsonUtility.FromJson<Structs.NftsCollectionsArray>(collectionsResult);
                 onCollectionsResult(collectionsResponse);
             });
         }
