@@ -1,4 +1,0 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
-    <Style src="/Assets/com.cryptoavatars.sdk/Resources/UI Toolkit/Styles/PopupStyle.uss" />
-    <ui:VisualElement name="PopupContainer" style="height: 271px; width: 743px;" />
-</ui:UXML>

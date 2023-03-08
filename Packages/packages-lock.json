@@ -1,11 +1,5 @@
 {
   "dependencies": {
-    "com.unity.2d.sprite": {
-      "version": "1.0.0",
-      "depth": 1,
-      "source": "builtin",
-      "dependencies": {}
-    },
     "com.unity.collab-proxy": {
       "version": "1.17.2",
       "depth": 0,
@@ -64,11 +58,13 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.services.core": {
-      "version": "1.0.1",
+      "version": "1.4.3",
       "depth": 1,
       "source": "registry",
       "dependencies": {
-        "com.unity.modules.unitywebrequest": "1.0.0"
+        "com.unity.modules.unitywebrequest": "1.0.0",
+        "com.unity.nuget.newtonsoft-json": "3.0.2",
+        "com.unity.modules.androidjni": "1.0.0"
       },
       "url": "https://packages.unity.com"
     },
@@ -83,13 +79,6 @@
       },
       "url": "https://packages.unity.com"
     },
-    "com.unity.textcore": {
-      "version": "1.0.0-preview.3",
-      "depth": 1,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://packages.unity.com"
-    },
     "com.unity.textmeshpro": {
       "version": "3.0.6",
       "depth": 0,
@@ -100,7 +89,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.timeline": {
-      "version": "1.4.8",
+      "version": "1.6.4",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -121,40 +110,16 @@
       }
     },
     "com.unity.ui": {
-      "version": "1.0.0-preview.18",
+      "version": "2.0.0",
       "depth": 0,
-      "source": "registry",
-      "dependencies": {
-        "com.unity.modules.uielementsnative": "1.0.0",
-        "com.unity.textcore": "1.0.0-preview.3"
-      },
-      "url": "https://packages.unity.com"
+      "source": "builtin",
+      "dependencies": {}
     },
     "com.unity.ui.builder": {
-      "version": "1.0.0-preview.18",
+      "version": "2.0.0",
       "depth": 0,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://packages.unity.com"
-    },
-    "com.unity.vectorgraphics": {
-      "version": "2.0.0-preview.20",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {
-        "com.unity.2d.sprite": "1.0.0",
-        "com.unity.ugui": "1.0.0",
-        "com.unity.modules.animation": "1.0.0",
-        "com.unity.modules.imageconversion": "1.0.0",
-        "com.unity.modules.physics": "1.0.0",
-        "com.unity.modules.physics2d": "1.0.0",
-        "com.unity.modules.ui": "1.0.0",
-        "com.unity.modules.uielements": "1.0.0",
-        "com.unity.modules.unitywebrequest": "1.0.0",
-        "com.unity.modules.unitywebrequesttexture": "1.0.0",
-        "com.unity.modules.unitywebrequestwww": "1.0.0"
-      },
-      "url": "https://packages.unity.com"
+      "source": "builtin",
+      "dependencies": {}
     },
     "com.vrmc.gltf": {
       "version": "https://github.com/vrm-c/UniVRM.git?path=/Assets/UniGLTF#v0.87.0",
