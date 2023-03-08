@@ -32,7 +32,6 @@ public class HttpService
         return this.HttpMethod(request, callbackResult);
     }
 
-    // Pensar en refactorizar este método para que utilice HttpMethod y evitar duplicar código
     public IEnumerator DownloadImage(string url, System.Action<Texture2D> callbackResult)
     {
         UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);

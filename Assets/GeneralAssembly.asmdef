@@ -4,7 +4,6 @@
     "references": [
         "VRM",
         "UniGLTF",
-        "Unity.VectorGraphics",
         "VRMShaders.GLTF.IO.Editor",
         "VRMShaders.GLTF.IO.Runtime",
         "UnityEditor.UI"
