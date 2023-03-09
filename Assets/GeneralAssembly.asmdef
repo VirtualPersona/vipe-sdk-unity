@@ -6,7 +6,8 @@
         "UniGLTF",
         "VRMShaders.GLTF.IO.Editor",
         "VRMShaders.GLTF.IO.Runtime",
-        "UnityEditor.UI"
+        "UnityEditor.UI",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
