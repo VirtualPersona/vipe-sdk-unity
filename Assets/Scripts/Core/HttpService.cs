@@ -57,6 +57,7 @@ namespace CA
 
             Texture2D tex = ((DownloadHandlerTexture)request.downloadHandler).texture;
             callbackResult(tex);
+            request.Dispose();
         }
 
         public IEnumerator Download3DModel(string url, System.Action<string> callbackResult)
@@ -72,6 +73,7 @@ namespace CA
             else
             {
                 byte[] results = request.downloadHandler.data;
+
                 string dirPath = Path.Combine(Application.persistentDataPath, "cryptoavatars");
 
                 if (!Directory.Exists(dirPath))
@@ -80,6 +82,7 @@ namespace CA
                 string path = Path.Combine(dirPath, "avatarDownloaded.vrm");
                 File.WriteAllBytes(path, results);
                 callbackResult(path);
+                request.Dispose();
             }
         }
 
@@ -97,6 +100,7 @@ namespace CA
                 throw new System.Exception("Error requesting to " + request.url + ", error: " + request.error);
 
             callbackResult(request.downloadHandler.text);
+            request.Dispose();
         }
 
     }
