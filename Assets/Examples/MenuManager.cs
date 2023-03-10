@@ -52,6 +52,8 @@ public class MenuManager : MonoBehaviour
     {
         TryGetComponent(out cryptoAvatars);
 
+        vrm = GameObject.Find("AVATAR");
+
         useAsGuestBtn.onClick.AddListener(OnGuestEnter);
 
         nextPageBtn.onClick.AddListener(() => cryptoAvatars.NextPage(avatarsResult => LoadAndDisplayAvatars(avatarsResult)));
@@ -110,18 +112,21 @@ public class MenuManager : MonoBehaviour
 
         foreach (var nft in nfts)
         {
-            GameObject avatarCard = Instantiate(avatarCardPrefab);
+            GameObject avatarCard = Instantiate(avatarCardPrefab, scrollViewAvatars.content.transform);
             CardAvatarController cardController = avatarCard.GetComponentInChildren<CardAvatarController>();
-            avatarCard.transform.SetParent(scrollViewAvatars.content.transform);
             cardController.SetAvatarData(nft.metadata.name, nft.metadata.asset, urlVRM => {
-                Destroy(vrm);
-                InstantiateSpinners(out loadingSpinner);
+
+                loadingSpinner.SetActive(true);
                 cryptoAvatars.GetAvatarVRMModel(urlVRM, (model, path) =>
                 {
+                    Vector3 avatarPos = vrm.transform.position;
+                    Quaternion avatarRot = vrm.transform.rotation;
+                    Destroy(vrm);
                     vrm = model;
                     vrm.name = "AVATAR";
+                    vrm.transform.SetPositionAndRotation(avatarPos, avatarRot);
                     vrm.GetComponent<Animator>().runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Anims/VRM");
-                    RemoveLoadingSpinners(loadingSpinner);
+                    loadingSpinner.SetActive(false);
                 });
 
             });
@@ -147,13 +152,4 @@ public class MenuManager : MonoBehaviour
         GameObject.Find("VRM").GetComponent<Animator>().SetTrigger(dropdown.options[dropdown.value].text.ToLower());
     }
 
-    private void RemoveLoadingSpinners(GameObject loading_spin_Stream)
-    {
-        Destroy(loading_spin_Stream);
-    }
-
-    private void InstantiateSpinners(out GameObject loading_spin_Stream)
-    {
-        loading_spin_Stream = Instantiate(loadingSpinner, canvas.transform);
-    }
 }

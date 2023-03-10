@@ -11,8 +11,6 @@ public class CardAvatarController : MonoBehaviour
 
     public void SetAvatarData(string name, string vrmUrl, System.Action<string> onClickCardBtn)
     {
-        Debug.Log(name + ", " + vrmUrl);
-
         this.vrmUrl = vrmUrl;
         this.avatarName.text = name;
         this.gameObject.name = name;
@@ -25,7 +23,7 @@ public class CardAvatarController : MonoBehaviour
         if (!texture)
             return;
 
-        Rect rec = new Rect(0, 0, texture.width, texture.height);
+        Rect rec = new(0, 0, texture.width, texture.height);
         Image imageAvatar = GetComponent<Image>();
         imageAvatar.sprite = Sprite.Create(texture, rec, new Vector2(0, 0), 1); 
     }
