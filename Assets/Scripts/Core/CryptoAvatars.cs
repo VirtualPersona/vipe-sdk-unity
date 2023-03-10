@@ -253,6 +253,7 @@ namespace CA
                 var loaded = context.Load();
                 loaded.EnableUpdateWhenOffscreen();
                 loaded.ShowMeshes();
+                data.Dispose();
                 return loaded.gameObject;
             }
 
