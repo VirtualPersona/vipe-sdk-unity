@@ -1,5 +1,6 @@
 ﻿namespace CA
 {
+
     public class CAModels
     {
         [System.Serializable]
