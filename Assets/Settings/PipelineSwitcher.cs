@@ -31,14 +31,14 @@ public class PipelineSwitcher : EditorWindow
     private void SwitchToBuiltInPipeline()
     {
         // Replace MaterialFactory script when switching to Built-In Pipeline
-        FileUtil.ReplaceFile("Assets/SimplestarGame/SimpleURPToonLitOutlineExample/Scripts/MaterialFactory.cs", "Assets/VRMShaders/GLTF/IO/Runtime/Material/Importer/MaterialFactory.cs");
+        FileUtil.ReplaceFile("Assets/Packages/VRMShaders/GLTF/IO/Runtime/Material/Importer/MaterialFactory.cs", "Assets/SimplestarGame/SimpleURPToonLitOutlineExample/Scripts/MaterialFactory.cs");
         AssetDatabase.Refresh();
 
         // Create a backup of the original MaterialFactory script if it doesn't exist
         string backupPath = "Backup/MaterialFactoryBackup.cs";
         if (!File.Exists(backupPath))
         {
-            FileUtil.CopyFileOrDirectory("Assets/VRMShaders/GLTF/IO/Runtime/Material/Importer/MaterialFactory.cs", backupPath);
+            FileUtil.CopyFileOrDirectory("Assets/Packages/VRMShaders/GLTF/IO/Runtime/Material/Importer/MaterialFactory.cs", backupPath);
         }
 
         GraphicsSettings.renderPipelineAsset = null;
@@ -48,14 +48,14 @@ public class PipelineSwitcher : EditorWindow
     private void SwitchToURPPipeline()
     {
         // Replace MaterialFactory script when switching to URP Pipeline
-        FileUtil.ReplaceFile("Assets/VRMShaders/GLTF/IO/Runtime/Material/Importer/MaterialFactory.cs", "Assets/SimplestarGame/SimpleURPToonLitOutlineExample/Scripts/MaterialFactory.cs");
+        FileUtil.ReplaceFile("Assets/Packages/VRMShaders/GLTF/IO/Runtime/Material/Importer/MaterialFactory.cs", "Assets/SimplestarGame/SimpleURPToonLitOutlineExample/Scripts/MaterialFactory.cs");
         AssetDatabase.Refresh();
 
         // Restore the original MaterialFactory script from the backup
         string backupPath = "Backup/MaterialFactoryBackup.cs";
         if (File.Exists(backupPath))
         {
-            FileUtil.ReplaceFile(backupPath, "Assets/VRMShaders/GLTF/IO/Runtime/Material/Importer/MaterialFactory.cs");
+            FileUtil.ReplaceFile(backupPath, "Assets/Packages/VRMShaders/GLTF/IO/Runtime/Material/Importer/MaterialFactory.cs");
         }
 
         var urpAsset = AssetDatabase.LoadAssetAtPath<UniversalRenderPipelineAsset>("Assets/MyURPAsset.asset");
@@ -69,5 +69,4 @@ public class PipelineSwitcher : EditorWindow
         GraphicsSettings.renderPipelineAsset = urpAsset;
         Debug.Log("Switched to URP Pipeline");
     }
-
 }
