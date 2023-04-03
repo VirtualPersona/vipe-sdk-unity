@@ -7,7 +7,10 @@
         "VRMShaders.GLTF.IO.Editor",
         "VRMShaders.GLTF.IO.Runtime",
         "UnityEditor.UI",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "Unity.RenderPipelines.Universal.Editor",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipelines.Universal.Shaders"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
