@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -100,9 +101,9 @@ namespace VRMShaders
                 getTexture = (x, y) => Task.FromResult<Texture>(null);
             }
 
-            if (matDesc.ShaderName == null)
+            if (matDesc.Shader == null)
             {
-                throw new ArgumentNullException(nameof(matDesc.ShaderName));
+                throw new ArgumentNullException(nameof(matDesc.Shader));
             }
 
             bool hasShadeMap = false;

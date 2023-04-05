@@ -31,15 +31,10 @@ public class PipelineSwitcher : EditorWindow
     private void SwitchToBuiltInPipeline()
     {
         // Replace MaterialFactory script when switching to Built-In Pipeline
-        FileUtil.ReplaceFile("Assets/Packages/VRMShaders/GLTF/IO/Runtime/Material/Importer/MaterialFactory.cs", "Assets/SimplestarGame/SimpleURPToonLitOutlineExample/Scripts/MaterialFactory.cs");
+        string sourcePath = Path.Combine(Directory.GetParent(Application.dataPath).FullName, "PipelineSwitcherFiles/BuiltInPipeline/MaterialFactory.cs");
+        string destinationPath = Path.Combine(Directory.GetParent(Application.dataPath).FullName, "Library/PackageCache/com.vrmc.vrmshaders@6ea7819cec/GLTF/IO/Runtime/Material/Importer/MaterialFactory.cs");
+        File.Copy(sourcePath, destinationPath, true);
         AssetDatabase.Refresh();
-
-        // Create a backup of the original MaterialFactory script if it doesn't exist
-        string backupPath = "Backup/MaterialFactoryBackup.cs";
-        if (!File.Exists(backupPath))
-        {
-            FileUtil.CopyFileOrDirectory("Assets/Packages/VRMShaders/GLTF/IO/Runtime/Material/Importer/MaterialFactory.cs", backupPath);
-        }
 
         GraphicsSettings.renderPipelineAsset = null;
         Debug.Log("Switched to Built In Pipeline");
@@ -48,15 +43,10 @@ public class PipelineSwitcher : EditorWindow
     private void SwitchToURPPipeline()
     {
         // Replace MaterialFactory script when switching to URP Pipeline
-        FileUtil.ReplaceFile("Assets/Packages/VRMShaders/GLTF/IO/Runtime/Material/Importer/MaterialFactory.cs", "Assets/SimplestarGame/SimpleURPToonLitOutlineExample/Scripts/MaterialFactory.cs");
+        string sourcePath = Path.Combine(Directory.GetParent(Application.dataPath).FullName, "PipelineSwitcherFiles/URPPipeline/MaterialFactory.cs");
+        string destinationPath = Path.Combine(Directory.GetParent(Application.dataPath).FullName, "Library/PackageCache/com.vrmc.vrmshaders@6ea7819cec/GLTF/IO/Runtime/Material/Importer/MaterialFactory.cs");
+        File.Copy(sourcePath, destinationPath, true);
         AssetDatabase.Refresh();
-
-        // Restore the original MaterialFactory script from the backup
-        string backupPath = "Backup/MaterialFactoryBackup.cs";
-        if (File.Exists(backupPath))
-        {
-            FileUtil.ReplaceFile(backupPath, "Assets/Packages/VRMShaders/GLTF/IO/Runtime/Material/Importer/MaterialFactory.cs");
-        }
 
         var urpAsset = AssetDatabase.LoadAssetAtPath<UniversalRenderPipelineAsset>("Assets/MyURPAsset.asset");
         if (urpAsset == null)
