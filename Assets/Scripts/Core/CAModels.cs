@@ -1,6 +1,5 @@
 ﻿namespace CA
 {
-
     public class CAModels
     {
         [System.Serializable]
@@ -9,14 +8,12 @@
             public string email;
             public string password;
         }
-
         [System.Serializable]
         public struct LoginWeb3RequestDto
         {
             public string wallet;
             public string signature;
         }
-
         [System.Serializable]
         public struct LoginResponseDto
         {
@@ -24,7 +21,6 @@
             public string wallet;
             public string accessToken;
         }
-
         [System.Serializable]
         public struct SearchAvatarsDto
         {
@@ -32,19 +28,33 @@
             public string name;
             public string collectionName;
             public string owner;
+            public string contractAddress;
+            public string chainId;
+            public string sortField;
+            public string sortOrder;
         }
-
         [System.Serializable]
         public struct NftsArray
         {
             public Nft[] nfts;
-            public int totalNfts;
+            public int totalItemsCount;
             public int currentPage;
             public int totalPages;
             public string next;
             public string prev;
-        }
 
+        }
+        [System.Serializable]
+        public struct NftCollectionsArray
+        {
+            public NftsCollection[] nftCollections;
+            public string next;
+            public string prev;
+            public int currentPage;
+            public int totalPages;
+            public int totalItemsCount;
+            public int chainId;
+        }
         [System.Serializable]
         public struct Nft
         {
@@ -62,9 +72,20 @@
                 public string createdAt;
                 public Asset[] assets;
                 public string[] tags;
+                public Licenses licenses;
+
             }
         }
-
+        [System.Serializable]
+        public class Licenses
+        {
+            public string author;
+            public string allowedUser;
+            public string violentUsage;
+            public string sexualUsage;
+            public string commercialUsage;
+            public string license;
+        }
         [System.Serializable]
         public struct Asset
         {
@@ -74,7 +95,6 @@
             public AssetStats stats;
             public AssetFile[] files;
         }
-
         [System.Serializable]
         public struct AssetStats
         {
@@ -85,14 +105,12 @@
             public int texturesResolution;
             public int fileSize;
         }
-
         [System.Serializable]
         public struct AssetFile
         {
             public string url;
             public string file_type;
         }
-
         [System.Serializable]
         public struct NftsCollection
         {
@@ -125,8 +143,8 @@
                 public string contractAddress;
                 public string chainId;
             }
+            public bool containsCC0Nfts;
         }
-
         [System.Serializable]
         public struct NftsCollectionsArray
         {

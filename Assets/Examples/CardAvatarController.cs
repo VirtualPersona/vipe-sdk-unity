@@ -24,8 +24,10 @@ public class CardAvatarController : MonoBehaviour
             return;
 
         Rect rec = new(0, 0, texture.width, texture.height);
-        Image imageAvatar = GetComponent<Image>();
-        imageAvatar.sprite = Sprite.Create(texture, rec, new Vector2(0, 0), 1); 
+        if (GetComponent<Image>())
+        {
+            Image imageAvatar = GetComponent<Image>();
+            imageAvatar.sprite = Sprite.Create(texture, rec, new Vector2(0, 0), 1);
+        }
     }
-
 }

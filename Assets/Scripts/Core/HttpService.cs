@@ -1,26 +1,20 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Networking;
-using System.Text;
 using System.IO;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
-using System.Linq;
+using System.Threading.Tasks;
+using System;
+using System.Collections.Generic;
+using System.Web;
 
 namespace CA
 {
     public class HttpService
     {
-        private static HttpService instance;
-
+        public static HttpService instance;
         public static string accessToken;
         public static string apiKey;
         public static string baseUri;
-
-        private HttpService()
-        {
-        }
-
+        private HttpService() { }
         public static HttpService Instance()
         {
             if (baseUri == null || apiKey == null)
@@ -31,77 +25,105 @@ namespace CA
 
             return instance;
         }
-
-        public IEnumerator Post<T>(string resource, T body, System.Action<string> callbackResult)
+        public async Task<Texture2D> DownloadImageAsync(string url)
         {
-            string json = JsonConvert.SerializeObject(body, Formatting.None, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
-            UnityWebRequest request = new (baseUri + resource, "POST");
-            byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            request.downloadHandler = new DownloadHandlerBuffer();
-            return this.HttpMethod(request, callbackResult);
-        }
+            if (!Uri.TryCreate(url, UriKind.Absolute, out Uri uriResult) || (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps))
+            {
+                return null;
+            }
 
-        public IEnumerator Get(string resource, System.Action<string> callbackResult)
-        {
-            UnityWebRequest request = UnityWebRequest.Get(baseUri + resource);
-            return this.HttpMethod(request, callbackResult);
-        }
-
-        public IEnumerator DownloadImage(string url, System.Action<Texture2D> callbackResult)
-        {
             UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
-            yield return request.SendWebRequest();
+            TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+            var operation = request.SendWebRequest();
+            operation.completed += (op) => tcs.SetResult(true);
+            await tcs.Task;
+
             if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
-                throw new System.Exception("Error requesting to " + request.url + ", error: " + request.error);
+            {
+                throw new Exception("Error downloading image from " + request.url + ", error: " + request.error);
+            }
 
             Texture2D tex = ((DownloadHandlerTexture)request.downloadHandler).texture;
-            callbackResult(tex);
             request.Dispose();
+            return tex;
         }
-
-        public IEnumerator Download3DModel(string url, System.Action<string> callbackResult)
+        public async Task<string> Download3DModelAsync(string url)
         {
-            UnityWebRequest request = new (url);
+            UnityWebRequest request = new UnityWebRequest(url);
             request.downloadHandler = new DownloadHandlerBuffer();
-            yield return request.SendWebRequest();
+            TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+            var operation = request.SendWebRequest();
+            operation.completed += (op) => tcs.SetResult(true);
+            await tcs.Task;
 
             if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
             {
-                throw new System.Exception("Error requesting to " + request.url + ", error: " + request.error);
+                throw new Exception("Error downloading 3D model from " + request.url + ", error: " + request.error);
             }
-            else
+
+            byte[] results = request.downloadHandler.data;
+
+            string dirPath = Path.Combine(Application.persistentDataPath, "cryptoavatars");
+
+            if (!Directory.Exists(dirPath))
             {
-                byte[] results = request.downloadHandler.data;
+                Directory.CreateDirectory(dirPath);
+            }
 
-                string dirPath = Path.Combine(Application.persistentDataPath, "cryptoavatars");
+            string path = Path.Combine(dirPath, "avatarDownloaded.vrm");
+            File.WriteAllBytes(path, results);
+            request.Dispose();
+            return path;
+        }
+        public string AddOrUpdateParametersInUrl(string pageUrl, Dictionary<string, string> queryParams)
+        {
+            if (string.IsNullOrEmpty(pageUrl))
+            {
+                throw new ArgumentException("pageUrl cannot be null or empty.");
+            }
 
-                if (!Directory.Exists(dirPath))
-                    Directory.CreateDirectory(dirPath);
+            try
+            {
+                var uriBuilder = new UriBuilder(HttpService.baseUri + pageUrl);
+                var query = HttpUtility.ParseQueryString(uriBuilder.Query);
 
-                string path = Path.Combine(dirPath, "avatarDownloaded.vrm");
-                File.WriteAllBytes(path, results);
-                callbackResult(path);
-                request.Dispose();
+                foreach (var keyValuePair in queryParams)
+                {
+                    query[keyValuePair.Key] = keyValuePair.Value;
+                }
+
+                uriBuilder.Query = query.ToString();
+                return uriBuilder.Uri.ToString();
+            }
+            catch (UriFormatException e)
+            {
+                throw new ArgumentException("Invalid URL format.", e);
             }
         }
-
-        private IEnumerator HttpMethod(UnityWebRequest request, System.Action<string> callbackResult)
+        public Task<string> Get(string resource)
         {
+            var tcs = new TaskCompletionSource<string>();
+
+            UnityWebRequest request = UnityWebRequest.Get(resource);
             if (accessToken == null)
                 request.SetRequestHeader("API-KEY", apiKey);
             else
                 request.SetRequestHeader("Authorization", "Bearer " + accessToken);
+            var operation = request.SendWebRequest();
 
-            request.SetRequestHeader("Content-Type", "application/json");
-            yield return request.SendWebRequest();
+            operation.completed += op =>
+            {
+                if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+                {
+                    tcs.SetException(new Exception(request.error));
+                }
+                else
+                {
+                    tcs.SetResult(request.downloadHandler.text);
+                }
+            };
 
-            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
-                throw new System.Exception("Error requesting to " + request.url + ", error: " + request.error);
-
-            callbackResult(request.downloadHandler.text);
-            request.Dispose();
+            return tcs.Task;
         }
-
     }
 }

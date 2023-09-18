@@ -1,19 +1,19 @@
 using CA;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Threading.Tasks;
 using TMPro;
+using System.Collections.Generic;
+using UnityStandardAssets.Characters.ThirdPerson;
 
 public class MenuManager : MonoBehaviour
 {
     [SerializeField]
     private Canvas canvas;
-
     [SerializeField]
     private RectTransform loginPanel;
     [SerializeField]
     private RectTransform avatarsPanel;
-
     private CryptoAvatars cryptoAvatars;
 
     [SerializeField]
@@ -23,6 +23,7 @@ public class MenuManager : MonoBehaviour
     [SerializeField]
     private Button prevPageBtn;
 
+
     /*[SerializeField]
     private WalletLogin metamaskLogin;*/
 
@@ -30,42 +31,47 @@ public class MenuManager : MonoBehaviour
 
     [SerializeField]
     private TMP_Text walletAddress;
-
     [SerializeField]
     private GameObject avatarCardPrefab;
     [SerializeField]
+    private GameObject collectionCardPrefab;
+    [SerializeField]
     private GameObject loadingSpinner;
-
     [SerializeField]
     private ScrollRect scrollViewAvatars;
     [SerializeField]
+    private ScrollRect scrollViewCollections;
+    [SerializeField]
     private TMP_InputField searchField;
-
     [SerializeField]
     private TMP_Text currentPageText;
-
+    [SerializeField]
     private GameObject vrm;
 
     private bool loginPanelOn = true;
 
+    private void Awake()
+    {
+        MainThreadDispatcher mainThreadDispatcher = MainThreadDispatcher.Instance;
+        cryptoAvatars = new CryptoAvatars(mainThreadDispatcher);
+    }
     private void Start()
     {
-        TryGetComponent(out cryptoAvatars);
-
         vrm = GameObject.Find("AVATAR");
 
         useAsGuestBtn.onClick.AddListener(OnGuestEnter);
 
-        nextPageBtn.onClick.AddListener(() => cryptoAvatars.NextPage(avatarsResult => LoadAndDisplayAvatars(avatarsResult)));
-        prevPageBtn.onClick.AddListener(() => cryptoAvatars.PrevPage(avatarsResult => LoadAndDisplayAvatars(avatarsResult)));
+        nextPageBtn.onClick.AddListener(async () => await cryptoAvatars.NextPage(avatarsResult => LoadAndDisplayAvatars(avatarsResult)));
+        prevPageBtn.onClick.AddListener(async () => await cryptoAvatars.PrevPage(avatarsResult => LoadAndDisplayAvatars(avatarsResult)));
 
-        searchField.onValueChanged.AddListener((value) => {
+        searchField.onValueChanged.AddListener(async (value) =>
+        {
             CAModels.SearchAvatarsDto searchAvatar = new() { name = value };
-            cryptoAvatars.GetAvatars(searchAvatar, LoadAndDisplayAvatars);
+            await Task.Run(() => cryptoAvatars.GetAvatars(LoadAndDisplayAvatars,searchAvatar.name));
         });
+        LoadCollections();
     }
-
-    private void OnGuestEnter()
+    public void OnGuestEnter()
     {
         Vector3 screenPos = loginPanelOn
             ? loginPanel.GetComponent<RectTransform>().position
@@ -77,79 +83,86 @@ public class MenuManager : MonoBehaviour
 
         avatarsPanel.GetComponent<RectTransform>().position = loginPanelOn ? screenPos : hiddenPos;
         loginPanel.GetComponent<RectTransform>().position = loginPanelOn ? hiddenPos : screenPos;
-
-        cryptoAvatars.GetAvatars(new (), avatarsResult => LoadAndDisplayAvatars(avatarsResult));
     }
-
-    public void LoginProcess(string email, string password)
-    {
-        cryptoAvatars.Web2Login(email, password, onLoginResult => {
-            this.userLoggedIn = onLoginResult.userId != null;
-            if (this.userLoggedIn)
-                cryptoAvatars.GetUserAvatars(onLoginResult.wallet, onAvatarsResult => LoadAndDisplayAvatars(onAvatarsResult));
-        });
-    }
-
-    public void MetamaskLoginProccess(string walletAddress, string signature)
-    {
-        cryptoAvatars.Web3Login(walletAddress, signature, onLoginResult => {
-            this.userLoggedIn = onLoginResult.userId != null;
-            if (this.userLoggedIn)
-                cryptoAvatars.GetUserAvatars(walletAddress, onAvatarsResult => LoadAndDisplayAvatars(onAvatarsResult));
-        });
-    }
-
     private void LoadAndDisplayAvatars(CAModels.NftsArray onAvatarsResult)
     {
+        ClearScrollView();
+        DisplayAvatars(onAvatarsResult);
+    }
+    private void ClearScrollView()
+    {
         foreach (Transform child in scrollViewAvatars.content)
+        {
             Destroy(child.gameObject);
-
-        prevPageBtn.enabled = cryptoAvatars.HasPrevPage();
-        nextPageBtn.enabled = cryptoAvatars.HasNextPage();
-
-        currentPageText.text = $"{onAvatarsResult.currentPage}/{onAvatarsResult.totalPages}";
+        }
+    }
+    private async void DisplayAvatars(CAModels.NftsArray onAvatarsResult)
+    {
         CAModels.Nft[] nfts = onAvatarsResult.nfts;
-
         foreach (var nft in nfts)
         {
             GameObject avatarCard = Instantiate(avatarCardPrefab, scrollViewAvatars.content.transform);
             CardAvatarController cardController = avatarCard.GetComponentInChildren<CardAvatarController>();
-            cardController.SetAvatarData(nft.metadata.name, nft.metadata.asset, urlVRM => {
 
-                loadingSpinner.SetActive(true);
-                cryptoAvatars.GetAvatarVRMModel(urlVRM, (model, path) =>
-                {
-                    Vector3 avatarPos = vrm.transform.position;
-                    Quaternion avatarRot = vrm.transform.rotation;
-                    Destroy(vrm);
-                    vrm = model;
-                    vrm.name = "AVATAR";
-                    vrm.transform.SetPositionAndRotation(avatarPos, avatarRot);
-                    vrm.GetComponent<Animator>().runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Anims/VRM");
-                    loadingSpinner.SetActive(false);
-                });
+            cardController.SetAvatarData(
+                nft.metadata.name,
+                nft.metadata.asset,
+                urlVRM => LoadVRMModel(urlVRM)
+            );
 
-            });
-
-            this.cryptoAvatars.GetAvatarPreviewImage(nft.metadata.image, texture => {
-                cardController.LoadAvatarImage(texture);
-            });
+            await cryptoAvatars.GetAvatarPreviewImage(nft.metadata.image, texture => cardController.LoadAvatarImage(texture));
         }
     }
-
-    public void LoadMoreNfts()
+    private async void LoadVRMModel(string urlVRM)
     {
-        cryptoAvatars.NextPage(onAvatarsResult => LoadAndDisplayAvatars(onAvatarsResult));
+        loadingSpinner.SetActive(true);
+        await cryptoAvatars.GetAvatarVRMModel(urlVRM, (model, path) =>
+        {
+            ReplaceVRMModel(model);
+            loadingSpinner.SetActive(false);
+        });
     }
-
-    public void LoadPreviousNfts()
+    private void ReplaceVRMModel(GameObject model)
     {
-        cryptoAvatars.PrevPage(onAvatarsResult => LoadAndDisplayAvatars(onAvatarsResult));
+        Vector3 avatarPos = vrm.transform.position;
+        Quaternion avatarRot = vrm.transform.rotation;
+        Destroy(vrm);
+        vrm = model;
+        vrm.name = "AVATAR";
+        vrm.transform.SetPositionAndRotation(avatarPos, avatarRot);
+        vrm.GetComponent<Animator>().runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Anims/Animator/ThirdPersonAnimatorController");
+        vrm.AddComponent<ResizeCapsuleCollider>();
+        vrm.AddComponent<ThirdPersonUserControl>();
+        Camera.main.GetComponent<OrbitCamera>().targetPosition = vrm.transform;
     }
-
-    public void OnAnimSelected(TMP_Dropdown dropdown)
+    public async void LoadMoreNfts()
     {
-        GameObject.Find("VRM").GetComponent<Animator>().SetTrigger(dropdown.options[dropdown.value].text.ToLower());
+        await cryptoAvatars.NextPage(onAvatarsResult => LoadAndDisplayAvatars(onAvatarsResult));
     }
+    public async void LoadPreviousNfts()
+    {
+        await cryptoAvatars.PrevPage(onAvatarsResult => LoadAndDisplayAvatars(onAvatarsResult));
+    }
+    public async void LoadCollections()
+    {
+        await cryptoAvatars.GetNFTCollections((collections) =>
+        {          
+            List<string> options = new List<string>();
 
+            for (int i = 0; i < collections.nftCollections.Length; i++)
+            {
+                string name = collections.nftCollections[i].name;
+                GameObject avatarCard = Instantiate(collectionCardPrefab, scrollViewCollections.content.transform);
+                avatarCard.GetComponent<CardCollectionController>().SetCollectionData(
+                    collections.nftCollections[i].name,
+                    collections.nftCollections[i].logoImage,
+                    async collectionName => await cryptoAvatars.GetAvatars(LoadAndDisplayAvatars, name)
+
+                );
+                cryptoAvatars.GetAvatarPreviewImage(collections.nftCollections[i].logoImage, 
+                    texture => avatarCard.GetComponent<CardCollectionController>().LoadCollectionImage(texture)
+                );
+            }
+        });
+    }
 }
