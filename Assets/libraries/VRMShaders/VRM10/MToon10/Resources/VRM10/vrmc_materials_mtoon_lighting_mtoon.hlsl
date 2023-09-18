@@ -1,7 +1,7 @@
 ﻿#ifndef VRMC_MATERIALS_MTOON_LIGHTING_MTOON_INCLUDED
 #define VRMC_MATERIALS_MTOON_LIGHTING_MTOON_INCLUDED
 
-#include <UnityShaderVariables.cginc>
+#include "./vrmc_materials_mtoon_render_pipeline.hlsl"
 #include "./vrmc_materials_mtoon_define.hlsl"
 #include "./vrmc_materials_mtoon_utility.hlsl"
 #include "./vrmc_materials_mtoon_input.hlsl"
@@ -20,12 +20,9 @@ inline half GetMToonLighting_Reflectance_ShadingShift(const MToonInput input)
 {
     if (MToon_IsParameterMapOn())
     {
-        return UNITY_SAMPLE_TEX2D(_ShadingShiftTex, input.uv).r * _ShadingShiftTexScale + _ShadingShiftFactor;
+        return MTOON_SAMPLE_TEXTURE2D(_ShadingShiftTex, input.uv).r * _ShadingShiftTexScale + _ShadingShiftFactor;
     }
-    else
-    {
-        return _ShadingShiftFactor;
-    }
+    return _ShadingShiftFactor;
 }
 
 inline half GetMToonLighting_DotNL(const UnityLighting lighting, const MToonInput input)
@@ -47,7 +44,7 @@ inline half GetMToonLighting_Shade(const UnityLighting lighting, const MToonInpu
     if (MToon_IsForwardBasePass())
     {
         const half shadeInput = lerp(-1, 1, mtoon_linearstep(-1, 1, dotNL));
-        return mtoon_linearstep(-1.0 + shadeToony, +1.0 - shadeToony, shadeInput + shadeShift) * lighting.directLightAttenuation;
+        return mtoon_linearstep(-1.0 + shadeToony, +1.0 - shadeToony, shadeInput + shadeShift) * lighting.directLightAttenuation.x;
     }
     else
     {
@@ -60,7 +57,7 @@ inline half GetMToonLighting_Shadow(const UnityLighting lighting, const half dot
 {
     if (MToon_IsPbrCorrectOn())
     {
-        return lighting.directLightAttenuation * step(0, dotNL);
+        return lighting.directLightAttenuation.x * step(0, dotNL);
     }
 
     if (MToon_IsForwardBasePass())
@@ -72,13 +69,13 @@ inline half GetMToonLighting_Shadow(const UnityLighting lighting, const half dot
         // heuristic term for weak lights.
         //     0.5: heuristic.
         //     min(0, dotNL) + 1: darken if (dotNL < 0) by using half lambert.
-        return lighting.directLightAttenuation * 0.5 * (min(0, dotNL) + 1);
+        return lighting.directLightAttenuation.x * 0.5 * (min(0, dotNL) + 1);
     }
 }
 
 inline half3 GetMToonLighting_DirectLighting(const UnityLighting unityLight, const MToonInput input, const half shade, const half shadow)
 {
-    const half3 shadeColor = UNITY_SAMPLE_TEX2D(_ShadeTex, input.uv).rgb * _ShadeColor.rgb;
+    const half3 shadeColor = MTOON_SAMPLE_TEXTURE2D(_ShadeTex, input.uv).rgb * _ShadeColor.rgb;
     const half3 albedo = lerp(shadeColor, input.litColor, shade);
 
     return albedo * unityLight.directLightColor * shadow;
@@ -102,17 +99,11 @@ inline half3 GetMToonLighting_Emissive(const MToonInput input)
     {
         if (MToon_IsEmissiveMapOn())
         {
-            return UNITY_SAMPLE_TEX2D(_EmissionMap, input.uv).rgb * _EmissionColor.rgb;
+            return MTOON_SAMPLE_TEXTURE2D(_EmissionMap, input.uv).rgb * _EmissionColor.rgb;
         }
-        else
-        {
-            return _EmissionColor.rgb;
-        }
+        return _EmissionColor.rgb;
     }
-    else
-    {
-        return 0;
-    }
+    return 0;
 }
 
 inline half3 GetMToonLighting_Rim_Matcap(const MToonInput input)
@@ -124,12 +115,10 @@ inline half3 GetMToonLighting_Rim_Matcap(const MToonInput input)
         const half3 matcapRightAxisWS = normalize(cross(input.viewDirWS, worldUpWS));
         const half3 matcapUpAxisWS = normalize(cross(matcapRightAxisWS, input.viewDirWS));
         const half2 matcapUv = float2(dot(matcapRightAxisWS, input.normalWS), dot(matcapUpAxisWS, input.normalWS)) * 0.5 + 0.5;
-        return _MatcapColor.rgb * UNITY_SAMPLE_TEX2D(_MatcapTex, matcapUv).rgb;
+        
+        return _MatcapColor.rgb * MTOON_SAMPLE_TEXTURE2D(_MatcapTex, matcapUv).rgb;
     }
-    else
-    {
-        return _MatcapColor.rgb;
-    }
+    return _MatcapColor.rgb;
 }
 
 inline half3 GetMToonLighting_Rim(const UnityLighting unityLight, const MToonInput input, const half shadow)
@@ -152,12 +141,9 @@ inline half3 GetMToonLighting_Rim(const UnityLighting unityLight, const MToonInp
 
     if (MToon_IsRimMapOn())
     {
-        return (matcapFactor + parametricRimFactor) * rimLightingFactor * UNITY_SAMPLE_TEX2D(_RimTex, input.uv).rgb;
+        return (matcapFactor + parametricRimFactor) * rimLightingFactor * MTOON_SAMPLE_TEXTURE2D(_RimTex, input.uv).rgb;
     }
-    else
-    {
-        return (matcapFactor + parametricRimFactor) * rimLightingFactor;
-    }
+    return (matcapFactor + parametricRimFactor) * rimLightingFactor;
 }
 
 half4 GetMToonLighting(const UnityLighting unityLight, const MToonInput input)
@@ -179,10 +165,51 @@ half4 GetMToonLighting(const UnityLighting unityLight, const MToonInput input)
         const half3 outlineCol = _OutlineColor.rgb * lerp(half3(1, 1, 1), baseCol, _OutlineLightingMix);
         return half4(outlineCol, input.alpha);
     }
-    else
-    {
-        return half4(baseCol, input.alpha);
-    }
+    return half4(baseCol, input.alpha);
 }
+
+#ifdef MTOON_URP
+
+inline half GetMToonURPAdditionalLighting_Shadow(const UnityLighting lighting, const half dotNL)
+{
+    if (MToon_IsPbrCorrectOn())
+    {
+        return lighting.directLightAttenuation.x * step(0, dotNL);
+    }
+
+    return lighting.directLightAttenuation.x * 0.5 * (min(0, dotNL) + 1);
+}
+
+inline half GetMToonURPAdditionalLighting_Shade(const UnityLighting lighting, const MToonInput input, const half dotNL)
+{
+    const half shadeShift = GetMToonLighting_Reflectance_ShadingShift(input);
+    const half shadeToony = _ShadingToonyFactor;
+
+    if (MToon_IsPbrCorrectOn())
+    {
+        const half shadeInput = dotNL;
+        return mtoon_linearstep(-1.0 + shadeToony, +1.0 - shadeToony, shadeInput + shadeShift);
+    }
+
+    const half shadeInput = dotNL;
+    return mtoon_linearstep(-1.0 + shadeToony, +1.0 - shadeToony, shadeInput + shadeShift);
+}
+
+half4 GetMToonURPAdditionalLighting(const UnityLighting unityLight, const MToonInput input)
+{
+    const half dotNL = GetMToonLighting_DotNL(unityLight, input);
+    const half shade = GetMToonURPAdditionalLighting_Shade(unityLight, input, dotNL);
+    const half shadow = GetMToonURPAdditionalLighting_Shadow(unityLight, dotNL);
+
+    const half3 direct = GetMToonLighting_DirectLighting(unityLight, input, shade, shadow);
+    const half3 lighting = direct;
+    
+    const half3 baseCol = lighting;
+
+    return half4(baseCol, input.alpha);
+}
+
+#endif
+
 
 #endif

@@ -1,19 +1,19 @@
 ﻿#ifndef VRMC_MATERIALS_MTOON_INPUT_INCLUDED
 #define VRMC_MATERIALS_MTOON_INPUT_INCLUDED
 
-#include <UnityShaderVariables.cginc>
+#include "./vrmc_materials_mtoon_render_pipeline.hlsl"
 
 // Textures
-UNITY_DECLARE_TEX2D(_MainTex);
-UNITY_DECLARE_TEX2D(_ShadeTex);
-UNITY_DECLARE_TEX2D(_BumpMap);
-UNITY_DECLARE_TEX2D(_ShadingShiftTex);
-UNITY_DECLARE_TEX2D(_EmissionMap);
-UNITY_DECLARE_TEX2D(_MatcapTex);
-UNITY_DECLARE_TEX2D(_RimTex);
-UNITY_DECLARE_TEX2D(_OutlineWidthTex);
+MTOON_DECLARE_TEX2D(_MainTex);
+MTOON_DECLARE_TEX2D(_ShadeTex);
+MTOON_DECLARE_TEX2D(_BumpMap);
+MTOON_DECLARE_TEX2D(_ShadingShiftTex);
+MTOON_DECLARE_TEX2D(_EmissionMap);
+MTOON_DECLARE_TEX2D(_MatcapTex);
+MTOON_DECLARE_TEX2D(_RimTex);
+MTOON_DECLARE_TEX2D(_OutlineWidthTex);
 // NOTE: "tex2d() * _Time.y" returns mediump value if sampler is half precision in Android VR platform
-UNITY_DECLARE_TEX2D_FLOAT(_UvAnimMaskTex);
+MTOON_DECLARE_TEX2D_FLOAT(_UvAnimMaskTex);
 
 CBUFFER_START(UnityPerMaterial)
 // Vector

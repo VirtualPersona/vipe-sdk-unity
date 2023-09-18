@@ -7452,8 +7452,8 @@ Transform:
   m_GameObject: {fileID: 1413486477}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 425627315}
   - {fileID: 1140789286}
@@ -10853,14 +10853,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetPosition: {fileID: 150268004}
   distance: 2
-  xSpeed: 1
-  ySpeed: 5
-  yMinLimit: -90
-  yMaxLimit: 90
-  distanceMin: 5
-  distanceMax: 10
-  smoothTime: 2
-  panSpeed: 1
+  xSpeed: 3
+  ySpeed: 3
+  yMinLimit: 3
+  yMaxLimit: 60
+  distanceMin: 4
+  distanceMax: 8
+  smoothTime: 1
+  panSpeed: 2
   uiLayer:
     serializedVersion: 2
     m_Bits: 0

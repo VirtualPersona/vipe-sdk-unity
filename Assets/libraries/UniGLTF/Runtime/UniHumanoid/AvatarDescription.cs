@@ -75,6 +75,7 @@ namespace UniHumanoid
         }
     }
 
+
     [Serializable]
     public class AvatarDescription : ScriptableObject
     {
@@ -125,6 +126,8 @@ namespace UniHumanoid
 
         public Avatar CreateAvatar(Transform root)
         {
+            // force unique name
+            ForceUniqueName.Process(root);
             return AvatarBuilder.BuildHumanAvatar(root.gameObject, ToHumanDescription(root));
         }
 

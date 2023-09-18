@@ -1,8 +1,7 @@
 #ifndef VRMC_MATERIALS_MTOON_FORWARD_VERTEX_INCLUDED
 #define VRMC_MATERIALS_MTOON_FORWARD_VERTEX_INCLUDED
 
-#include <UnityCG.cginc>
-#include <AutoLight.cginc>
+#include "./vrmc_materials_mtoon_render_pipeline.hlsl"
 #include "./vrmc_materials_mtoon_define.hlsl"
 #include "./vrmc_materials_mtoon_utility.hlsl"
 #include "./vrmc_materials_mtoon_input.hlsl"
@@ -23,26 +22,27 @@ Varyings MToonVertex(const Attributes v) // v is UnityCG macro specified name.
     {
         const VertexPositionInfo position = MToon_GetOutlineVertex(v.vertex.xyz, normalize(v.normalOS), output.uv);
         output.pos = position.positionCS;
-        output.positionWS = position.positionWS;
-        output.normalWS = UnityObjectToWorldNormal(-v.normalOS);
+        output.positionWS = position.positionWS.xyz;
+
+        output.normalWS = MToon_TransformObjectToWorldNormal(-v.normalOS);
     }
     else
     {
         const VertexPositionInfo position = MToon_GetVertex(v.vertex.xyz);
         output.pos = position.positionCS;
-        output.positionWS = position.positionWS;
-        output.normalWS = UnityObjectToWorldNormal(v.normalOS);
+        output.positionWS = position.positionWS.xyz;
+
+        output.normalWS = MToon_TransformObjectToWorldNormal(v.normalOS);
     }
 
     output.viewDirWS = MToon_GetWorldSpaceNormalizedViewDir(output.positionWS);
 
 #if defined(_NORMALMAP)
     const half tangentSign = v.tangentOS.w * unity_WorldTransformParams.w;
-    output.tangentWS = half4(UnityObjectToWorldDir(v.tangentOS), tangentSign);
+    output.tangentWS = half4(MToon_TransformObjectToWorldDir(v.tangentOS), tangentSign);
 #endif
 
-    UNITY_TRANSFER_FOG(output, output.pos);
-    UNITY_TRANSFER_LIGHTING(output, v.texcoord1.xy);
+    MTOON_TRANSFER_FOG_AND_LIGHTING(output, output.pos, v.texcoord1.xy, v.vertex.xyz);
 
     return output;
 }

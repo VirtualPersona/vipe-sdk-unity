@@ -75,11 +75,15 @@ namespace UniHumanoid
             //
             // scaling. reposition
             //
+            var yCh = Bvh.Root.GetChannelIndex(BvhChannel.Yposition);
+            var curve = Bvh.Channels[yCh];
+            var hipHeight = curve.Keys[0];
+
             float scaling = 1.0f;
             {
                 //var foot = animator.GetBoneTransform(HumanBodyBones.LeftFoot);
-                var foot = hips.Traverse().Skip(skeleton.GetBoneIndex(HumanBodyBones.LeftFoot)).First();
-                var hipHeight = hips.position.y - foot.position.y;
+                // var foot = hips.Traverse().Skip(skeleton.GetBoneIndex(HumanBodyBones.LeftFoot)).First();
+                // var hipHeight = hips.position.y - foot.position.y;
                 // hips height to a meter
                 scaling = 1.0f / hipHeight;
                 foreach (var x in Root.transform.Traverse())
@@ -90,15 +94,6 @@ namespace UniHumanoid
                 var scaledHeight = hipHeight * scaling;
                 hips.position = new Vector3(0, scaledHeight, 0); // foot to ground
             }
-
-            //
-            // avatar
-            //
-            Avatar = description.CreateAvatar(Root.transform);
-            Avatar.name = "Avatar";
-            AvatarDescription = description;
-            var animator = Root.AddComponent<Animator>();
-            animator.avatar = Avatar;
 
             //
             // create AnimationClip
@@ -113,15 +108,16 @@ namespace UniHumanoid
             animation.clip = Animation;
             animation.Play();
 
-            var humanPoseTransfer = Root.AddComponent<HumanPoseTransfer>();
-            humanPoseTransfer.Avatar = Avatar;
+            //
+            // avatar
+            //
+            Avatar = description.CreateAvatar(Root.transform);
+            Avatar.name = "Avatar";
+            AvatarDescription = description;
+            var animator = Root.AddComponent<Animator>();
+            animator.avatar = Avatar;
 
-            // create SkinnedMesh for bone visualize
-            var renderer = SkeletonMeshUtility.CreateRenderer(animator);
-            Material = new Material(Shader.Find("Standard"));
-            renderer.sharedMaterial = Material;
-            Mesh = renderer.sharedMesh;
-            Mesh.name = "box-man";
+            Root.AddComponent<HumanPoseTransfer>();
         }
 
         static Transform BuildHierarchy(Transform parent, BvhNode node, float toMeter)

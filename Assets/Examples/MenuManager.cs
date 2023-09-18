@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using System.Threading.Tasks;
 using TMPro;
 using System.Collections.Generic;
+using UnityStandardAssets.Characters.ThirdPerson;
 
 public class MenuManager : MonoBehaviour
 {
@@ -129,7 +130,10 @@ public class MenuManager : MonoBehaviour
         vrm = model;
         vrm.name = "AVATAR";
         vrm.transform.SetPositionAndRotation(avatarPos, avatarRot);
-        vrm.GetComponent<Animator>().runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Anims/VRM");
+        vrm.GetComponent<Animator>().runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Anims/Animator/ThirdPersonAnimatorController");
+        vrm.AddComponent<ResizeCapsuleCollider>();
+        vrm.AddComponent<ThirdPersonUserControl>();
+        Camera.main.GetComponent<OrbitCamera>().targetPosition = vrm.transform;
     }
     public async void LoadMoreNfts()
     {
@@ -152,7 +156,7 @@ public class MenuManager : MonoBehaviour
                 avatarCard.GetComponent<CardCollectionController>().SetCollectionData(
                     collections.nftCollections[i].name,
                     collections.nftCollections[i].logoImage,
-                    collectionName => cryptoAvatars.GetAvatars(LoadAndDisplayAvatars, name)
+                    async collectionName => await cryptoAvatars.GetAvatars(LoadAndDisplayAvatars, name)
 
                 );
                 cryptoAvatars.GetAvatarPreviewImage(collections.nftCollections[i].logoImage, 

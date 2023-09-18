@@ -5,13 +5,14 @@ using UniGLTF;
 using UnityEngine;
 using System.Collections.Generic;
 using VRM;
+using Codice.CM.SEIDInfo;
 
 namespace CA
 {
     public class CryptoAvatars
     {
         private static readonly string avatarsResource = "/nfts/avatars";
-        private static readonly string collectionsResource = "/collections?containsCC0Nfts=true";
+        private static readonly string collectionsResource = "/collections";
         public MainThreadDispatcher mainThreadDispatcher;
         private CAModels.SearchAvatarsDto searchAvatarsDto;
 
@@ -138,8 +139,7 @@ namespace CA
         {
             this.searchAvatarsDto = searchAvatarsDto;
             var queryParams = new Dictionary<string, string>{
-                {"collectionName", searchAvatarsDto.collectionName},
-                {"license", "CC0"}
+                {"collectionName", searchAvatarsDto.collectionName}
             };
             pageUrl = HttpService.instance.AddOrUpdateParametersInUrl(pageUrl, queryParams);
             string result = await HttpService.Instance().Get(pageUrl);
