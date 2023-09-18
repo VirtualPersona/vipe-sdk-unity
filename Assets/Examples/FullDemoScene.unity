@@ -5645,10 +5645,13 @@ MonoBehaviour:
   walletAddress: {fileID: 999816664}
   avatarCardPrefab: {fileID: 2389009472019987712, guid: 0d798dcf4ccb055418a08e1a7de0e9e9,
     type: 3}
+  collectionCardPrefab: {fileID: 0}
   loadingSpinner: {fileID: 535987261}
   scrollViewAvatars: {fileID: 1629232801}
+  scrollViewCollections: {fileID: 0}
   searchField: {fileID: 2141229575}
   currentPageText: {fileID: 1054679280}
+  vrm: {fileID: 0}
 --- !u!114 &2102780767
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6858,7 +6861,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 35.999878, y: 432}
+  m_AnchoredPosition: {x: 36, y: 432}
   m_SizeDelta: {x: 450, y: 500}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &1886148133573272930
