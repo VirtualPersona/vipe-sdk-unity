@@ -3,12 +3,14 @@ using UnityEngine.Networking;
 using System.IO;
 using System.Threading.Tasks;
 using System;
+using System.Collections.Generic;
+using System.Web;
 
 namespace CA
 {
     public class HttpService
     {
-        private static HttpService instance;
+        public static HttpService instance;
         public static string accessToken;
         public static string apiKey;
         public static string baseUri;
@@ -27,7 +29,6 @@ namespace CA
         {
             if (!Uri.TryCreate(url, UriKind.Absolute, out Uri uriResult) || (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps))
             {
-                //throw new ArgumentException("URL ERROR");
                 return null;
             }
 
@@ -74,21 +75,45 @@ namespace CA
             request.Dispose();
             return path;
         }
-        public Task<string> GetAsync(string resource)
+        public string AddOrUpdateParametersInUrl(string pageUrl, Dictionary<string, string> queryParams)
+        {
+            if (string.IsNullOrEmpty(pageUrl))
+            {
+                throw new ArgumentException("pageUrl cannot be null or empty.");
+            }
+
+            try
+            {
+                var uriBuilder = new UriBuilder(HttpService.baseUri + pageUrl);
+                var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+
+                foreach (var keyValuePair in queryParams)
+                {
+                    query[keyValuePair.Key] = keyValuePair.Value;
+                }
+
+                uriBuilder.Query = query.ToString();
+                return uriBuilder.Uri.ToString();
+            }
+            catch (UriFormatException e)
+            {
+                throw new ArgumentException("Invalid URL format.", e);
+            }
+        }
+        public Task<string> Get(string resource)
         {
             var tcs = new TaskCompletionSource<string>();
 
-            UnityWebRequest request = UnityWebRequest.Get(baseUri + resource);
+            UnityWebRequest request = UnityWebRequest.Get(resource);
             if (accessToken == null)
                 request.SetRequestHeader("API-KEY", apiKey);
             else
                 request.SetRequestHeader("Authorization", "Bearer " + accessToken);
-
             var operation = request.SendWebRequest();
 
             operation.completed += op =>
             {
-                if (request.isNetworkError || request.isHttpError)
+                if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
                 {
                     tcs.SetException(new Exception(request.error));
                 }

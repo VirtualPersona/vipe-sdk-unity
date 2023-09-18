@@ -8,7 +8,6 @@ public class CAMenu : EditorWindow
     private const string ExampleScenePath = "Assets/Scenes/NombreDeLaEscena.unity";
     private const string PrefabPath = "Assets/Ruta/Al/Prefab.prefab";
     private Texture2D _iconTexture;
-
     private string _apiKey;
 
 
