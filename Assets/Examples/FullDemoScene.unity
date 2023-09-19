@@ -5601,7 +5601,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2102780765}
   - component: {fileID: 2102780766}
-  - component: {fileID: 2102780767}
   m_Layer: 0
   m_Name: UIManager
   m_TagString: Untagged
@@ -5652,21 +5651,6 @@ MonoBehaviour:
   searchField: {fileID: 2141229575}
   currentPageText: {fileID: 1054679280}
   vrm: {fileID: 0}
---- !u!114 &2102780767
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2102780763}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae89d2d27cbe6274da59e02c67e0b9ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  API_KEY: $2b$10$EfHC7O4G9bqfqxrsrDfAPesR1napi3.4NVX3y6cTrjlO2Qfh4P6iy
-  API_KEY_TESTNETS: $2b$10$.9FXFfpoCmuzGzHIpX8a..NB5k1X1UugM2sAQtZv23.moriTENlNO
-  useTestnetsEnvironment: 0
 --- !u!1 &2141229573
 GameObject:
   m_ObjectHideFlags: 0
