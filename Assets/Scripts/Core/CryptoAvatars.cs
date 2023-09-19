@@ -30,6 +30,7 @@ namespace CA
         }
         private GameObject ImportVRM(string path)
         {
+            Debug.LogFormat("ImportVRM: {0}", path);
             if (string.IsNullOrEmpty(path))
                 return null;
 
@@ -141,8 +142,8 @@ namespace CA
         {
             this.searchAvatarsDto = searchAvatarsDto;
             var queryParams = new Dictionary<string, string>{
-                {"collectionName", searchAvatarsDto.collectionName},
-                // {"license", "CC0"}
+            {"collectionName", searchAvatarsDto.collectionName},
+            // {"license", "CC0"}
             };
             pageUrl = HttpService.instance.AddOrUpdateParametersInUrl(pageUrl, queryParams);
             string result = await HttpService.Instance().Get(pageUrl);
