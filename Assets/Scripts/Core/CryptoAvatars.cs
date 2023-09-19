@@ -11,7 +11,9 @@ namespace CA
     public class CryptoAvatars
     {
         private static readonly string avatarsResource = "/nfts/avatars";
-        private static readonly string collectionsResource = "/collections?containsCC0Nfts=true";
+        // private static readonly string collectionsResource = "/collections?containsCC0Nfts=true";
+        private static readonly string collectionsResource = "/collections";
+
         public MainThreadDispatcher mainThreadDispatcher;
         private CAModels.SearchAvatarsDto searchAvatarsDto;
 
@@ -139,14 +141,20 @@ namespace CA
         {
             this.searchAvatarsDto = searchAvatarsDto;
             var queryParams = new Dictionary<string, string>{
-                {"collectionName", searchAvatarsDto.collectionName}
+                {"collectionName", searchAvatarsDto.collectionName},
+                // {"license", "CC0"}
             };
             pageUrl = HttpService.instance.AddOrUpdateParametersInUrl(pageUrl, queryParams);
             string result = await HttpService.Instance().Get(pageUrl);
-            var avatarsResponse = JsonConvert.DeserializeObject<CAModels.NftsArray>(result);
 
-            SetPaginationData(avatarsResponse.next, avatarsResponse.prev);
-            onAvatarsResult(avatarsResponse);
+            // Utiliza el MainThreadDispatcher para asegurarte de que este bloque se ejecute en el hilo principal
+            MainThreadDispatcher.RunOnMainThread(() =>
+            {
+                var avatarsResponse = JsonConvert.DeserializeObject<CAModels.NftsArray>(result);
+                SetPaginationData(avatarsResponse.next, avatarsResponse.prev);
+                onAvatarsResult(avatarsResponse);
+            });
         }
+
     }
 }
