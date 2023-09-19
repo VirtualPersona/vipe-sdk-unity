@@ -1,11 +1,10 @@
-using CA;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Threading.Tasks;
 using TMPro;
 using System.Collections.Generic;
 using UnityStandardAssets.Characters.ThirdPerson;
-
+using CA;
 public class MenuManager : MonoBehaviour
 {
     [SerializeField]

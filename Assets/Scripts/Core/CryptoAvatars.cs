@@ -5,14 +5,13 @@ using UniGLTF;
 using UnityEngine;
 using System.Collections.Generic;
 using VRM;
-using Codice.CM.SEIDInfo;
 
 namespace CA
 {
     public class CryptoAvatars
     {
         private static readonly string avatarsResource = "/nfts/avatars";
-        private static readonly string collectionsResource = "/collections";
+        private static readonly string collectionsResource = "/collections?containsCC0Nfts=true";
         public MainThreadDispatcher mainThreadDispatcher;
         private CAModels.SearchAvatarsDto searchAvatarsDto;
 
@@ -23,7 +22,7 @@ namespace CA
 
         public CryptoAvatars(MainThreadDispatcher dispatcher)
         {
-            this.mainThreadDispatcher = dispatcher;
+            mainThreadDispatcher = dispatcher;
             HttpService.apiKey = ApiKeyManager.GetApiKey();
             HttpService.baseUri = "https://api.cryptoavatars.io/v1";
         }
@@ -80,6 +79,7 @@ namespace CA
             }
             catch (Exception e)
             {
+                Debug.Log(placeholderTexture.name);
                 onImageLoaded(placeholderTexture);
             }
         }
