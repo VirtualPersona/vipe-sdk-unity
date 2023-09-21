@@ -5,6 +5,8 @@ using TMPro;
 using System.Collections.Generic;
 using UnityStandardAssets.Characters.ThirdPerson;
 using CA;
+using System;
+
 public class MenuManager : MonoBehaviour
 {
     [SerializeField]
@@ -64,10 +66,20 @@ public class MenuManager : MonoBehaviour
         prevPageBtn.onClick.AddListener(async () => await cryptoAvatars.PrevPage(avatarsResult => LoadAndDisplayAvatars(avatarsResult)));
 
         searchField.onValueChanged.AddListener(async (value) =>
+    {
+        CAModels.SearchAvatarsDto searchAvatar = new() { name = value };
+
+        // Envuelve la llamada a GetAvatars con una acción que se ejecutará en el hilo principal
+        Action wrapperAction = async () =>  await cryptoAvatars.GetAvatars(LoadAndDisplayAvatars, searchAvatar.name);
+
+        // Ejecuta la tarea en un hilo separado
+        Task myTask = Task.Run(() =>
         {
-            CAModels.SearchAvatarsDto searchAvatar = new() { name = value };
-            await Task.Run(() => cryptoAvatars.GetAvatars(LoadAndDisplayAvatars,searchAvatar.name));
+            MainThreadDispatcher.RunOnMainThread(wrapperAction);
         });
+
+        await myTask;
+    });
         LoadCollections();
     }
     public void OnGuestEnter()
@@ -87,6 +99,7 @@ public class MenuManager : MonoBehaviour
     {
         ClearScrollView();
         DisplayAvatars(onAvatarsResult);
+        Debug.Log("Avatars loaded");
     }
     private void ClearScrollView()
     {
@@ -145,7 +158,7 @@ public class MenuManager : MonoBehaviour
     public async void LoadCollections()
     {
         await cryptoAvatars.GetNFTCollections((collections) =>
-        {          
+        {
             List<string> options = new List<string>();
 
             for (int i = 0; i < collections.nftCollections.Length; i++)
@@ -158,7 +171,7 @@ public class MenuManager : MonoBehaviour
                     async collectionName => await cryptoAvatars.GetAvatars(LoadAndDisplayAvatars, name)
 
                 );
-                cryptoAvatars.GetAvatarPreviewImage(collections.nftCollections[i].logoImage, 
+                cryptoAvatars.GetAvatarPreviewImage(collections.nftCollections[i].logoImage,
                     texture => avatarCard.GetComponent<CardCollectionController>().LoadCollectionImage(texture)
                 );
             }

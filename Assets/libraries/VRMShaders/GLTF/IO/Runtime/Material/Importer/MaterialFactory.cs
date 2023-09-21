@@ -235,7 +235,21 @@ namespace VRMShaders
             }
 
             m_materials.Add(new MaterialLoadInfo(matDesc.SubAssetKey, material, false));
+            Debug.Log("--Checking final state of material in LoadAsync--");
+            foreach (var keyValue in textures)
+            {
+                var assignedTexture = material.GetTexture(keyValue.Key);
+                if (assignedTexture != null)
+                {
+                    Debug.Log($"Final texture for {keyValue.Key} in LoadAsync: {assignedTexture.name}");
+                }
+                else
+                {
+                    Debug.Log($"Final texture for {keyValue.Key} in LoadAsync is null");
+                }
+            }
 
+            Debug.Log("--LoadAsync completed--");
             return material;
         }
 

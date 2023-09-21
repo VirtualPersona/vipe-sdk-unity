@@ -280,6 +280,8 @@ namespace UniGLTF
 
         public async Task LoadMaterialsAsync(IAwaitCaller awaitCaller)
         {
+            Debug.Log("--LoadMaterialsAsync called--");
+
             if (awaitCaller == null)
             {
                 throw new ArgumentNullException();
@@ -287,21 +289,32 @@ namespace UniGLTF
 
             if (Data.GLTF.materials == null || Data.GLTF.materials.Count == 0)
             {
-                // no material. work around.
-                // TODO: https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#default-material
+                Debug.Log("No materials found, using default GLTF material.");
                 var param = MaterialDescriptorGenerator.GetGltfDefault();
-                await MaterialFactory.LoadAsync(param, TextureFactory.GetTextureAsync, awaitCaller);
+                var defaultMaterial = await MaterialFactory.LoadAsync(param, TextureFactory.GetTextureAsync, awaitCaller);
+                Debug.Log($"Default Material Name: {defaultMaterial?.name ?? "null"}");
             }
             else
             {
+                Debug.Log($"Found {Data.GLTF.materials.Count} materials, loading each one.");
                 for (int i = 0; i < Data.GLTF.materials.Count; ++i)
                 {
+                    Debug.Log($"Loading material at index {i}");
                     await awaitCaller.NextFrameIfTimedOut();
                     var param = MaterialDescriptorGenerator.Get(Data, i);
-                    await MaterialFactory.LoadAsync(param, TextureFactory.GetTextureAsync, awaitCaller);
+                    var material = await MaterialFactory.LoadAsync(param, TextureFactory.GetTextureAsync, awaitCaller);
+
+                    Debug.Log($"Material Name at index {i}: {material?.name ?? "null"}");
+
+                    // Debugging textures, assuming '_BaseMap' is one of the texture keys.
+                    var baseTexture = material?.GetTexture("_BaseMap");
+                    Debug.Log($"Main Texture for material at index {i}: {baseTexture?.name ?? "null"}");
                 }
             }
+
+            Debug.Log("--LoadMaterialsAsync completed--");
         }
+
 
         protected virtual Task OnLoadHierarchy(IAwaitCaller awaitCaller, Func<string, IDisposable> MeasureTime)
         {

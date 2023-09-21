@@ -11,8 +11,7 @@ namespace CA
     public class CryptoAvatars
     {
         private static readonly string avatarsResource = "/nfts/avatars";
-        // private static readonly string collectionsResource = "/collections?containsCC0Nfts=true";
-        private static readonly string collectionsResource = "/collections";
+        private static readonly string collectionsResource = "/collections?containsCC0Nfts=true";
 
         public MainThreadDispatcher mainThreadDispatcher;
         private CAModels.SearchAvatarsDto searchAvatarsDto;
@@ -30,7 +29,6 @@ namespace CA
         }
         private GameObject ImportVRM(string path)
         {
-            Debug.LogFormat("ImportVRM: {0}", path);
             if (string.IsNullOrEmpty(path))
                 return null;
 
@@ -82,7 +80,6 @@ namespace CA
             }
             catch (Exception e)
             {
-                Debug.Log(placeholderTexture.name);
                 onImageLoaded(placeholderTexture);
             }
         }
@@ -143,12 +140,11 @@ namespace CA
             this.searchAvatarsDto = searchAvatarsDto;
             var queryParams = new Dictionary<string, string>{
             {"collectionName", searchAvatarsDto.collectionName},
-            // {"license", "CC0"}
+            {"license", "CC0"}
             };
             pageUrl = HttpService.instance.AddOrUpdateParametersInUrl(pageUrl, queryParams);
             string result = await HttpService.Instance().Get(pageUrl);
 
-            // Utiliza el MainThreadDispatcher para asegurarte de que este bloque se ejecute en el hilo principal
             MainThreadDispatcher.RunOnMainThread(() =>
             {
                 var avatarsResponse = JsonConvert.DeserializeObject<CAModels.NftsArray>(result);
