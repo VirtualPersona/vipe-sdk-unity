@@ -1,12 +1,12 @@
-using System;
+using CA;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEditor;
-using CA;
 
 public class HorizontalMenuDrawer
 {
-    public static void DrawHorizontalMenu(ref Vector2 scrollPosition, List<string> collectionOptions, List<Texture2D> collectionLogos, Action<string> onCollectionSelected)
+    public static void DrawHorizontalMenu(ref Vector2 scrollPosition, List<string> collectionOptions, List<Texture2D> collectionLogos, Action<string> onCollectionSelected, bool isLoading, Texture2D loadingTexture, float rotationAngle, string currentlyLoadingCollection = null)
     {
         EditorUIHelpers.DrawScrollArea(ref scrollPosition, () =>
         {
@@ -21,7 +21,13 @@ public class HorizontalMenuDrawer
                         if (i < collectionLogos.Count && collectionLogos[i] != null)
                         {
                             Rect logoRect = GUILayoutUtility.GetRect(100, 100);
+
+                            //Pintar la textura
                             EditorUIHelpers.DrawTexture(logoRect, collectionLogos[i], () => onCollectionSelected(collectionOptions[i]));
+
+                            // Verificar si el cursor está sobre la textura
+                            if (isLoading && collectionOptions[i] == currentlyLoadingCollection)
+                                EditorUIHelpers.DrawLoadingSpinner(logoRect, loadingTexture, rotationAngle);
                         }
                     }, 20);
 
@@ -38,4 +44,4 @@ public class HorizontalMenuDrawer
             EditorGUILayout.EndHorizontal();
         }, GUILayout.Height(140));
     }
-}
+} 

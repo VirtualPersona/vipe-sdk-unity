@@ -23,7 +23,7 @@ namespace CA
         public CryptoAvatars(MainThreadDispatcher dispatcher)
         {
             mainThreadDispatcher = dispatcher;
-            HttpService.apiKey = ApiKeyManager.GetApiKey();
+            HttpService.apiKey = SecureDataHandler.LoadAPIKey();
             HttpService.baseUri = "https://api.cryptoavatars.io/v1";
         }
 
@@ -58,9 +58,12 @@ namespace CA
             return Utility.IsPng(imageBytes) || Utility.IsJpg(imageBytes);
         }
 
-        public async Task GetAvatars(Action<CAModels.NftsArray> onAvatarsResult, Dictionary<string, string> queryParams = null)
+        public async Task GetAvatars(Action<CAModels.NftsArray> onAvatarsResult,Dictionary<string, string> queryParams = null, string wallet = null)
         {
-            await GetAvatarsByURL(avatarsResource, onAvatarsResult, queryParams);
+            if(wallet != null)
+                wallet = "/" + wallet;
+
+            await GetAvatarsByURL(avatarsResource + wallet, onAvatarsResult, queryParams);
         }
 
         public async Task PrevPage(Action<CAModels.NftsArray> onAvatarsResult, Dictionary<string, string> queryParams = null)

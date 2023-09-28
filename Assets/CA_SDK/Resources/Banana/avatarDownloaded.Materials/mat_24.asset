@@ -11,7 +11,7 @@ Material:
   m_Shader: {fileID: 4800000, guid: e2c41f2ba6a3f334d894aeac1b04af52, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords:
-  - _CULL_NONE
+  - _CULL_BACK
   - _USEALPHACLIPPING_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0

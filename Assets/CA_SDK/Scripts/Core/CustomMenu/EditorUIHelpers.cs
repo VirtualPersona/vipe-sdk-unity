@@ -14,7 +14,15 @@ namespace CA
                 onClick?.Invoke();
             }
         }
-
+        public static bool HandleIsClickOnRect(Rect rect, Action onClick)
+        {
+            if (rect.Contains(Event.current.mousePosition) && Event.current.type == EventType.MouseDown && Event.current.button == 0)
+            {
+                onClick?.Invoke();
+                return true; // Rectángulo ha sido clickeado
+            }
+            return false; // Rectángulo no ha sido clickeado
+        }
         // Draw a scrollable area
         public static void DrawScrollArea(ref Vector2 scrollPosition, Action content, params GUILayoutOption[] options)
         {
@@ -84,9 +92,10 @@ namespace CA
         }
 
         // Search field (kept as is)
-        public static string DrawSearchField(string currentSearch, Action<string> onSearch)
+        public static string DrawSearchField(string currentSearch, Action<string> onSearch, string placeholder = "Buscar avatares...")
         {
-            string newSearch = EditorGUILayout.TextField("Search:", currentSearch);
+            GUIContent searchContent = new GUIContent("Search:", placeholder);
+            string newSearch = EditorGUILayout.TextField(searchContent, currentSearch);
             if (newSearch != currentSearch)
             {
                 onSearch?.Invoke(newSearch);

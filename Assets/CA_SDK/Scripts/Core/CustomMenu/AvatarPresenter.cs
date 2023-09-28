@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEditor;
 using System.Threading.Tasks;
 using System.Threading;
+using PlasticGui.Configuration.CloudEdition.Welcome;
 
 public class AvatarPresenter
 {
@@ -22,11 +23,12 @@ public class AvatarPresenter
     private bool shouldLoadImages = false;
     public bool isLoading = false;
     public bool isLoadingImages = false;
+    public bool islLoadingCollections = false;
 
     public event Action OnDataChanged;
     public event Action<string> OnVRMModelClicked;
 
-    private Texture2D loadingTexture;
+    public  Texture2D loadingTexture;
     private Texture2D placeHolder;
     private int creatingAvatarIndex = -1;
     public float rotationAngle = 0f;
@@ -34,6 +36,9 @@ public class AvatarPresenter
     private const float RectExpansion = 8f;
     private const float BorderThickness = 3f;
 
+    public string currentlyLoadingCollection = null;
+
+    private Dictionary<string, string> parameters = new Dictionary<string, string>();
     private async Task ExecuteLoad(Func<Task> action)
     {
         if (!isLoading && !isLoadingImages) await action();
@@ -42,14 +47,22 @@ public class AvatarPresenter
     {
         this.cryptoAvatars = cryptoAvatars;
         loadingTexture = Resources.Load<Texture2D>("LoadingBar/Materials/spinner_main");
-        placeHolder = Resources.Load<Texture2D>("Visuals/UI/dummy_pfp");
+        placeHolder = Resources.Load<Texture2D>("Visuals/UI/Icons/dummy_pfp");
     }
-    public async void OnGuestEnter() => await ExecuteLoad(() => LoadAvatars(new CAModels.SearchAvatarsDto()));
-    public async void LoadColletionAvatars(string collection) => await ExecuteLoad(() => LoadCollectionAvatars(collection));
+    public async void OnGuestEnter() => await ExecuteLoad(() => cryptoAvatars.GetAvatars(LoadAndDisplayAvatars, cryptoAvatars.DefaultQuerry("")));
+    public async void OnOwnerEnter() => await ExecuteLoad(() => cryptoAvatars.GetAvatars(LoadAndDisplayAvatars, null, SecureDataHandler.LoadWallet()));
+    public async void LoadColletionAvatars(string collection)
+    {
+        islLoadingCollections = true;
+        currentlyLoadingCollection = collection;
+        await ExecuteLoad(() => LoadCollectionAvatars(collection));
+        islLoadingCollections = false;
+        currentlyLoadingCollection = null;
+    }
     public async void LoadMoreNfts() => await ExecuteLoad(() => cryptoAvatars.NextPage(LoadAndDisplayAvatars));
     public async void LoadPreviousNfts() => await ExecuteLoad(() => cryptoAvatars.PrevPage(LoadAndDisplayAvatars));
     public async void SearchAvatars(string value) => await ExecuteLoad(() => DebounceSearch(value, 500));
-    private async Task LoadAvatars(CAModels.SearchAvatarsDto searchParams) => await cryptoAvatars.GetAvatars(LoadAndDisplayAvatars);
+    private async Task LoadAvatars(CAModels.SearchAvatarsDto searchParams) => await cryptoAvatars.GetAvatars(LoadAndDisplayAvatars,parameters);
     private async Task LoadCollectionAvatars(string collection) => await cryptoAvatars.GetAvatars(LoadAndDisplayAvatars,cryptoAvatars.DefaultQuerry(collection));
     private bool HasTextures() => textures != null && textures.Length > 0;
     public async void LoadImagesIfNeeded()
@@ -171,7 +184,6 @@ public class AvatarPresenter
     {
         cts.Cancel();
         cts = new CancellationTokenSource();
-
         try
         {
             await Task.Delay(delayMilliseconds, cts.Token);
@@ -185,6 +197,11 @@ public class AvatarPresenter
     private async Task ExecuteSearch(string value)
     {
         CAModels.SearchAvatarsDto searchAvatar = new CAModels.SearchAvatarsDto { name = value };
+        parameters = new Dictionary<string, string>
+        {
+            { "name", value },
+            {"license","CC0" }
+        };
         await Task.Run(() => MainThreadDispatcher.RunOnMainThread(async () => await LoadAvatars(searchAvatar)), cts.Token);
     }
     private async Task LoadImages()
@@ -194,12 +211,19 @@ public class AvatarPresenter
         if (shouldLoadImages)
         {
             textures = new Texture2D[nfts.Count];
+
+            // Inicializa todas las texturas con el placeholder
+            for (int i = 0; i < textures.Length; i++)
+            {
+                textures[i] = placeHolder;
+            }
+
             for (int i = 0; i < nfts.Count; i++)
             {
                 int index = i;
                 tasks.Add(cryptoAvatars.GetAvatarPreviewImage(nfts[i].metadata.image, texture =>
                 {
-                    textures[index] = texture;
+                    textures[index] = texture; // Reemplaza el placeholder con la imagen real
                     OnDataChanged?.Invoke();
                     if (index == nfts.Count - 1)
                     {
@@ -209,7 +233,6 @@ public class AvatarPresenter
                 }, placeHolder));
             }
             shouldLoadImages = false;
-
         }
 
         await Task.WhenAll(tasks);

@@ -11,12 +11,15 @@ public class AvatarLoaderGUI : EditorWindow
     private string searchField = "";
     private Vector2 scrollPosition = Vector2.zero;
     private const string WindowTitle = "Library";
-    private const string MenuItemPath = "Crypto Avatars/Avatar Library";
+    private const string MenuItemPath = "VIPE/Avatar Library";
 
     private List<string> collectionOptions = new List<string>();
     private List<Texture2D> collectionLogos = new List<Texture2D>();
 
     private Texture2D collectionLogoPlaceHolder;
+
+    private bool isLoadingCollections = true;
+    public bool isAvatarsLoading = false;
 
     private void HandleDataChanged() => Repaint();
     [MenuItem(MenuItemPath)]
@@ -39,6 +42,7 @@ public class AvatarLoaderGUI : EditorWindow
     }
     private async Task LoadCollectionsNameList()
     {
+        isLoadingCollections = true;
         await cryptoAvatars.GetNFTCollections(async collections =>
         {
             collectionOptions.Clear();
@@ -49,6 +53,7 @@ public class AvatarLoaderGUI : EditorWindow
                 collectionOptions.Add(collection.name);
                 await LoadLogoImage(collection.logoImage);
             }
+            isLoadingCollections = false;
         });
     }
     private async Task LoadLogoImage(string logoImageURL)
@@ -63,7 +68,7 @@ public class AvatarLoaderGUI : EditorWindow
         MainThreadDispatcher mainThreadDispatcher = MainThreadDispatcher.Instance;
         cryptoAvatars = new CryptoAvatars(mainThreadDispatcher);
         presenter = new AvatarPresenter(cryptoAvatars);
-        collectionLogoPlaceHolder = Resources.Load<Texture2D>("Visuals/UI/dummy_pfp");
+        collectionLogoPlaceHolder = Resources.Load<Texture2D>("Visuals/UI/Icons/dummy_pfp");
     }
     private void SubscribeToEvents()
     {
@@ -91,7 +96,7 @@ public class AvatarLoaderGUI : EditorWindow
     }
     private void UpdateLoadingAnimation()
     {
-        if (presenter.isLoading)
+        if (presenter.isLoading || presenter.islLoadingCollections)
         {
             presenter.rotationAngle += Time.deltaTime;
             if (presenter.rotationAngle > 360f)
@@ -106,6 +111,11 @@ public class AvatarLoaderGUI : EditorWindow
         if (GUILayout.Button("Load CC0"))
             presenter.OnGuestEnter();
     }
+    private void DrawLoadOwnerButton()
+    {
+        if (GUILayout.Button("Load Owner"))
+            presenter.OnOwnerEnter();
+    }
     private void DrawPaginationControls()
     {
         EditorUIHelpers.DrawPaginationControls(
@@ -117,9 +127,24 @@ public class AvatarLoaderGUI : EditorWindow
     }
     private void OnGUI()
     {
+        GUILayout.BeginHorizontal();
+        DrawLoadOwnerButton();
         DrawLoadCC0Button();
-        searchField = EditorUIHelpers.DrawSearchField(searchField, newSearch => presenter.SearchAvatars(newSearch));
-        HorizontalMenuDrawer.DrawHorizontalMenu(ref scrollPosition, collectionOptions, collectionLogos, collection => presenter.LoadColletionAvatars(collection));
+        GUILayout.EndHorizontal();
+
+        searchField = EditorUIHelpers.DrawSearchField(searchField, newSearch => presenter.SearchAvatars(newSearch), "Find VRM by Name");
+
+        if (isLoadingCollections)
+        {
+            GUILayout.Label("Loading collections...");
+        }
+        else
+        {
+            GUILayout.Space(10);
+            GUILayout.Label("CC0 Collection");
+            HorizontalMenuDrawer.DrawHorizontalMenu(ref scrollPosition, collectionOptions, collectionLogos, collection => presenter.LoadColletionAvatars(collection), presenter.islLoadingCollections, presenter.loadingTexture, presenter.rotationAngle, presenter.currentlyLoadingCollection);
+        }
+
         DrawPaginationControls();
         presenter.RenderUI();
     }
