@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a0c81412f5a26e4da6e51492d92585d, type: 3}
   m_Name: APIKeyConfig
   m_EditorClassIdentifier: 
-  API_KEY: 
+  API_KEY: $2b$10$dldPavMx9zQyce/xM9.POeoQZBa113m/hw7gyE.eyCza9BKwEctT2
