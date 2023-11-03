@@ -1,0 +1,1 @@
+USE GZ compression for WebGL build or change in index.html the .gz extension to your prefered before use it.
