@@ -1112,7 +1112,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  interiorButton: {fileID: 7436078587779655683}
+  interiorImage: {fileID: 0}
   activeColor: {r: 0, g: 0, b: 0, a: 1}
   inactiveColor: {r: 0.9921569, g: 0.9921569, b: 0.04705883, a: 1}
 --- !u!1 &1068970250428207666
@@ -9817,7 +9817,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  interiorButton: {fileID: 5731285932009434414}
+  interiorImage: {fileID: 0}
   activeColor: {r: 0, g: 0, b: 0, a: 1}
   inactiveColor: {r: 0.9921569, g: 0.9921569, b: 0.04705883, a: 1}
 --- !u!1 &8956767591727234875

@@ -69,6 +69,9 @@ namespace VIPE_SDK
 
         public bool loginPanelOn = true;
 
+        [SerializeField]
+        private CustomToggleController ownerButton;
+
 
         private void Awake()
         {
@@ -80,8 +83,8 @@ namespace VIPE_SDK
             {
                 Debug.LogError("Multiple instances of MenuManager");
             }
-            MainThreadDispatcher mainThreadDispatcher = MainThreadDispatcher.Instance;
-            VIPE = new VIPE(mainThreadDispatcher);
+
+            VIPE = new VIPE();
             login = GetComponent<Login>();
         }
         private void Start()
@@ -129,7 +132,8 @@ namespace VIPE_SDK
         /// <summary>
         /// Toggles the display between the login panel and avatar panel.
         /// </summary>
-        public void LoadAvatarUI()
+        /// //NOT USED..consider deleting
+        public void ToggleAvatarUI()
         {
             Vector3 screenPos = loginPanelOn
                 ? loginPanel.GetComponent<RectTransform>().position
@@ -141,6 +145,31 @@ namespace VIPE_SDK
 
             avatarsPanel.GetComponent<RectTransform>().position = loginPanelOn ? screenPos : hiddenPos;
             loginPanel.GetComponent<RectTransform>().position = loginPanelOn ? hiddenPos : screenPos;
+
+            loginPanelOn = !loginPanelOn;
+        }
+        /// <summary>
+        /// Changes the display to avatar panel.
+        /// </summary>
+        public void LoadAvatarUI()
+        {
+            if (!loginPanelOn)
+            {
+                return;
+            }
+            Debug.Log("loginPanelOn" + loginPanelOn);
+            Vector3 screenPos = loginPanelOn
+                ? loginPanel.GetComponent<RectTransform>().position
+                : avatarsPanel.GetComponent<RectTransform>().position;
+
+            Vector3 hiddenPos = loginPanelOn
+                ? avatarsPanel.GetComponent<RectTransform>().position
+                : loginPanel.GetComponent<RectTransform>().position;
+
+            avatarsPanel.GetComponent<RectTransform>().position = loginPanelOn ? screenPos : hiddenPos;
+            loginPanel.GetComponent<RectTransform>().position = loginPanelOn ? hiddenPos : screenPos;
+
+            loginPanelOn = false;
         }
         /// <summary>
         /// Sets up the search field to execute a search query when the text changes.
@@ -201,7 +230,7 @@ namespace VIPE_SDK
         /// </summary>
         public void LoadOwnVRMButtonWrapper()
         {
-            if (login.isLogedIn)
+            if (login.isLoggedIn)
             {
                 LoadOwnVRMAsync();
             }
@@ -316,11 +345,11 @@ namespace VIPE_SDK
             }
             catch (OperationCanceledException)
             {
-                Debug.Log("Operación cancelada en DisplayAvatars");
+                Debug.Log("Operation canceled in DisplayAvatars");
             }
             catch (Exception ex)
             {
-                Debug.LogError("Error al mostrar avatares: " + ex.Message);
+                Debug.LogError("Error displaying avatars: " + ex.Message);
             }
         }
         /// <summary>
@@ -388,7 +417,7 @@ namespace VIPE_SDK
                         {"limit","6" },
                         {"collectionName", name},
                     };
-                        GameObject avatarCard =  Instantiate(
+                        GameObject avatarCard = Instantiate(
                             collectionCardPrefab,
                             scrollViewCollections.content.transform
                         );
@@ -412,7 +441,7 @@ namespace VIPE_SDK
             }
             catch (OperationCanceledException)
             {
-                Debug.Log("Operación cancelada");
+                Debug.Log("Operaciï¿½n cancelada");
             }
         }
         private void OnEnable()
@@ -427,6 +456,11 @@ namespace VIPE_SDK
             ClearScrollView();
             ClearCollection();
             cts.Cancel();
+        }
+
+        public void SetOwnerButtonToggleToTrue()
+        {
+            ownerButton.OnToggleValueChanged(true);
         }
     }
 }

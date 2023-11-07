@@ -12,7 +12,6 @@ namespace VIPE_SDK
         public static readonly string avatarsResource = "/nfts/avatars";
         private static readonly string collectionsResource = "/collections?containsCC0Nfts=true";
 
-        public MainThreadDispatcher mainThreadDispatcher;
         private Models.SearchAvatarsDto searchAvatarsDto;
 
         public event Action modelCreated;
@@ -20,9 +19,8 @@ namespace VIPE_SDK
         public string nextPageUrl;
         public string prevPageUrl;
 
-        public VIPE(MainThreadDispatcher dispatcher)
+        public VIPE()
         {
-            mainThreadDispatcher = dispatcher;
             HttpService.apiKey = SecureDataHandler.LoadAPIKey();
             HttpService.baseUri = "https://api.cryptoavatars.io/v1";
         }

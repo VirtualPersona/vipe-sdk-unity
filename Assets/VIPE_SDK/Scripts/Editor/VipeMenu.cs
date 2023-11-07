@@ -13,12 +13,12 @@ namespace VIPE_SDK
         private Texture2D _iconTexture;
         private string _apiKey;
 
-        private const string LOGIN_URL   = "https://vipe.io/connect?integrationLogin=true";
-        private const string API_KEY     = "https://docs.vipe.io/reference/intro/getting-started";
+        private const string LOGIN_URL = "https://vipe.io/connect?integrationLogin=true";
+        private const string API_KEY = "https://docs.vipe.io/reference/intro/getting-started";
         private const string Twitter_URL = "https://twitter.com/vipeio";
         private const string Discord_URL = "https://discord.com/invite/vipeio";
-        private const string WEB_URL     = "https://vipe.io/";
-        private const string POST_URL    = "https://api.cryptoavatars.io/v1/login/vipe";
+        private const string WEB_URL = "https://vipe.io/";
+        private const string POST_URL = "https://api.cryptoavatars.io/v1/login/vipe";
 
         private string WalletAddress;
         private string Signature;
@@ -95,9 +95,9 @@ namespace VIPE_SDK
         {
             RenderLabelWithPadding("Community", EditorStyles.boldLabel, 10, 10, 0, 0, 15);
             GUILayout.BeginHorizontal();
-            RenderButtonWithPadding("VIPE WEB",     () => Application.OpenURL(WEB_URL), 10, 0, 0, 5);
-            RenderButtonWithPadding("Twitter",  () => Application.OpenURL(Twitter_URL), 0, 0, 0, 5);
-            RenderButtonWithPadding("Discord",  () => Application.OpenURL(Discord_URL), 0, 0, 0, 5);
+            RenderButtonWithPadding("VIPE WEB", () => Application.OpenURL(WEB_URL), 10, 0, 0, 5);
+            RenderButtonWithPadding("Twitter", () => Application.OpenURL(Twitter_URL), 0, 0, 0, 5);
+            RenderButtonWithPadding("Discord", () => Application.OpenURL(Discord_URL), 0, 0, 0, 5);
             GUILayout.EndHorizontal();
         }
         void DrawSeparator(int marginSide, int marginTop, int marginBot, int Height)
@@ -185,11 +185,11 @@ namespace VIPE_SDK
                 string sourceScriptPath = FindScriptPath(sourceScriptName);
                 if (string.IsNullOrEmpty(sourceScriptPath))
                 {
-                    Debug.LogError($"No se encontró el script {sourceScriptName}.");
+                    Debug.LogError($"Script was not found {sourceScriptName}.");
                     return;
                 }
                 OverwriteScriptContent(targetScriptName, sourceScriptPath);
-                Debug.Log($"El script {targetScriptName} ha sido sobrescrito con el contenido de {sourceScriptName}.");
+                Debug.Log($"The script {targetScriptName} has been overridden with the content of {sourceScriptName}.");
             };
         }
         private void OnLoginButtonClick()
@@ -284,7 +284,7 @@ namespace VIPE_SDK
                 }
             }
         }
-        private void RenderLabelWithPadding     (string labelText, string value, float paddingLeft, float paddingRight, float paddingTop, float paddingBottom)
+        private void RenderLabelWithPadding(string labelText, string value, float paddingLeft, float paddingRight, float paddingTop, float paddingBottom)
         {
             GUILayout.BeginVertical();
             GUILayout.Space(paddingTop);
@@ -300,7 +300,7 @@ namespace VIPE_SDK
             GUILayout.Space(paddingBottom);
             GUILayout.EndVertical();
         }
-        private void RenderLabelWithPadding     (string labelText, GUIStyle textStyle, float paddingLeft, float paddingRight, float paddingTop, float paddingBottom, int fontSize = -1)
+        private void RenderLabelWithPadding(string labelText, GUIStyle textStyle, float paddingLeft, float paddingRight, float paddingTop, float paddingBottom, int fontSize = -1)
         {
             GUIStyle modifiedTextStyle = new GUIStyle(textStyle);
 
@@ -323,7 +323,7 @@ namespace VIPE_SDK
             GUILayout.Space(paddingBottom);
             GUILayout.EndVertical();
         }
-        private void RenderButtonWithPadding    (string buttonText, System.Action buttonAction, float paddingLeft, float paddingRight, float paddingTop, float paddingBottom)
+        private void RenderButtonWithPadding(string buttonText, System.Action buttonAction, float paddingLeft, float paddingRight, float paddingTop, float paddingBottom)
         {
             GUILayout.BeginVertical();
             GUILayout.Space(paddingTop);
@@ -342,7 +342,7 @@ namespace VIPE_SDK
             GUILayout.Space(paddingBottom);
             GUILayout.EndVertical();
         }
-        private void RenderSettingsSection      (float paddingLeft, float paddingRight, float paddingTop, float paddingBottom)
+        private void RenderSettingsSection(float paddingLeft, float paddingRight, float paddingTop, float paddingBottom)
         {
             GUILayout.BeginVertical();
             GUILayout.Space(paddingTop);
@@ -361,7 +361,7 @@ namespace VIPE_SDK
             GUILayout.Space(paddingBottom);
             GUILayout.EndVertical();
         }
-        private void RenderCustomAlertMessage   (string message, string value, float paddingLeft, float paddingRight, float paddingTop, float paddingBottom)
+        private void RenderCustomAlertMessage(string message, string value, float paddingLeft, float paddingRight, float paddingTop, float paddingBottom)
         {
             if (string.IsNullOrEmpty(value))
             {
@@ -380,7 +380,7 @@ namespace VIPE_SDK
                 GUILayout.EndVertical();
             }
         }
-        private void RenderApiKeyField          (float paddingLeft, float paddingRight, float paddingTop, float paddingBottom)
+        private void RenderApiKeyField(float paddingLeft, float paddingRight, float paddingTop, float paddingBottom)
         {
             GUILayout.BeginVertical();
             GUILayout.Space(paddingTop);

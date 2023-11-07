@@ -14,7 +14,7 @@ namespace VIPE_SDK
         private bool messageObtained = false;
         private bool isLoginProcessActive = false;
 
-        public bool isLogedIn = false;
+        public bool isLoggedIn = false;
 
         public GameObject loadingSpinner;
 
@@ -33,7 +33,7 @@ namespace VIPE_SDK
 
         public void OnLoginButtonClick()
         {
-            if (!isLogedIn)
+            if (!isLoggedIn)
             {
                 OnLoginStart();
                 Application.OpenURL(LOGIN_URL);
@@ -46,7 +46,7 @@ namespace VIPE_SDK
             }
         }
 
-        // Método para llamar a una función JavaScript en WebGL
+        // Mï¿½todo para llamar a una funciï¿½n JavaScript en WebGL
         [System.Runtime.InteropServices.DllImport("__Internal")]
         private static extern void CallJavaScriptFunction();
 
@@ -113,7 +113,7 @@ namespace VIPE_SDK
 
         private void OnLoginEnd()
         {
-            if (!isLogedIn && messageObtained)
+            if (!isLoggedIn && messageObtained)
             {
                 StartCoroutine(SendLoginData());
             }
@@ -153,14 +153,14 @@ namespace VIPE_SDK
                         if (MenuManager.Instance)
                         {
                             MenuManager.Instance.LoadAvatarUI();
-                            MenuManager.Instance.LoadOwnVRMAsync();
-                            isLogedIn = true;
+                            isLoggedIn = true;
+                            MenuManager.Instance.SetOwnerButtonToggleToTrue();
                         }
                     }
                     else
                     {
                         Debug.LogWarning("Failed to log in, HTTP status: " + www.responseCode);
-                        isLogedIn = false;
+                        isLoggedIn = false;
                         CancelLogin();
                     }
                 }

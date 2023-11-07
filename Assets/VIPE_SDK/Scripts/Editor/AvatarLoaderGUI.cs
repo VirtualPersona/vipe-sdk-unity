@@ -55,45 +55,44 @@ namespace VIPE_SDK
                 isLoadingCollections = false;
             });
         }
-        private async Task LoadLogoImage    (string logoImageURL)
+        private async Task LoadLogoImage(string logoImageURL)
         {
             await cryptoAvatars.GetAvatarPreviewImage(logoImageURL, texture =>
             {
                 collectionLogos.Add(texture);
             }, collectionLogoPlaceHolder);
         }
-        private void InitializeComponents   ()
+        private void InitializeComponents()
         {
-            MainThreadDispatcher mainThreadDispatcher = MainThreadDispatcher.Instance;
-            cryptoAvatars = new VIPE(mainThreadDispatcher);
+            cryptoAvatars = new VIPE();
             presenter = new AvatarPresenter(cryptoAvatars);
             collectionLogoPlaceHolder = Resources.Load<Texture2D>("Visuals/UI/Icons/dummy_pfp");
         }
-        private void SubscribeToEvents      ()
+        private void SubscribeToEvents()
         {
             EditorApplication.update += OnEditorUpdate;
             presenter.OnDataChanged += HandleDataChanged;
             presenter.OnVRMModelClicked += LoadVRM;
             cryptoAvatars.modelCreated += SetState;
         }
-        private void UnsubscribeFromEvents  ()
+        private void UnsubscribeFromEvents()
         {
             EditorApplication.update -= OnEditorUpdate;
             presenter.OnDataChanged -= HandleDataChanged;
             presenter.OnVRMModelClicked -= LoadVRM;
             cryptoAvatars.modelCreated -= SetState;
         }
-        private void SetState               ()
+        private void SetState()
         {
             presenter.isLoading = false;
             GUI.color = Color.white;
         }
-        private void OnEditorUpdate         ()
+        private void OnEditorUpdate()
         {
             presenter.LoadImagesIfNeeded();
             UpdateLoadingAnimation();
         }
-        private void UpdateLoadingAnimation ()
+        private void UpdateLoadingAnimation()
         {
             if (presenter.isLoading || presenter.islLoadingCollections)
             {
@@ -105,17 +104,17 @@ namespace VIPE_SDK
                 Repaint();
             }
         }
-        private void DrawLoadCC0Button      ()
+        private void DrawLoadCC0Button()
         {
             if (GUILayout.Button("Load Open Source"))
                 presenter.OnGuestEnter();
         }
-        private void DrawLoadOwnerButton    ()
+        private void DrawLoadOwnerButton()
         {
             if (GUILayout.Button("Load Owned"))
                 presenter.OnOwnerEnter();
         }
-        private void DrawPaginationControls ()
+        private void DrawPaginationControls()
         {
             EditorUIHelpers.DrawPaginationControls(
                 () => presenter.LoadPreviousNfts(),
