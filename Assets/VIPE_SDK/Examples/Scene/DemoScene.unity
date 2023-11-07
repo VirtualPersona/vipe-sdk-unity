@@ -5660,7 +5660,7 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_IsOn: 1
+  m_IsOn: 0
 --- !u!114 &3764128731306454497
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6559,7 +6559,7 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_IsOn: 0
+  m_IsOn: 1
 --- !u!224 &4550987165340534796
 RectTransform:
   m_ObjectHideFlags: 0
@@ -10171,7 +10171,7 @@ MonoBehaviour:
   currentPageText: {fileID: 2170631912148624314}
   vrm: {fileID: 0}
   loginPanelOn: 1
-  ownerButton: {fileID: 0}
+  ownerButton: {fileID: 3675590101296155910}
 --- !u!114 &7785259546391164839
 MonoBehaviour:
   m_ObjectHideFlags: 0
