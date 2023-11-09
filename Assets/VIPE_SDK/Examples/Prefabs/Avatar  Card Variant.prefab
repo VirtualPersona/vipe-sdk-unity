@@ -20,8 +20,43 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8807223922646781626, guid: 765669dc841a2fc449aba39428163338,
         type: 3}
+      propertyPath: m_text
+      value: Paddy O'Furniture
+      objectReference: {fileID: 0}
+    - target: {fileID: 8807223922646781626, guid: 765669dc841a2fc449aba39428163338,
+        type: 3}
       propertyPath: m_fontSize
-      value: 6
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 8807223922646781626, guid: 765669dc841a2fc449aba39428163338,
+        type: 3}
+      propertyPath: m_margin.w
+      value: -1.138504
+      objectReference: {fileID: 0}
+    - target: {fileID: 8807223922646781626, guid: 765669dc841a2fc449aba39428163338,
+        type: 3}
+      propertyPath: m_margin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8807223922646781626, guid: 765669dc841a2fc449aba39428163338,
+        type: 3}
+      propertyPath: m_fontSizeMin
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 8807223922646781626, guid: 765669dc841a2fc449aba39428163338,
+        type: 3}
+      propertyPath: m_fontSizeBase
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 8807223922646781626, guid: 765669dc841a2fc449aba39428163338,
+        type: 3}
+      propertyPath: m_overflowMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8807223922646781626, guid: 765669dc841a2fc449aba39428163338,
+        type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8807223922646781627, guid: 765669dc841a2fc449aba39428163338,
         type: 3}
