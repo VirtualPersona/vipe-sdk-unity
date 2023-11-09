@@ -17,15 +17,15 @@ namespace VIPE_SDK
         /// <summary>
         /// Sets the collection data on the card, including name, VRM URL, and click action.
         /// </summary>
-        /// <param name="name">The name of the collection.</param>
+        /// <param name="slug">The name of the collection.</param>
         /// <param name="vrmUrl">The URL to the VRM model associated with the collection.</param>
         /// <param name="onClickCardBtn">The action to perform when the card is clicked.</param>
-        public void SetCollectionData(string name, string vrmUrl, System.Action<string> onClickCardBtn)
+        public void SetCollectionData(string slug, string vrmUrl, System.Action<string> onClickCardBtn)
         {
             if (!this.textCollection) return;
 
-            this.textCollection.text = name;
-            this.gameObject.name = name;
+            this.textCollection.text = slug;
+            this.gameObject.name = slug;
             Button btnPreview = GetComponent<Button>();
             btnPreview.onClick.AddListener(() => onClickCardBtn(vrmUrl));
         }

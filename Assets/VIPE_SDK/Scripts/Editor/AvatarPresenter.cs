@@ -49,7 +49,7 @@ namespace VIPE_SDK
             loadingTexture = Resources.Load<Texture2D>("LoadingBar/spinner_main");
             placeHolder = Resources.Load<Texture2D>("Visuals/UI/Icons/dummy_pfp");
         }
-        public async void OnGuestEnter() => await ExecuteLoad(() => Vipe.GetAvatars(LoadAndDisplayAvatars, Vipe.DefaultQuerry("")));
+        public async void OnGuestEnter() => await ExecuteLoad(() => Vipe.GetAvatars(LoadAndDisplayAvatars, Vipe.DefaultQuery("")));
         public async void OnOwnerEnter() => await ExecuteLoad(() => Vipe.GetAvatars(LoadAndDisplayAvatars, null, SecureDataHandler.LoadWallet()));
         public async void LoadColletionAvatars(string collection)
         {
@@ -63,7 +63,7 @@ namespace VIPE_SDK
         public async void LoadPreviousNfts() => await ExecuteLoad(() => Vipe.PrevPage(LoadAndDisplayAvatars));
         public async void SearchAvatars(string value) => await ExecuteLoad(() => DebounceSearch(value, 500));
         private async Task LoadAvatars(Models.SearchAvatarsDto searchParams) => await Vipe.GetAvatars(LoadAndDisplayAvatars, parameters);
-        private async Task LoadCollectionAvatars(string collection) => await Vipe.GetAvatars(LoadAndDisplayAvatars, Vipe.DefaultQuerry(collection));
+        private async Task LoadCollectionAvatars(string collection) => await Vipe.GetAvatars(LoadAndDisplayAvatars, Vipe.DefaultQuery(collection));
         private bool HasTextures() => textures != null && textures.Length > 0;
         public async void LoadImagesIfNeeded()
         {
@@ -119,7 +119,7 @@ namespace VIPE_SDK
                 EditorGUILayout.EndScrollView();
             }
         }
-        private void LoadAndDisplayAvatars  (Models.NftsArray onAvatarsResult)
+        private void LoadAndDisplayAvatars(Models.NftsArray onAvatarsResult)
         {
             lock (lockObject)
             {
@@ -133,7 +133,7 @@ namespace VIPE_SDK
                 shouldLoadImages = true;
             }
         }
-        private void RenderTextureButton    (int index, int padding, int imageWidth)
+        private void RenderTextureButton(int index, int padding, int imageWidth)
         {
             GUILayout.Space(padding);
             Rect buttonRect = GUILayoutUtility.GetRect(imageWidth, imageWidth, GUILayout.Width(imageWidth), GUILayout.Height(imageWidth));
@@ -143,7 +143,7 @@ namespace VIPE_SDK
 
             DrawButtonContent(index, buttonRect);
         }
-        private void DrawButtonContent      (int index, Rect buttonRect)
+        private void DrawButtonContent(int index, Rect buttonRect)
         {
             if (textures != null && index >= 0 && index < textures.Length)
             {
@@ -155,7 +155,7 @@ namespace VIPE_SDK
                 }
             }
         }
-        public void HandleButtonClick       (int index)
+        public void HandleButtonClick(int index)
         {
             if (isLoading) return;
 
@@ -163,7 +163,7 @@ namespace VIPE_SDK
             creatingAvatarIndex = index;
             OnVRMModelClicked?.Invoke(nfts[index].metadata.asset);
         }
-        private void HandleButtonHover      (int index, ref Rect buttonRect)
+        private void HandleButtonHover(int index, ref Rect buttonRect)
         {
             bool isHovering = buttonRect.Contains(Event.current.mousePosition);
 
@@ -178,7 +178,7 @@ namespace VIPE_SDK
                 hoverIndex = -1;
             }
         }
-        private async Task DebounceSearch   (string value, int delayMilliseconds)
+        private async Task DebounceSearch(string value, int delayMilliseconds)
         {
             cts.Cancel();
             cts = new CancellationTokenSource();
@@ -192,7 +192,7 @@ namespace VIPE_SDK
                 Debug.Log("Task was canceled, no further action needed");
             }
         }
-        private async Task ExecuteSearch    (string value)
+        private async Task ExecuteSearch(string value)
         {
             Models.SearchAvatarsDto searchAvatar = new Models.SearchAvatarsDto { name = value };
             parameters = new Dictionary<string, string>

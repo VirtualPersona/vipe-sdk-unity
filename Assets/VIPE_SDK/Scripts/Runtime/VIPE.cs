@@ -150,7 +150,7 @@ namespace VIPE_SDK
             return collectionsResponse;
         }
 
-        public Dictionary<string, string> DefaultQuerry(string collectionName)
+        public Dictionary<string, string> DefaultQuery(string collectionName)
         {
             return new Dictionary<string, string>
             {

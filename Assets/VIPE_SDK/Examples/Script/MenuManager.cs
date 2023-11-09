@@ -72,6 +72,9 @@ namespace VIPE_SDK
         [SerializeField]
         private CustomToggleController ownerButton;
 
+        [SerializeField]
+        private GameObject loadingBar;
+
 
         private void Awake()
         {
@@ -157,7 +160,6 @@ namespace VIPE_SDK
             {
                 return;
             }
-            Debug.Log("loginPanelOn" + loginPanelOn);
             Vector3 screenPos = loginPanelOn
                 ? loginPanel.GetComponent<RectTransform>().position
                 : avatarsPanel.GetComponent<RectTransform>().position;
@@ -177,7 +179,7 @@ namespace VIPE_SDK
         public void SetSearchField()
         {
             ClearScrollView();
-            searchField.onValueChanged.AddListener(async (value) => await DebounceSearch(value, 300));
+            searchField.onValueChanged.AddListener(async (value) => await DebounceSearch(value, 500));
         }
         /// <summary>
         /// Delays the execution of a search query and performs it after a specified delay.
@@ -204,6 +206,7 @@ namespace VIPE_SDK
         /// <param name="value">The search query value.</param>
         private async Task ExecuteSearch(string value)
         {
+            Debug.Log("value " + value);
             var parameters = new Dictionary<string, string>
             {
                 {"name", value },
@@ -314,6 +317,7 @@ namespace VIPE_SDK
         private async void DisplayAvatars(Models.NftsArray onAvatarsResult)
         {
             ClearScrollView();
+            DisplayLoadingBar();
 
             try
             {
@@ -337,7 +341,7 @@ namespace VIPE_SDK
                         urlVRM => LoadVRMModel(urlVRM)
                     );
 
-                    await VIPE.GetAvatarPreviewImage(
+                    VIPE.GetAvatarPreviewImage(
                         nft.metadata.image,
                         texture => cardController.LoadAvatarImage(texture)
                     );
@@ -351,6 +355,8 @@ namespace VIPE_SDK
             {
                 Debug.LogError("Error displaying avatars: " + ex.Message);
             }
+
+            HideLoadingBar();
         }
         /// <summary>
         /// Loads a VRM model based on a URL.
@@ -406,29 +412,33 @@ namespace VIPE_SDK
 
                     for (int i = 0; i < collections.nftCollections.Length; i++)
                     {
+                        Debug.Log("i " + i + "collections.nftCollections " + collections.nftCollections[i].name);
                         //State of the task
                         //cts.Token.ThrowIfCancellationRequested();
 
-                        string name = collections.nftCollections[i].name;
+                        string slug = collections.nftCollections[i].slug;
 
                         var parameters = new Dictionary<string, string>
-                    {
-                        {"license", "CC0" },
-                        {"limit","6" },
-                        {"collectionName", name},
-                    };
+                        {
+                            {"license", "CC0" },
+                            {"limit","6" },
+                            {"collectionSlug", slug},
+                        };
+
                         GameObject avatarCard = Instantiate(
                             collectionCardPrefab,
                             scrollViewCollections.content.transform
                         );
+
                         avatarCard
                             .GetComponent<CardCollectionController>()
                             .SetCollectionData(
-                                collections.nftCollections[i].name,
+                                collections.nftCollections[i].slug,
                                 collections.nftCollections[i].logoImage,
                                 async collectionName =>
                                     await VIPE.GetAvatars(LoadAndDisplayAvatars, parameters)
                             );
+
                         Task task = VIPE.GetAvatarPreviewImage(
                             collections.nftCollections[i].logoImage,
                             texture =>
@@ -461,6 +471,18 @@ namespace VIPE_SDK
         public void SetOwnerButtonToggleToTrue()
         {
             ownerButton.OnToggleValueChanged(true);
+        }
+
+        public void DisplayLoadingBar()
+        {
+            Debug.Log("displaying");
+            loadingBar.SetActive(true);
+        }
+
+        public void HideLoadingBar()
+        {
+            Debug.Log("hiding");
+            loadingBar.SetActive(false);
         }
     }
 }
