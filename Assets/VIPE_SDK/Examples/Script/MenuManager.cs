@@ -332,10 +332,11 @@ namespace VIPE_SDK
                         avatarCardPrefab,
                         scrollViewAvatars.content.transform
                     );
-                    CardAvatarController cardController =
-                        avatarCard.GetComponentInChildren<CardAvatarController>();
 
-                    cardController.SetAvatarData(
+                    CardManager cardManager =
+                        avatarCard.GetComponent<CardManager>();
+
+                    cardManager.SetCardData(
                         nft.metadata.name,
                         nft.metadata.asset,
                         urlVRM => LoadVRMModel(urlVRM)
@@ -343,7 +344,7 @@ namespace VIPE_SDK
 
                     VIPE.GetAvatarPreviewImage(
                         nft.metadata.image,
-                        texture => cardController.LoadAvatarImage(texture)
+                        texture => cardManager.LoadCardImage(texture)
                     );
                 }
             }
@@ -430,9 +431,10 @@ namespace VIPE_SDK
                             scrollViewCollections.content.transform
                         );
 
+                        Debug.Log("avatarCard.name" + avatarCard.name);
                         avatarCard
-                            .GetComponent<CardCollectionController>()
-                            .SetCollectionData(
+                            .GetComponent<CardManager>()
+                            .SetCardData(
                                 collections.nftCollections[i].slug,
                                 collections.nftCollections[i].logoImage,
                                 async collectionName =>
@@ -443,8 +445,8 @@ namespace VIPE_SDK
                             collections.nftCollections[i].logoImage,
                             texture =>
                                 avatarCard
-                                    .GetComponent<CardCollectionController>()
-                                    .LoadCollectionImage(texture)
+                                    .GetComponent<CardManager>()
+                                    .LoadCardImage(texture)
                         );
                     }
                 });
