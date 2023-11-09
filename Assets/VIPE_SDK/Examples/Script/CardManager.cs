@@ -12,9 +12,9 @@ namespace VIPE_SDK
 
         private void Awake()
         {
-            cardImage = GetComponent<Image>();
+            cardImage = GetComponentInChildren<Image>();
             cardText = GetComponentInChildren<TextMeshProUGUI>();
-            cardButton = GetComponent<Button>();
+            cardButton = GetComponentInChildren<Button>();
         }
 
 
@@ -41,7 +41,7 @@ namespace VIPE_SDK
                 return;
 
             Rect rec = new(0, 0, texture.width, texture.height);
-            if (GetComponent<Image>())
+            if (cardImage)
             {
                 cardImage.sprite = Sprite.Create(texture, rec, new Vector2(0, 0), 1);
             }
