@@ -1,6 +1,8 @@
 ﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
+
 
 namespace VIPE_SDK
 {
@@ -9,12 +11,27 @@ namespace VIPE_SDK
         private Image cardImage;
         private TextMeshProUGUI cardText;
         private Button cardButton;
+        private Image cardBackground;
+        private Toggle cardToggle;
+        private Toggle parentToggle;
+
 
         private void Awake()
         {
-            cardImage = GetComponentInChildren<Image>();
+            Image[] images = GetComponentsInChildren<Image>();
+            cardImage = images.FirstOrDefault(img => img.gameObject.name == "CardImage");
             cardText = GetComponentInChildren<TextMeshProUGUI>();
             cardButton = GetComponentInChildren<Button>();
+            cardBackground = images.FirstOrDefault(img => img.gameObject.name == "CardBackground");
+            cardToggle = GetComponent<Toggle>();
+            cardBackground.gameObject.SetActive(false);
+
+            parentToggle = GetComponentInParent<Toggle>(); // Get the parent's Toggle
+            if (parentToggle != null)
+            {
+                Debug.Log(this.gameObject.name);
+                parentToggle.isOn = false; // Set the Toggle's initial state to false
+            }
         }
 
 
@@ -45,6 +62,20 @@ namespace VIPE_SDK
             {
                 cardImage.sprite = Sprite.Create(texture, rec, new Vector2(0, 0), 1);
             }
+        }
+
+        public void SetToggleGroup(ToggleGroup group)
+        {
+            if (cardToggle != null)
+            {
+                cardToggle.group = group;
+                cardToggle.onValueChanged.AddListener(OnToggleValueChanged);
+            }
+        }
+
+        private void OnToggleValueChanged(bool isOn)
+        {
+            cardBackground.gameObject.SetActive(isOn);
         }
     }
 }
