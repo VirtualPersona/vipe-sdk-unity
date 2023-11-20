@@ -14,7 +14,7 @@ namespace VIPE_SDK
         private string _apiKey;
 
         private const string LOGIN_URL = "https://vipe.io/connect?integrationLogin=true";
-        private const string API_KEY = "https://docs.vipe.io/reference/intro/getting-started";
+        private const string API_KEY = "https://docs.vipe.io/reference/intro/authentication";
         private const string Twitter_URL = "https://twitter.com/vipeio";
         private const string Discord_URL = "https://discord.com/invite/vipeio";
         private const string WEB_URL = "https://vipe.io/";
@@ -23,7 +23,7 @@ namespace VIPE_SDK
         private string WalletAddress;
         private string Signature;
         private bool messageObtained = false;
-        public bool isLogedIn = false;
+        public bool isLoggedIn = false;
 
         [MenuItem("Tools/VIPE/Settings")]
         public static void OpenWindow()
@@ -62,7 +62,7 @@ namespace VIPE_SDK
             RenderLabelWithPadding("Wallet Address:", WalletAddress, 10, 10, 0, 0);
 
             // Login/Logout buttons
-            if (isLogedIn)
+            if (isLoggedIn)
             {
                 RenderButtonWithPadding("Log out from VIPE", OnLogOffButtonClick, 10, 10, 5, 0);
             }
@@ -194,7 +194,7 @@ namespace VIPE_SDK
         }
         private void OnLoginButtonClick()
         {
-            if (!isLogedIn)
+            if (!isLoggedIn)
             {
                 Application.OpenURL(LOGIN_URL);
                 StartGetClipboardMessage();
@@ -202,11 +202,11 @@ namespace VIPE_SDK
         }
         private void OnLogOffButtonClick()
         {
-            if (isLogedIn)
+            if (isLoggedIn)
             {
                 WalletAddress = string.Empty;
                 SecureDataHandler.SaveWallet(WalletAddress);
-                isLogedIn = false;
+                isLoggedIn = false;
             }
         }
         private void StartGetClipboardMessage()
@@ -242,11 +242,11 @@ namespace VIPE_SDK
         }
         private void OnLoginEnd()
         {
-            if (!isLogedIn && messageObtained)
+            if (!isLoggedIn && messageObtained)
             {
                 Debug.Log("Login process completed successfully.");
                 Task.Run(SendLoginData);
-                isLogedIn = true;
+                isLoggedIn = true;
                 SecureDataHandler.SaveWallet(WalletAddress);
             }
             else
@@ -280,7 +280,7 @@ namespace VIPE_SDK
                 else
                 {
                     Debug.LogWarning("Failed to log in, HTTP status: " + response.StatusCode);
-                    isLogedIn = false;
+                    isLoggedIn = false;
                 }
             }
         }
