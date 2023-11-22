@@ -138,9 +138,7 @@ namespace VIPE_SDK
         private async Task<Models.NftCollectionsArray> FetchCollectionsPage(string url = null)
         {
             string finalUrl = url ?? HttpService.baseUri + collectionsResource;
-            Debug.Log("finalUrl:" + finalUrl);
             string collectionsResult = await HttpService.Instance().Get(finalUrl);
-            Debug.Log("collectionsResult:" + collectionsResult);
             Models.NftCollectionsArray collectionsResponse =
                 JsonUtility.FromJson<Models.NftCollectionsArray>(collectionsResult);
 

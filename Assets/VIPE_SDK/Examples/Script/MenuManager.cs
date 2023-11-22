@@ -81,7 +81,6 @@ namespace VIPE_SDK
         private void Awake()
         {
             //debug log of this objects name
-            Debug.Log(this.gameObject.name);
             if (Instance == null)
             {
                 Instance = this;

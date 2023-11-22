@@ -29,7 +29,6 @@ namespace VIPE_SDK
             parentToggle = GetComponentInParent<Toggle>(); // Get the parent's Toggle
             if (parentToggle != null)
             {
-                Debug.Log(this.gameObject.name);
                 parentToggle.isOn = false; // Set the Toggle's initial state to false
             }
         }
