@@ -3356,11 +3356,11 @@ MonoBehaviour:
   scrollViewAvatars: {fileID: 6834913506939952558}
   scrollViewCollections: {fileID: 7726922294405879718}
   searchField: {fileID: 3719950248427248490}
-  urlField: {fileID: 0}
+  urlField: {fileID: 3520804202974815141}
   currentPageText: {fileID: 3644116735632095272}
   vrm: {fileID: 0}
   LoginPanelOn: 1
-  ownerButton: {fileID: 0}
+  ownerButton: {fileID: 2274163180943300244}
   loadingBar: {fileID: 1828322378449495337}
 --- !u!114 &5716866984773606855
 MonoBehaviour:
@@ -3375,7 +3375,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IsLoggedIn: 0
-  LoadingSpinner: {fileID: 0}
+  LoadingSpinner: {fileID: 657520982315961845}
 --- !u!1 &3184010637194130706
 GameObject:
   m_ObjectHideFlags: 0

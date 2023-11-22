@@ -320,7 +320,6 @@ namespace VIPE_SDK
             ClearScrollView();
             await Task.Delay(1);
             //timeout
-            DisplayLoadingBar();
 
             try
             {
@@ -362,7 +361,6 @@ namespace VIPE_SDK
                 Debug.LogError("Error displaying avatars: " + ex.Message);
             }
 
-            HideLoadingBar();
         }
         /// <summary>
         /// Loads a VRM model based on a URL.
@@ -478,16 +476,5 @@ namespace VIPE_SDK
             ownerButton.OnToggleValueChanged(true);
         }
 
-        public void DisplayLoadingBar()
-        {
-            Debug.Log("displaying");
-            loadingBar.SetActive(true);
-        }
-
-        public void HideLoadingBar()
-        {
-            Debug.Log("hiding");
-            loadingBar.SetActive(false);
-        }
     }
 }
