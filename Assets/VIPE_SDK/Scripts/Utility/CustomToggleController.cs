@@ -15,7 +15,7 @@ namespace VIPE_SDK
 
         [Header("UI Components")]
         private TextMeshProUGUI textComponent;
-        public Image interiorButton;
+        public Image interiorImage;
 
         [Header("Text Colors")]
         public Color activeColor = Color.white;
@@ -35,17 +35,25 @@ namespace VIPE_SDK
             }
         }
 
-        private void OnToggleValueChanged(bool isOn)
+        public void OnToggleValueChanged(bool isOn)
         {
             if (isOn && onToggleActivated != null)
             {
                 onToggleActivated.Invoke();
             }
 
-            if (interiorButton != null)
-                interiorButton.enabled = isOn;
+            if (interiorImage != null)
+                interiorImage.enabled = isOn;
+
+            setToggleColor(isOn);
+        }
+
+        private void setToggleColor(bool isOn)
+        {
             if (textComponent != null)
+            {
                 textComponent.color = isOn ? activeColor : inactiveColor;
+            }
         }
     }
 }

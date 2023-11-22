@@ -6,7 +6,7 @@
 ## Log-In
 
 * Playing as guest you will have acces to Open Source VRM Avatars.
-* If you Log In with your CryptoAvatars account, you will have access to the avatars in your asociated wallet.
+* If you Log In with your VIPE account, you will have access to the avatars in your asociated wallet.
 
 ## Usage
 
@@ -15,7 +15,7 @@
 * Play araund with your avatar
 * Sometimes Unity dont show your VRM downloaded:
     * Go to your Asset folder, right-click and select 'Show in Explorer'.
-    * Your Assets folder will contain a new folder called 'cryptoavatars'.
+    * Your Assets folder will contain a new folder called 'VIPE'.
     * Click on Unity again and wait til the project load the VRM.
     * Your VRM will be inside 'cryptoavatar' folder, included a prefab with VRM & character controller (Last Avatar played).
 * You can use this Vrm to whatever you want.

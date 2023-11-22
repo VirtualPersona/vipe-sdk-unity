@@ -9,20 +9,18 @@ namespace VIPE_SDK
 {
     public class VIPE
     {
-        public static readonly string avatarsResource = "/nfts/avatars";
+        public static readonly string AvatarsResource = "/nfts/avatars";
         private static readonly string collectionsResource = "/collections?containsCC0Nfts=true";
 
-        public MainThreadDispatcher mainThreadDispatcher;
         private Models.SearchAvatarsDto searchAvatarsDto;
 
-        public event Action modelCreated;
+        public event Action ModelCreated;
 
-        public string nextPageUrl;
-        public string prevPageUrl;
+        public string NextPageUrl;
+        public string PrevPageUrl;
 
-        public VIPE(MainThreadDispatcher dispatcher)
+        public VIPE()
         {
-            mainThreadDispatcher = dispatcher;
             HttpService.apiKey = SecureDataHandler.LoadAPIKey();
             HttpService.baseUri = "https://api.cryptoavatars.io/v1";
         }
@@ -49,8 +47,8 @@ namespace VIPE_SDK
 
         private void SetPaginationData(string next, string prev)
         {
-            nextPageUrl = next?.Split("/v1")[1];
-            prevPageUrl = prev?.Split("/v1")[1];
+            NextPageUrl = next?.Split("/v1")[1];
+            PrevPageUrl = prev?.Split("/v1")[1];
         }
 
         private bool IsSupportedFormat(byte[] imageBytes)
@@ -63,22 +61,22 @@ namespace VIPE_SDK
             if (wallet != null)
                 wallet = "/" + wallet;
 
-            await GetAvatarsByURL(avatarsResource + wallet, onAvatarsResult, queryParams);
+            await GetAvatarsByURL(AvatarsResource + wallet, onAvatarsResult, queryParams);
         }
 
         public async Task PrevPage(Action<Models.NftsArray> onAvatarsResult, Dictionary<string, string> queryParams = null)
         {
-            if (prevPageUrl != null)
+            if (PrevPageUrl != null)
             {
-                await GetAvatarsByURL(prevPageUrl, onAvatarsResult, queryParams);
+                await GetAvatarsByURL(PrevPageUrl, onAvatarsResult, queryParams);
             }
         }
 
         public async Task NextPage(Action<Models.NftsArray> onAvatarsResult, Dictionary<string, string> queryParams = null)
         {
-            if (nextPageUrl != null)
+            if (NextPageUrl != null)
             {
-                await GetAvatarsByURL(nextPageUrl, onAvatarsResult, queryParams);
+                await GetAvatarsByURL(NextPageUrl, onAvatarsResult, queryParams);
             }
         }
 
@@ -101,7 +99,7 @@ namespace VIPE_SDK
             string localPath = await HttpService.Instance().Download3DModelAsync(urlVrm);
             GameObject avatar = ImportVRM(localPath);
             onModelLoaded(avatar, localPath);
-            modelCreated?.Invoke();
+            ModelCreated?.Invoke();
         }
 
         public async Task GetNFTCollections(Action<Models.NftCollectionsArray> onCollectionsResult)
@@ -152,7 +150,7 @@ namespace VIPE_SDK
             return collectionsResponse;
         }
 
-        public Dictionary<string, string> DefaultQuerry(string collectionName)
+        public Dictionary<string, string> DefaultQuery(string collectionName)
         {
             return new Dictionary<string, string>
             {

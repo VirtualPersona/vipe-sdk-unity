@@ -59,7 +59,7 @@ namespace VIPE_SDK
 
 
         [SerializeField]
-        private TMP_InputField URLField;
+        private TMP_InputField urlField;
 
         [SerializeField]
         private TMP_Text currentPageText;
@@ -67,11 +67,20 @@ namespace VIPE_SDK
         [SerializeField]
         private GameObject vrm;
 
-        public bool loginPanelOn = true;
+        public bool LoginPanelOn = true;
 
+        [SerializeField]
+        private CustomToggleController ownerButton;
+
+        [SerializeField]
+        private GameObject loadingBar;
+
+        private ToggleGroup avatarToggleGroup;
+        private ToggleGroup collectionToggleGroup;
 
         private void Awake()
         {
+            //debug log of this objects name
             if (Instance == null)
             {
                 Instance = this;
@@ -80,9 +89,12 @@ namespace VIPE_SDK
             {
                 Debug.LogError("Multiple instances of MenuManager");
             }
-            MainThreadDispatcher mainThreadDispatcher = MainThreadDispatcher.Instance;
-            VIPE = new VIPE(mainThreadDispatcher);
+
+            VIPE = new VIPE();
             login = GetComponent<Login>();
+
+            avatarToggleGroup = new GameObject("ToggleGroup").AddComponent<ToggleGroup>();
+            collectionToggleGroup = new GameObject("ToggleGroup").AddComponent<ToggleGroup>();
         }
         private void Start()
         {
@@ -90,11 +102,11 @@ namespace VIPE_SDK
 
             nextPageBtn.onClick.AddListener(
                 async () =>
-                    await VIPE.NextPage(avatarsResult => LoadAndDisplayAvatars(avatarsResult))
+                    await VIPE.NextPage(avatarsResult => DisplayAvatars(avatarsResult))
             );
             prevPageBtn.onClick.AddListener(
                 async () =>
-                    await VIPE.PrevPage(avatarsResult => LoadAndDisplayAvatars(avatarsResult))
+                    await VIPE.PrevPage(avatarsResult => DisplayAvatars(avatarsResult))
             );
             SetSearchField();
             LoadCollections();
@@ -112,7 +124,7 @@ namespace VIPE_SDK
         /// </summary>
         public void LoadByURL()
         {
-            string url = URLField.text;
+            string url = urlField.text;
             if (url != "")
             {
                 LoadVRMModel(url);
@@ -129,18 +141,43 @@ namespace VIPE_SDK
         /// <summary>
         /// Toggles the display between the login panel and avatar panel.
         /// </summary>
-        public void LoadAvatarUI()
+        /// //NOT USED..consider deleting
+        public void ToggleAvatarUI()
         {
-            Vector3 screenPos = loginPanelOn
+            Vector3 screenPos = LoginPanelOn
                 ? loginPanel.GetComponent<RectTransform>().position
                 : avatarsPanel.GetComponent<RectTransform>().position;
 
-            Vector3 hiddenPos = loginPanelOn
+            Vector3 hiddenPos = LoginPanelOn
                 ? avatarsPanel.GetComponent<RectTransform>().position
                 : loginPanel.GetComponent<RectTransform>().position;
 
-            avatarsPanel.GetComponent<RectTransform>().position = loginPanelOn ? screenPos : hiddenPos;
-            loginPanel.GetComponent<RectTransform>().position = loginPanelOn ? hiddenPos : screenPos;
+            avatarsPanel.GetComponent<RectTransform>().position = LoginPanelOn ? screenPos : hiddenPos;
+            loginPanel.GetComponent<RectTransform>().position = LoginPanelOn ? hiddenPos : screenPos;
+
+            LoginPanelOn = !LoginPanelOn;
+        }
+        /// <summary>
+        /// Changes the display to avatar panel.
+        /// </summary>
+        public void LoadAvatarUI()
+        {
+            if (!LoginPanelOn)
+            {
+                return;
+            }
+            Vector3 screenPos = LoginPanelOn
+                ? loginPanel.GetComponent<RectTransform>().position
+                : avatarsPanel.GetComponent<RectTransform>().position;
+
+            Vector3 hiddenPos = LoginPanelOn
+                ? avatarsPanel.GetComponent<RectTransform>().position
+                : loginPanel.GetComponent<RectTransform>().position;
+
+            avatarsPanel.GetComponent<RectTransform>().position = LoginPanelOn ? screenPos : hiddenPos;
+            loginPanel.GetComponent<RectTransform>().position = LoginPanelOn ? hiddenPos : screenPos;
+
+            LoginPanelOn = false;
         }
         /// <summary>
         /// Sets up the search field to execute a search query when the text changes.
@@ -148,7 +185,7 @@ namespace VIPE_SDK
         public void SetSearchField()
         {
             ClearScrollView();
-            searchField.onValueChanged.AddListener(async (value) => await DebounceSearch(value, 300));
+            searchField.onValueChanged.AddListener(async (value) => await DebounceSearch(value, 500));
         }
         /// <summary>
         /// Delays the execution of a search query and performs it after a specified delay.
@@ -182,7 +219,7 @@ namespace VIPE_SDK
                 {"limit","6" }
             };
             Models.SearchAvatarsDto searchAvatar = new() { name = value };
-            VIPE.GetAvatars(LoadAndDisplayAvatars, parameters);
+            VIPE.GetAvatars(DisplayAvatars, parameters);
         }
         /// <summary>
         /// Loads the user's own VRM models asynchronously.
@@ -193,7 +230,7 @@ namespace VIPE_SDK
             ClearScrollView();
 
             Models.SearchAvatarsDto searchAvatar = new() { };
-            VIPE.GetAvatarsByURL(VIPE.avatarsResource + "/" + login.GetWallet(), LoadAndDisplayAvatars);
+            VIPE.GetAvatarsByURL(VIPE.AvatarsResource + "/" + login.GetWallet(), DisplayAvatars);
         }
 
         /// <summary>
@@ -201,7 +238,7 @@ namespace VIPE_SDK
         /// </summary>
         public void LoadOwnVRMButtonWrapper()
         {
-            if (login.isLogedIn)
+            if (login.IsLoggedIn)
             {
                 LoadOwnVRMAsync();
             }
@@ -216,7 +253,7 @@ namespace VIPE_SDK
         public async Task LoadOpenSourceAsync()
         {
             CancelExistingTasks();
-            ClearScrollView();
+            // ClearScrollView();
 
             var parameters = new Dictionary<string, string>
         {
@@ -228,7 +265,7 @@ namespace VIPE_SDK
 
             //await Task.Run(() => MainThreadDispatcher.RunOnMainThread(wrapperAction));
 
-            await VIPE.GetAvatars(LoadAndDisplayAvatars, parameters);
+            await VIPE.GetAvatars(DisplayAvatars, parameters);
         }
         /// <summary>
         /// Wrapper for loading open-source VRM models.
@@ -238,18 +275,11 @@ namespace VIPE_SDK
             //_ = LoadOpenSourceAsync();
             LoadOpenSourceAsync();
         }
+
+
         /// <summary>
-        /// Clears the avatar scroll view by destroying its child objects.
-        /// </summary>
-        private void LoadAndDisplayAvatars(Models.NftsArray onAvatarsResult)
-        {
-            ClearScrollView();
-            DisplayAvatars(onAvatarsResult);
-        }
-        /// <summary>
-        /// Replaces the current VRM model with a new one.
-        /// </summary>
-        /// <param name="model">The new VRM model GameObject.</param>
+        /// Removes the Cards from the scroll.
+        /// </summary>        
         private void ClearScrollView()
         {
             if (scrollViewAvatars)
@@ -258,6 +288,7 @@ namespace VIPE_SDK
                     Destroy(child.gameObject);
                 }
         }
+
         /// <summary>
         /// Displays a list of avatars in the scroll view.
         /// </summary>
@@ -278,6 +309,7 @@ namespace VIPE_SDK
             vrm.AddComponent<ThirdPersonUserControl>();
             Camera.main.GetComponent<OrbitCamera>().targetPosition = vrm.transform;
         }
+
         /// <summary>
         /// Displays a list of avatars in the scroll view.
         /// </summary>
@@ -285,6 +317,8 @@ namespace VIPE_SDK
         private async void DisplayAvatars(Models.NftsArray onAvatarsResult)
         {
             ClearScrollView();
+            await Task.Delay(1);
+            //timeout
 
             try
             {
@@ -299,29 +333,33 @@ namespace VIPE_SDK
                         avatarCardPrefab,
                         scrollViewAvatars.content.transform
                     );
-                    CardAvatarController cardController =
-                        avatarCard.GetComponentInChildren<CardAvatarController>();
 
-                    cardController.SetAvatarData(
+                    CardManager cardManager =
+                        avatarCard.GetComponent<CardManager>();
+
+                    cardManager.SetCardData(
                         nft.metadata.name,
                         nft.metadata.asset,
                         urlVRM => LoadVRMModel(urlVRM)
                     );
 
-                    await VIPE.GetAvatarPreviewImage(
+                    cardManager.SetToggleGroup(avatarToggleGroup);
+
+                    VIPE.GetAvatarPreviewImage(
                         nft.metadata.image,
-                        texture => cardController.LoadAvatarImage(texture)
+                        texture => cardManager.LoadCardImage(texture)
                     );
                 }
             }
             catch (OperationCanceledException)
             {
-                Debug.Log("Operación cancelada en DisplayAvatars");
+                Debug.Log("Operation canceled in DisplayAvatars");
             }
             catch (Exception ex)
             {
-                Debug.LogError("Error al mostrar avatares: " + ex.Message);
+                Debug.LogError("Error displaying avatars: " + ex.Message);
             }
+
         }
         /// <summary>
         /// Loads a VRM model based on a URL.
@@ -344,14 +382,14 @@ namespace VIPE_SDK
         /// </summary>
         public async void LoadMoreNfts()
         {
-            await VIPE.NextPage(onAvatarsResult => LoadAndDisplayAvatars(onAvatarsResult));
+            await VIPE.NextPage(onAvatarsResult => DisplayAvatars(onAvatarsResult));
         }
         /// <summary>
         /// Loads previous avatars when the "Load Previous" button is clicked.
         /// </summary>
         public async void LoadPreviousNfts()
         {
-            await VIPE.PrevPage(onAvatarsResult => LoadAndDisplayAvatars(onAvatarsResult));
+            await VIPE.PrevPage(onAvatarsResult => DisplayAvatars(onAvatarsResult));
         }
         /// <summary>
         /// Clears the collection scroll view by destroying its child objects.
@@ -371,7 +409,7 @@ namespace VIPE_SDK
         {
             try
             {
-                await VIPE.GetNFTCollections(async (collections) =>
+                await VIPE.GetNFTCollections((Action<Models.NftCollectionsArray>)(async (collections) =>
                 {
                     List<string> options = new List<string>();
 
@@ -380,39 +418,42 @@ namespace VIPE_SDK
                         //State of the task
                         //cts.Token.ThrowIfCancellationRequested();
 
-                        string name = collections.nftCollections[i].name;
+                        string slug = collections.nftCollections[i].slug;
 
                         var parameters = new Dictionary<string, string>
-                    {
-                        {"license", "CC0" },
-                        {"limit","6" },
-                        {"collectionName", name},
-                    };
-                        GameObject avatarCard =  Instantiate(
+                        {
+                            {"license", "CC0" },
+                            {"limit","6" },
+                            {"collectionSlug", slug},
+                        };
+
+                        GameObject avatarCard = Instantiate(
                             collectionCardPrefab,
                             scrollViewCollections.content.transform
                         );
+
                         avatarCard
-                            .GetComponent<CardCollectionController>()
-                            .SetCollectionData(
-                                collections.nftCollections[i].name,
+                            .GetComponent<CardManager>()
+                            .SetCardData(
+                                collections.nftCollections[i].slug,
                                 collections.nftCollections[i].logoImage,
-                                async collectionName =>
-                                    await VIPE.GetAvatars(LoadAndDisplayAvatars, parameters)
+                                (Action<string>)(async collectionName =>
+                                    await VIPE.GetAvatars((Action<Models.NftsArray>)this.DisplayAvatars, parameters))
                             );
+
                         Task task = VIPE.GetAvatarPreviewImage(
                             collections.nftCollections[i].logoImage,
                             texture =>
                                 avatarCard
-                                    .GetComponent<CardCollectionController>()
-                                    .LoadCollectionImage(texture)
+                                    .GetComponent<CardManager>()
+                                    .LoadCardImage(texture)
                         );
                     }
-                });
+                }));
             }
             catch (OperationCanceledException)
             {
-                Debug.Log("Operación cancelada");
+                Debug.Log("Operaciï¿½n cancelada");
             }
         }
         private void OnEnable()
@@ -428,5 +469,11 @@ namespace VIPE_SDK
             ClearCollection();
             cts.Cancel();
         }
+
+        public void SetOwnerButtonToggleToTrue()
+        {
+            ownerButton.OnToggleValueChanged(true);
+        }
+
     }
 }

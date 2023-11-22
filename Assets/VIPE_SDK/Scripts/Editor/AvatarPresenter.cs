@@ -14,56 +14,52 @@ namespace VIPE_SDK
         private List<Models.Nft> nfts = new List<Models.Nft>();
         private Texture2D[] textures;
 
-        public int currentPage;
-        public int totalPages;
+        public int CurrentPage;
+        public int TotalPages;
         private int hoverIndex = -1;
         private Vector2 scrollPosition;
         private object lockObject = new object();
-
         private bool shouldLoadImages = false;
-        public bool isLoading = false;
-        public bool isLoadingImages = false;
-        public bool islLoadingCollections = false;
-
+        public bool IsLoading = false;
+        public bool IsLoadingImages = false;
+        public bool IslLoadingCollections = false;
         public event Action OnDataChanged;
         public event Action<string> OnVRMModelClicked;
-
-        public Texture2D loadingTexture;
+        public Texture2D LoadingTexture;
         private Texture2D placeHolder;
         private int creatingAvatarIndex = -1;
-        public float rotationAngle = 0f;
+        public float RotationAngle = 0f;
         private float scale = 1.0f;
-        private const float RectExpansion = 8f;
-        private const float BorderThickness = 3f;
-
-        public string currentlyLoadingCollection = null;
+        private const float rectExpansion = 8f;
+        private const float borderThickness = 3f;
+        public string CurrentlyLoadingCollection = null;
 
         private Dictionary<string, string> parameters = new Dictionary<string, string>();
         private async Task ExecuteLoad(Func<Task> action)
         {
-            if (!isLoading && !isLoadingImages) await action();
+            if (!IsLoading && !IsLoadingImages) await action();
         }
-        public AvatarPresenter(VIPE cryptoAvatars)
+        public AvatarPresenter(VIPE vipe)
         {
-            this.Vipe = cryptoAvatars;
-            loadingTexture = Resources.Load<Texture2D>("LoadingBar/spinner_main");
+            this.Vipe = vipe;
+            LoadingTexture = Resources.Load<Texture2D>("LoadingBar/spinner_main");
             placeHolder = Resources.Load<Texture2D>("Visuals/UI/Icons/dummy_pfp");
         }
-        public async void OnGuestEnter() => await ExecuteLoad(() => Vipe.GetAvatars(LoadAndDisplayAvatars, Vipe.DefaultQuerry("")));
+        public async void OnGuestEnter() => await ExecuteLoad(() => Vipe.GetAvatars(LoadAndDisplayAvatars, Vipe.DefaultQuery("")));
         public async void OnOwnerEnter() => await ExecuteLoad(() => Vipe.GetAvatars(LoadAndDisplayAvatars, null, SecureDataHandler.LoadWallet()));
         public async void LoadColletionAvatars(string collection)
         {
-            islLoadingCollections = true;
-            currentlyLoadingCollection = collection;
+            IslLoadingCollections = true;
+            CurrentlyLoadingCollection = collection;
             await ExecuteLoad(() => LoadCollectionAvatars(collection));
-            islLoadingCollections = false;
-            currentlyLoadingCollection = null;
+            IslLoadingCollections = false;
+            CurrentlyLoadingCollection = null;
         }
         public async void LoadMoreNfts() => await ExecuteLoad(() => Vipe.NextPage(LoadAndDisplayAvatars));
         public async void LoadPreviousNfts() => await ExecuteLoad(() => Vipe.PrevPage(LoadAndDisplayAvatars));
         public async void SearchAvatars(string value) => await ExecuteLoad(() => DebounceSearch(value, 500));
         private async Task LoadAvatars(Models.SearchAvatarsDto searchParams) => await Vipe.GetAvatars(LoadAndDisplayAvatars, parameters);
-        private async Task LoadCollectionAvatars(string collection) => await Vipe.GetAvatars(LoadAndDisplayAvatars, Vipe.DefaultQuerry(collection));
+        private async Task LoadCollectionAvatars(string collection) => await Vipe.GetAvatars(LoadAndDisplayAvatars, Vipe.DefaultQuery(collection));
         private bool HasTextures() => textures != null && textures.Length > 0;
         public async void LoadImagesIfNeeded()
         {
@@ -119,7 +115,7 @@ namespace VIPE_SDK
                 EditorGUILayout.EndScrollView();
             }
         }
-        private void LoadAndDisplayAvatars  (Models.NftsArray onAvatarsResult)
+        private void LoadAndDisplayAvatars(Models.NftsArray onAvatarsResult)
         {
             lock (lockObject)
             {
@@ -128,12 +124,12 @@ namespace VIPE_SDK
                 {
                     nfts.Add(nft);
                 }
-                currentPage = onAvatarsResult.currentPage;
-                totalPages = onAvatarsResult.totalPages;
+                CurrentPage = onAvatarsResult.currentPage;
+                TotalPages = onAvatarsResult.totalPages;
                 shouldLoadImages = true;
             }
         }
-        private void RenderTextureButton    (int index, int padding, int imageWidth)
+        private void RenderTextureButton(int index, int padding, int imageWidth)
         {
             GUILayout.Space(padding);
             Rect buttonRect = GUILayoutUtility.GetRect(imageWidth, imageWidth, GUILayout.Width(imageWidth), GUILayout.Height(imageWidth));
@@ -143,42 +139,42 @@ namespace VIPE_SDK
 
             DrawButtonContent(index, buttonRect);
         }
-        private void DrawButtonContent      (int index, Rect buttonRect)
+        private void DrawButtonContent(int index, Rect buttonRect)
         {
             if (textures != null && index >= 0 && index < textures.Length)
             {
                 GUI.DrawTexture(buttonRect, textures[index]);
 
-                if (isLoading && index == creatingAvatarIndex)
+                if (IsLoading && index == creatingAvatarIndex)
                 {
-                    EditorUIHelpers.DrawLoadingSpinner(buttonRect, loadingTexture, rotationAngle, 10);
+                    EditorUIHelpers.DrawLoadingSpinner(buttonRect, LoadingTexture, RotationAngle, 10);
                 }
             }
         }
-        public void HandleButtonClick       (int index)
+        public void HandleButtonClick(int index)
         {
-            if (isLoading) return;
+            if (IsLoading) return;
 
-            isLoading = true;
+            IsLoading = true;
             creatingAvatarIndex = index;
             OnVRMModelClicked?.Invoke(nfts[index].metadata.asset);
         }
-        private void HandleButtonHover      (int index, ref Rect buttonRect)
+        private void HandleButtonHover(int index, ref Rect buttonRect)
         {
             bool isHovering = buttonRect.Contains(Event.current.mousePosition);
 
             if (isHovering)
             {
                 hoverIndex = index;
-                buttonRect = EditorUIHelpers.ExpandRect(buttonRect, RectExpansion);
-                EditorUIHelpers.DrawBorder(buttonRect, BorderThickness, Color.white);
+                buttonRect = EditorUIHelpers.ExpandRect(buttonRect, rectExpansion);
+                EditorUIHelpers.DrawBorder(buttonRect, borderThickness, Color.white);
             }
             else if (hoverIndex == index)
             {
                 hoverIndex = -1;
             }
         }
-        private async Task DebounceSearch   (string value, int delayMilliseconds)
+        private async Task DebounceSearch(string value, int delayMilliseconds)
         {
             cts.Cancel();
             cts = new CancellationTokenSource();
@@ -192,7 +188,7 @@ namespace VIPE_SDK
                 Debug.Log("Task was canceled, no further action needed");
             }
         }
-        private async Task ExecuteSearch    (string value)
+        private async Task ExecuteSearch(string value)
         {
             Models.SearchAvatarsDto searchAvatar = new Models.SearchAvatarsDto { name = value };
             parameters = new Dictionary<string, string>
@@ -224,7 +220,7 @@ namespace VIPE_SDK
                         OnDataChanged?.Invoke();
                         if (index == nfts.Count - 1)
                         {
-                            isLoadingImages = false;
+                            IsLoadingImages = false;
                         }
 
                     }, placeHolder));

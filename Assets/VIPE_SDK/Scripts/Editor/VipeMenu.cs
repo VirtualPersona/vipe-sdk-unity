@@ -11,19 +11,19 @@ namespace VIPE_SDK
     public class VipeMenu : EditorWindow
     {
         private Texture2D _iconTexture;
-        private string _apiKey;
+        private string apiKey;
 
-        private const string LOGIN_URL   = "https://vipe.io/connect?integrationLogin=true";
-        private const string API_KEY     = "https://docs.vipe.io/reference/intro/getting-started";
+        private const string LOGIN_URL = "https://vipe.io/connect?integrationLogin=true";
+        private const string API_KEY = "https://docs.vipe.io/reference/intro/authentication";
         private const string Twitter_URL = "https://twitter.com/vipeio";
         private const string Discord_URL = "https://discord.com/invite/vipeio";
-        private const string WEB_URL     = "https://vipe.io/";
-        private const string POST_URL    = "https://api.cryptoavatars.io/v1/login/vipe";
+        private const string WEB_URL = "https://vipe.io/";
+        private const string POST_URL = "https://api.cryptoavatars.io/v1/login/vipe";
 
-        private string WalletAddress;
-        private string Signature;
+        private string walletAddress;
+        private string signature;
         private bool messageObtained = false;
-        public bool isLogedIn = false;
+        public bool IsLoggedIn = false;
 
         [MenuItem("Tools/VIPE/Settings")]
         public static void OpenWindow()
@@ -58,11 +58,11 @@ namespace VIPE_SDK
 
             // Wallet connection settings
             RenderLabelWithPadding("Wallet connect setting menu", EditorStyles.boldLabel, 10, 10, 0, 0, 16);
-            RenderCustomAlertMessage("Log in to see your owned avatars.", WalletAddress, 10, 10, 10, 0);
-            RenderLabelWithPadding("Wallet Address:", WalletAddress, 10, 10, 0, 0);
+            RenderCustomAlertMessage("Log in to see your owned avatars.", walletAddress, 10, 10, 10, 0);
+            RenderLabelWithPadding("Wallet Address:", walletAddress, 10, 10, 0, 0);
 
             // Login/Logout buttons
-            if (isLogedIn)
+            if (IsLoggedIn)
             {
                 RenderButtonWithPadding("Log out from VIPE", OnLogOffButtonClick, 10, 10, 5, 0);
             }
@@ -95,9 +95,9 @@ namespace VIPE_SDK
         {
             RenderLabelWithPadding("Community", EditorStyles.boldLabel, 10, 10, 0, 0, 15);
             GUILayout.BeginHorizontal();
-            RenderButtonWithPadding("VIPE WEB",     () => Application.OpenURL(WEB_URL), 10, 0, 0, 5);
-            RenderButtonWithPadding("Twitter",  () => Application.OpenURL(Twitter_URL), 0, 0, 0, 5);
-            RenderButtonWithPadding("Discord",  () => Application.OpenURL(Discord_URL), 0, 0, 0, 5);
+            RenderButtonWithPadding("VIPE WEB", () => Application.OpenURL(WEB_URL), 10, 0, 0, 5);
+            RenderButtonWithPadding("Twitter", () => Application.OpenURL(Twitter_URL), 0, 0, 0, 5);
+            RenderButtonWithPadding("Discord", () => Application.OpenURL(Discord_URL), 0, 0, 0, 5);
             GUILayout.EndHorizontal();
         }
         void DrawSeparator(int marginSide, int marginTop, int marginBot, int Height)
@@ -185,16 +185,16 @@ namespace VIPE_SDK
                 string sourceScriptPath = FindScriptPath(sourceScriptName);
                 if (string.IsNullOrEmpty(sourceScriptPath))
                 {
-                    Debug.LogError($"No se encontró el script {sourceScriptName}.");
+                    Debug.LogError($"Script was not found {sourceScriptName}.");
                     return;
                 }
                 OverwriteScriptContent(targetScriptName, sourceScriptPath);
-                Debug.Log($"El script {targetScriptName} ha sido sobrescrito con el contenido de {sourceScriptName}.");
+                Debug.Log($"The script {targetScriptName} has been overridden with the content of {sourceScriptName}.");
             };
         }
         private void OnLoginButtonClick()
         {
-            if (!isLogedIn)
+            if (!IsLoggedIn)
             {
                 Application.OpenURL(LOGIN_URL);
                 StartGetClipboardMessage();
@@ -202,11 +202,11 @@ namespace VIPE_SDK
         }
         private void OnLogOffButtonClick()
         {
-            if (isLogedIn)
+            if (IsLoggedIn)
             {
-                WalletAddress = string.Empty;
-                SecureDataHandler.SaveWallet(WalletAddress);
-                isLogedIn = false;
+                walletAddress = string.Empty;
+                SecureDataHandler.SaveWallet(walletAddress);
+                IsLoggedIn = false;
             }
         }
         private void StartGetClipboardMessage()
@@ -232,8 +232,8 @@ namespace VIPE_SDK
             string[] parts = message.Split(';');
             if (parts.Length == 2)
             {
-                WalletAddress = parts[0];
-                Signature = parts[1];
+                walletAddress = parts[0];
+                signature = parts[1];
             }
             else
             {
@@ -242,12 +242,12 @@ namespace VIPE_SDK
         }
         private void OnLoginEnd()
         {
-            if (!isLogedIn && messageObtained)
+            if (!IsLoggedIn && messageObtained)
             {
                 Debug.Log("Login process completed successfully.");
                 Task.Run(SendLoginData);
-                isLogedIn = true;
-                SecureDataHandler.SaveWallet(WalletAddress);
+                IsLoggedIn = true;
+                SecureDataHandler.SaveWallet(walletAddress);
             }
             else
             {
@@ -256,7 +256,7 @@ namespace VIPE_SDK
         }
         private async Task SendLoginData()
         {
-            if (Signature == null || WalletAddress == null)
+            if (signature == null || walletAddress == null)
             {
                 Debug.LogWarning("Signature or WalletAddress is null");
                 return;
@@ -266,8 +266,8 @@ namespace VIPE_SDK
             {
                 var formData = new FormUrlEncodedContent(new[]
                 {
-                new KeyValuePair<string, string>("wallet", WalletAddress),
-                new KeyValuePair<string, string>("signature", Signature),
+                new KeyValuePair<string, string>("wallet", walletAddress),
+                new KeyValuePair<string, string>("signature", signature),
                 });
 
                 HttpResponseMessage response = await httpClient.PostAsync(POST_URL, formData);
@@ -280,11 +280,11 @@ namespace VIPE_SDK
                 else
                 {
                     Debug.LogWarning("Failed to log in, HTTP status: " + response.StatusCode);
-                    isLogedIn = false;
+                    IsLoggedIn = false;
                 }
             }
         }
-        private void RenderLabelWithPadding     (string labelText, string value, float paddingLeft, float paddingRight, float paddingTop, float paddingBottom)
+        private void RenderLabelWithPadding(string labelText, string value, float paddingLeft, float paddingRight, float paddingTop, float paddingBottom)
         {
             GUILayout.BeginVertical();
             GUILayout.Space(paddingTop);
@@ -300,7 +300,7 @@ namespace VIPE_SDK
             GUILayout.Space(paddingBottom);
             GUILayout.EndVertical();
         }
-        private void RenderLabelWithPadding     (string labelText, GUIStyle textStyle, float paddingLeft, float paddingRight, float paddingTop, float paddingBottom, int fontSize = -1)
+        private void RenderLabelWithPadding(string labelText, GUIStyle textStyle, float paddingLeft, float paddingRight, float paddingTop, float paddingBottom, int fontSize = -1)
         {
             GUIStyle modifiedTextStyle = new GUIStyle(textStyle);
 
@@ -323,7 +323,7 @@ namespace VIPE_SDK
             GUILayout.Space(paddingBottom);
             GUILayout.EndVertical();
         }
-        private void RenderButtonWithPadding    (string buttonText, System.Action buttonAction, float paddingLeft, float paddingRight, float paddingTop, float paddingBottom)
+        private void RenderButtonWithPadding(string buttonText, System.Action buttonAction, float paddingLeft, float paddingRight, float paddingTop, float paddingBottom)
         {
             GUILayout.BeginVertical();
             GUILayout.Space(paddingTop);
@@ -342,7 +342,7 @@ namespace VIPE_SDK
             GUILayout.Space(paddingBottom);
             GUILayout.EndVertical();
         }
-        private void RenderSettingsSection      (float paddingLeft, float paddingRight, float paddingTop, float paddingBottom)
+        private void RenderSettingsSection(float paddingLeft, float paddingRight, float paddingTop, float paddingBottom)
         {
             GUILayout.BeginVertical();
             GUILayout.Space(paddingTop);
@@ -355,13 +355,13 @@ namespace VIPE_SDK
             GUILayout.Space(paddingRight);
             GUILayout.EndHorizontal();
 
-            RenderCustomAlertMessage("Please enter an API key.", _apiKey, paddingLeft, paddingRight, 0, 0);
+            RenderCustomAlertMessage("Please enter an API key.", apiKey, paddingLeft, paddingRight, 0, 0);
             RenderApiKeyField(paddingLeft, paddingRight, 0, 0);
 
             GUILayout.Space(paddingBottom);
             GUILayout.EndVertical();
         }
-        private void RenderCustomAlertMessage   (string message, string value, float paddingLeft, float paddingRight, float paddingTop, float paddingBottom)
+        private void RenderCustomAlertMessage(string message, string value, float paddingLeft, float paddingRight, float paddingTop, float paddingBottom)
         {
             if (string.IsNullOrEmpty(value))
             {
@@ -380,7 +380,7 @@ namespace VIPE_SDK
                 GUILayout.EndVertical();
             }
         }
-        private void RenderApiKeyField          (float paddingLeft, float paddingRight, float paddingTop, float paddingBottom)
+        private void RenderApiKeyField(float paddingLeft, float paddingRight, float paddingTop, float paddingBottom)
         {
             GUILayout.BeginVertical();
             GUILayout.Space(paddingTop);
@@ -388,18 +388,18 @@ namespace VIPE_SDK
             GUILayout.BeginHorizontal();
             GUILayout.Space(paddingLeft);
 
-            string previousApiKey = _apiKey;
-            _apiKey = EditorGUILayout.TextField("API Key:", _apiKey, GUILayout.ExpandWidth(true));
+            string previousApiKey = apiKey;
+            apiKey = EditorGUILayout.TextField("API Key:", apiKey, GUILayout.ExpandWidth(true));
 
             float buttonWidth = 19;
             if (GUILayout.Button(EditorGUIUtility.IconContent("Clipboard"), GUILayout.Width(buttonWidth), GUILayout.MaxHeight(buttonWidth)))
             {
-                _apiKey = EditorGUIUtility.systemCopyBuffer;
+                apiKey = EditorGUIUtility.systemCopyBuffer;
             }
 
-            if (_apiKey != previousApiKey)
+            if (apiKey != previousApiKey)
             {
-                SecureDataHandler.SaveAPIKey(_apiKey);
+                SecureDataHandler.SaveAPIKey(apiKey);
             }
 
             GUILayout.Space(paddingRight);
@@ -435,11 +435,11 @@ namespace VIPE_SDK
         }
         private void LoadApiKey()
         {
-            _apiKey = SecureDataHandler.LoadAPIKey();
+            apiKey = SecureDataHandler.LoadAPIKey();
         }
         private void LoadWallet()
         {
-            WalletAddress = SecureDataHandler.LoadWallet();
+            walletAddress = SecureDataHandler.LoadWallet();
         }
     }
 }
