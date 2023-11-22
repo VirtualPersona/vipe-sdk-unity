@@ -59,7 +59,7 @@ namespace VIPE_SDK
 
 
         [SerializeField]
-        private TMP_InputField URLField;
+        private TMP_InputField urlField;
 
         [SerializeField]
         private TMP_Text currentPageText;
@@ -67,7 +67,7 @@ namespace VIPE_SDK
         [SerializeField]
         private GameObject vrm;
 
-        public bool loginPanelOn = true;
+        public bool LoginPanelOn = true;
 
         [SerializeField]
         private CustomToggleController ownerButton;
@@ -125,7 +125,7 @@ namespace VIPE_SDK
         /// </summary>
         public void LoadByURL()
         {
-            string url = URLField.text;
+            string url = urlField.text;
             if (url != "")
             {
                 LoadVRMModel(url);
@@ -145,40 +145,40 @@ namespace VIPE_SDK
         /// //NOT USED..consider deleting
         public void ToggleAvatarUI()
         {
-            Vector3 screenPos = loginPanelOn
+            Vector3 screenPos = LoginPanelOn
                 ? loginPanel.GetComponent<RectTransform>().position
                 : avatarsPanel.GetComponent<RectTransform>().position;
 
-            Vector3 hiddenPos = loginPanelOn
+            Vector3 hiddenPos = LoginPanelOn
                 ? avatarsPanel.GetComponent<RectTransform>().position
                 : loginPanel.GetComponent<RectTransform>().position;
 
-            avatarsPanel.GetComponent<RectTransform>().position = loginPanelOn ? screenPos : hiddenPos;
-            loginPanel.GetComponent<RectTransform>().position = loginPanelOn ? hiddenPos : screenPos;
+            avatarsPanel.GetComponent<RectTransform>().position = LoginPanelOn ? screenPos : hiddenPos;
+            loginPanel.GetComponent<RectTransform>().position = LoginPanelOn ? hiddenPos : screenPos;
 
-            loginPanelOn = !loginPanelOn;
+            LoginPanelOn = !LoginPanelOn;
         }
         /// <summary>
         /// Changes the display to avatar panel.
         /// </summary>
         public void LoadAvatarUI()
         {
-            if (!loginPanelOn)
+            if (!LoginPanelOn)
             {
                 return;
             }
-            Vector3 screenPos = loginPanelOn
+            Vector3 screenPos = LoginPanelOn
                 ? loginPanel.GetComponent<RectTransform>().position
                 : avatarsPanel.GetComponent<RectTransform>().position;
 
-            Vector3 hiddenPos = loginPanelOn
+            Vector3 hiddenPos = LoginPanelOn
                 ? avatarsPanel.GetComponent<RectTransform>().position
                 : loginPanel.GetComponent<RectTransform>().position;
 
-            avatarsPanel.GetComponent<RectTransform>().position = loginPanelOn ? screenPos : hiddenPos;
-            loginPanel.GetComponent<RectTransform>().position = loginPanelOn ? hiddenPos : screenPos;
+            avatarsPanel.GetComponent<RectTransform>().position = LoginPanelOn ? screenPos : hiddenPos;
+            loginPanel.GetComponent<RectTransform>().position = LoginPanelOn ? hiddenPos : screenPos;
 
-            loginPanelOn = false;
+            LoginPanelOn = false;
         }
         /// <summary>
         /// Sets up the search field to execute a search query when the text changes.
@@ -231,7 +231,7 @@ namespace VIPE_SDK
             ClearScrollView();
 
             Models.SearchAvatarsDto searchAvatar = new() { };
-            VIPE.GetAvatarsByURL(VIPE.avatarsResource + "/" + login.GetWallet(), DisplayAvatars);
+            VIPE.GetAvatarsByURL(VIPE.AvatarsResource + "/" + login.GetWallet(), DisplayAvatars);
         }
 
         /// <summary>
@@ -239,7 +239,7 @@ namespace VIPE_SDK
         /// </summary>
         public void LoadOwnVRMButtonWrapper()
         {
-            if (login.isLoggedIn)
+            if (login.IsLoggedIn)
             {
                 LoadOwnVRMAsync();
             }

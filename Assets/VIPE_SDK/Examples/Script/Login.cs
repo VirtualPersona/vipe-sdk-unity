@@ -8,15 +8,15 @@ namespace VIPE_SDK
     {
         private const string LOGIN_URL = "https://vipe.io/connect?integrationLogin=true";
         private const string POST_URL = "https://api.cryptoavatars.io/v1/login/vipe";
-        private string WalletAddress;
-        private string Signature;
+        private string walletAddress;
+        private string signature;
 
         private bool messageObtained = false;
         private bool isLoginProcessActive = false;
 
-        public bool isLoggedIn = false;
+        public bool IsLoggedIn = false;
 
-        public GameObject loadingSpinner;
+        public GameObject LoadingSpinner;
 
         private void Update()
         {
@@ -28,12 +28,12 @@ namespace VIPE_SDK
 
         public string GetWallet()
         {
-            return WalletAddress;
+            return walletAddress;
         }
 
         public void OnLoginButtonClick()
         {
-            if (!isLoggedIn)
+            if (!IsLoggedIn)
             {
                 OnLoginStart();
                 Application.OpenURL(LOGIN_URL);
@@ -63,7 +63,7 @@ namespace VIPE_SDK
         {
             StopCoroutine(GetClipboardMessage());
             isLoginProcessActive = false;
-            loadingSpinner.SetActive(false);
+            LoadingSpinner.SetActive(false);
         }
 
         public void ProcessMessage(string message)
@@ -71,8 +71,8 @@ namespace VIPE_SDK
             string[] parts = message.Split(';');
             if (parts.Length == 2)
             {
-                WalletAddress = parts[0];
-                Signature = parts[1];
+                walletAddress = parts[0];
+                signature = parts[1];
             }
             else
             {
@@ -108,31 +108,31 @@ namespace VIPE_SDK
         private void OnLoginStart()
         {
             isLoginProcessActive = true;
-            loadingSpinner.SetActive(true);
+            LoadingSpinner.SetActive(true);
         }
 
         private void OnLoginEnd()
         {
-            if (!isLoggedIn && messageObtained)
+            if (!IsLoggedIn && messageObtained)
             {
                 StartCoroutine(SendLoginData());
             }
             else
                 Debug.LogWarning("Login process completed without obtaining a valid message.");
 
-            loadingSpinner.SetActive(false);
+            LoadingSpinner.SetActive(false);
         }
 
         private IEnumerator SendLoginData()
         {
-            if (Signature == null || WalletAddress == null)
+            if (signature == null || walletAddress == null)
             {
                 Debug.LogWarning("Signature or WalletAddress is null");
                 yield break;
             }
             WWWForm form = new WWWForm();
-            form.AddField("wallet", WalletAddress);
-            form.AddField("signature", Signature);
+            form.AddField("wallet", walletAddress);
+            form.AddField("signature", signature);
 
             using (UnityWebRequest www = UnityWebRequest.Post(POST_URL, form))
             {
@@ -153,14 +153,14 @@ namespace VIPE_SDK
                         if (MenuManager.Instance)
                         {
                             MenuManager.Instance.LoadAvatarUI();
-                            isLoggedIn = true;
+                            IsLoggedIn = true;
                             MenuManager.Instance.SetOwnerButtonToggleToTrue();
                         }
                     }
                     else
                     {
                         Debug.LogWarning("Failed to log in, HTTP status: " + www.responseCode);
-                        isLoggedIn = false;
+                        IsLoggedIn = false;
                         CancelLogin();
                     }
                 }

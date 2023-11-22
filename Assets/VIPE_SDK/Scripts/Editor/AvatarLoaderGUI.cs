@@ -7,11 +7,11 @@ namespace VIPE_SDK
 {
     public class AvatarLoaderGUI : EditorWindow
     {
-        private VIPE cryptoAvatars;
+        private VIPE vipe;
         private AvatarPresenter presenter;
         private string searchField = "";
         private Vector2 scrollPosition = Vector2.zero;
-        private const string WindowTitle = "Library";
+        private const string windowTitle = "Library";
 
         private List<string> collectionOptions = new List<string>();
         private List<Texture2D> collectionLogos = new List<Texture2D>();
@@ -19,13 +19,13 @@ namespace VIPE_SDK
         private Texture2D collectionLogoPlaceHolder;
 
         private bool isLoadingCollections = true;
-        public bool isAvatarsLoading = false;
+        public bool IsAvatarsLoading = false;
 
         private void HandleDataChanged() => Repaint();
         [MenuItem("Tools/VIPE/Avatar Library")]
         public static void ShowWindow()
         {
-            EditorWindow.GetWindow<AvatarLoaderGUI>(WindowTitle);
+            EditorWindow.GetWindow<AvatarLoaderGUI>(windowTitle);
         }
         private async void LoadData()
         {
@@ -38,12 +38,12 @@ namespace VIPE_SDK
         }
         private async void LoadVRM(string urlVRM)
         {
-            await cryptoAvatars.GetAvatarVRMModel(urlVRM, (model, path) => { });
+            await vipe.GetAvatarVRMModel(urlVRM, (model, path) => { });
         }
         private async Task LoadCollectionsNameList()
         {
             isLoadingCollections = true;
-            await cryptoAvatars.GetNFTCollections(async collections =>
+            await vipe.GetNFTCollections(async collections =>
             {
                 collectionOptions.Clear();
                 collectionLogos.Clear();
@@ -57,15 +57,15 @@ namespace VIPE_SDK
         }
         private async Task LoadLogoImage(string logoImageURL)
         {
-            await cryptoAvatars.GetAvatarPreviewImage(logoImageURL, texture =>
+            await vipe.GetAvatarPreviewImage(logoImageURL, texture =>
             {
                 collectionLogos.Add(texture);
             }, collectionLogoPlaceHolder);
         }
         private void InitializeComponents()
         {
-            cryptoAvatars = new VIPE();
-            presenter = new AvatarPresenter(cryptoAvatars);
+            vipe = new VIPE();
+            presenter = new AvatarPresenter(vipe);
             collectionLogoPlaceHolder = Resources.Load<Texture2D>("Visuals/UI/Icons/dummy_pfp");
         }
         private void SubscribeToEvents()
@@ -73,18 +73,18 @@ namespace VIPE_SDK
             EditorApplication.update += OnEditorUpdate;
             presenter.OnDataChanged += HandleDataChanged;
             presenter.OnVRMModelClicked += LoadVRM;
-            cryptoAvatars.modelCreated += SetState;
+            vipe.ModelCreated += SetState;
         }
         private void UnsubscribeFromEvents()
         {
             EditorApplication.update -= OnEditorUpdate;
             presenter.OnDataChanged -= HandleDataChanged;
             presenter.OnVRMModelClicked -= LoadVRM;
-            cryptoAvatars.modelCreated -= SetState;
+            vipe.ModelCreated -= SetState;
         }
         private void SetState()
         {
-            presenter.isLoading = false;
+            presenter.IsLoading = false;
             GUI.color = Color.white;
         }
         private void OnEditorUpdate()
@@ -94,12 +94,12 @@ namespace VIPE_SDK
         }
         private void UpdateLoadingAnimation()
         {
-            if (presenter.isLoading || presenter.islLoadingCollections)
+            if (presenter.IsLoading || presenter.IslLoadingCollections)
             {
-                presenter.rotationAngle += Time.deltaTime * 100;
-                if (presenter.rotationAngle > 360f)
+                presenter.RotationAngle += Time.deltaTime * 100;
+                if (presenter.RotationAngle > 360f)
                 {
-                    presenter.rotationAngle -= 360f;
+                    presenter.RotationAngle -= 360f;
                 }
                 Repaint();
             }
@@ -119,8 +119,8 @@ namespace VIPE_SDK
             EditorUIHelpers.DrawPaginationControls(
                 () => presenter.LoadPreviousNfts(),
                 () => presenter.LoadMoreNfts(),
-                presenter.currentPage,
-                presenter.totalPages
+                presenter.CurrentPage,
+                presenter.TotalPages
             );
         }
 
@@ -141,7 +141,7 @@ namespace VIPE_SDK
             {
                 GUILayout.Space(10);
                 GUILayout.Label("CC0 Collection");
-                HorizontalMenuDrawer.DrawHorizontalMenu(ref scrollPosition, collectionOptions, collectionLogos, collection => presenter.LoadColletionAvatars(collection), presenter.islLoadingCollections, presenter.loadingTexture, presenter.rotationAngle, presenter.currentlyLoadingCollection);
+                HorizontalMenuDrawer.DrawHorizontalMenu(ref scrollPosition, collectionOptions, collectionLogos, collection => presenter.LoadColletionAvatars(collection), presenter.IslLoadingCollections, presenter.LoadingTexture, presenter.RotationAngle, presenter.CurrentlyLoadingCollection);
             }
 
             DrawPaginationControls();

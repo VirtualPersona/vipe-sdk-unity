@@ -3348,20 +3348,20 @@ MonoBehaviour:
   nextPageBtn: {fileID: 170268048481893773}
   prevPageBtn: {fileID: 3836230860505803656}
   messageEnableUI: {fileID: 7902619227420215404}
-  avatarCardPrefab: {fileID: 2389009472019987712, guid: 0d798dcf4ccb055418a08e1a7de0e9e9,
+  avatarCardPrefab: {fileID: 3653846946518870327, guid: bff85b2f100606d469b2017421c54243,
     type: 3}
-  collectionCardPrefab: {fileID: 8807223923810728612, guid: b413d22e40ab27e418acca61b8ba58d2,
+  collectionCardPrefab: {fileID: 8807223923810728612, guid: 765669dc841a2fc449aba39428163338,
     type: 3}
   loadingSpinner: {fileID: 3445091111090774436}
   scrollViewAvatars: {fileID: 6834913506939952558}
   scrollViewCollections: {fileID: 7726922294405879718}
   searchField: {fileID: 3719950248427248490}
-  URLField: {fileID: 3520804202974815141}
+  urlField: {fileID: 0}
   currentPageText: {fileID: 3644116735632095272}
   vrm: {fileID: 0}
-  loginPanelOn: 1
+  LoginPanelOn: 1
   ownerButton: {fileID: 0}
-  loadingBar: {fileID: 0}
+  loadingBar: {fileID: 1828322378449495337}
 --- !u!114 &5716866984773606855
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3374,8 +3374,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4da33a91bdb870a4da1ad6f3795068f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isLoggedIn: 0
-  loadingSpinner: {fileID: 657520982315961845}
+  IsLoggedIn: 0
+  LoadingSpinner: {fileID: 0}
 --- !u!1 &3184010637194130706
 GameObject:
   m_ObjectHideFlags: 0

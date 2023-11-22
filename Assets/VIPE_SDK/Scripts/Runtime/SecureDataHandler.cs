@@ -5,44 +5,44 @@ namespace VIPE_SDK
     public static class SecureDataHandler
     {
         private static readonly string resourcePath = "APIKeyConfig";
-        private static APIKeyConfig _apiKeyConfig;
+        private static APIKeyConfig apiKeyConfig;
 
-        public static APIKeyConfig apiKeyConfig
+        public static APIKeyConfig ApiKeyConfig
         {
             get
             {
-                if (_apiKeyConfig == null)
+                if (apiKeyConfig == null)
                 {
-                    _apiKeyConfig = Resources.Load<APIKeyConfig>(resourcePath);
+                    apiKeyConfig = Resources.Load<APIKeyConfig>(resourcePath);
 
 #if UNITY_EDITOR
-                    if (_apiKeyConfig == null)
+                    if (apiKeyConfig == null)
                     {
-                        _apiKeyConfig = ScriptableObject.CreateInstance<APIKeyConfig>();
+                        apiKeyConfig = ScriptableObject.CreateInstance<APIKeyConfig>();
                         string dirPath = Path.Combine(Application.dataPath, "Resources");
                         if (!Directory.Exists(dirPath))
                         {
                             UnityEditor.AssetDatabase.CreateFolder("Assets", "Resources");
                         }
-                        UnityEditor.AssetDatabase.CreateAsset(_apiKeyConfig, "Assets/Resources/APIKeyConfig.asset");
+                        UnityEditor.AssetDatabase.CreateAsset(apiKeyConfig, "Assets/Resources/APIKeyConfig.asset");
                         UnityEditor.AssetDatabase.SaveAssets();
                     }
 #endif
                 }
-                return _apiKeyConfig;
+                return apiKeyConfig;
             }
         }
 
         public static string LoadAPIKey()
         {
-            return apiKeyConfig.API_KEY;
+            return ApiKeyConfig.API_KEY;
         }
 
 #if UNITY_EDITOR
         public static void SaveAPIKey(string apiKey)
         {
-            apiKeyConfig.API_KEY = apiKey;
-            UnityEditor.EditorUtility.SetDirty(apiKeyConfig);
+            ApiKeyConfig.API_KEY = apiKey;
+            UnityEditor.EditorUtility.SetDirty(ApiKeyConfig);
             UnityEditor.AssetDatabase.SaveAssets();
         }
 #endif
