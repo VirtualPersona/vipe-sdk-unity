@@ -1,30 +1,34 @@
-# CASDK
+# **VIPE Unity SDK**
 
-* Unity-Supports 2021.3.12f1 and later
-* You can download OpenSource Avatars or get yours if they are in your wallet as an NFT.
+Welcome to the VIPE Unity SDK! This toolkit is designed to provide Unity developers with a comprehensive and user-friendly solution for integrating NFT avatars into their projects. With support for Unity 2021.3.12f1 and later versions, our SDK facilitates the use of both open-source and personal NFT avatars directly from your digital wallet.
 
-## Log-In
+## **Key Features**
 
-* Playing as guest you will have acces to Open Source VRM Avatars.
-* If you Log In with your CryptoAvatars account, you will have access to the avatars in your asociated wallet.
+- **Log-In Capabilities:** Choose between guest access for a quick start with open-source VRM avatars or log in with your VIPE account to access avatars from your associated wallet.
+- **Seamless Usage:** Easily start the scene, log in or join as a guest, and select your preferred VRM avatar for an immersive experience.
+- **Troubleshooting Assistance:** If your VRM avatar doesn't appear immediately, we provide simple steps to locate and load it from the Unity Asset folder.
 
-## Usage
+## **Getting Started with VIPE Unity SDK**
 
-* Start the scene and log in or join as a guess
-* Select the VRM you want to use
-* Play araund with your avatar
-* Sometimes Unity dont show your VRM downloaded:
-    * Go to your Asset folder, right-click and select 'Show in Explorer'.
-    * Your Assets folder will contain a new folder called 'cryptoavatars'.
-    * Click on Unity again and wait til the project load the VRM.
-    * Your VRM will be inside 'cryptoavatar' folder, included a prefab with VRM & character controller (Last Avatar played).
-* You can use this Vrm to whatever you want.
+For a comprehensive understanding and effective integration of the VIPE Unity SDK into your projects, we recommend exploring the following documentation pages:
 
-# License
+1. [What is the VIPE Unity SDK?](https://docs.vipe.io/reference/what-is-the-vipe-unity-sdk)
+2. [Getting Started Guide](https://docs.vipe.io/reference/getting-started-1)
+3. [Developer Integration](https://docs.vipe.io/reference/developer-integration)
+4. [Example Scene](https://docs.vipe.io/reference/example-scene)
 
-* [Closed-Source](LICENSE)
+## **Release Information**
 
-# Download
+To download the latest version of the VIPE Unity SDK and view release notes, please visit our [Releases Page](https://github.com/VirtualPersona/vipe-sdk-unity/releases).
 
-* https://github.com/...
+## **License**
 
+This project is under a [Closed-Source License](https://chat.openai.com/c/LICENSE).
+
+## **Quick Links**
+
+- **Download the SDK:** [GitHub Repository](https://github.com/VirtualPersona/vipe-sdk-unity)
+- **Learn More About VIPE:** [About VIPE](https://vipe.io/about)
+- **Explore the VIPE API:** [VIPE API Documentation](https://docs.vipe.io/reference/getting-started-with-your-api)
+
+We hope this SDK empowers you to effectively integrate dynamic and interactive NFT avatars into your Unity applications, enhancing both the developer and user experience.
