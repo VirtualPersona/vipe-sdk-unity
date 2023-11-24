@@ -73,3 +73,7 @@ crashlytics-build.properties
 /Assets/cryptoavatars.meta
 /Assets/com.cryptoavatars.sdk/Scripts/ThirdPersonCharacter/Animation
 /Assets/com.cryptoavatars.sdk/Scripts/ThirdPersonCharacter/Animator
+
+
+# Exclude API Key files in Assets/Resources
+/Assets/Resources/APIKeyConfig.asset
