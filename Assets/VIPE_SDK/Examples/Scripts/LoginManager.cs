@@ -4,7 +4,7 @@ using UnityEngine.Networking;
 
 namespace VIPE_SDK
 {
-    public class Login : MonoBehaviour
+    public class LoginManager : MonoBehaviour
     {
         private const string LOGIN_URL = "https://vipe.io/connect?integrationLogin=true";
         private const string POST_URL = "https://api.cryptoavatars.io/v1/login/vipe";

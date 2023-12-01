@@ -15,7 +15,7 @@ namespace VIPE_SDK
 
         public static MenuManager Instance;
 
-        private Login login;
+        private LoginManager login;
 
         [SerializeField]
         private Canvas canvas;
@@ -24,7 +24,7 @@ namespace VIPE_SDK
         private RectTransform loginPanel;
 
         [SerializeField]
-        private RectTransform avatarsPanel;
+        private RectTransform avatarsAndCollectionsPanel;
         private VIPE VIPE;
 
         [SerializeField]
@@ -65,15 +65,12 @@ namespace VIPE_SDK
         private TMP_Text currentPageText;
 
         [SerializeField]
-        private GameObject vrm;
+        private GameObject Avatar;
 
         public bool LoginPanelOn = true;
 
         [SerializeField]
         private CustomToggleController ownerButton;
-
-        [SerializeField]
-        private GameObject loadingBar;
 
         private ToggleGroup avatarToggleGroup;
         private ToggleGroup collectionToggleGroup;
@@ -91,15 +88,13 @@ namespace VIPE_SDK
             }
 
             VIPE = new VIPE();
-            login = GetComponent<Login>();
+            login = GetComponent<LoginManager>();
 
             avatarToggleGroup = new GameObject("ToggleGroup").AddComponent<ToggleGroup>();
             collectionToggleGroup = new GameObject("ToggleGroup").AddComponent<ToggleGroup>();
         }
         private void Start()
         {
-            vrm = GameObject.Find("AVATAR");
-
             nextPageBtn.onClick.AddListener(
                 async () =>
                     await VIPE.NextPage(avatarsResult => DisplayAvatars(avatarsResult))
@@ -115,7 +110,7 @@ namespace VIPE_SDK
         {
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                avatarsPanel.gameObject.SetActive(!avatarsPanel.gameObject.activeSelf);
+                avatarsAndCollectionsPanel.gameObject.SetActive(!avatarsAndCollectionsPanel.gameObject.activeSelf);
                 messageEnableUI.SetActive(!messageEnableUI.activeSelf);
             }
         }
@@ -146,13 +141,13 @@ namespace VIPE_SDK
         {
             Vector3 screenPos = LoginPanelOn
                 ? loginPanel.GetComponent<RectTransform>().position
-                : avatarsPanel.GetComponent<RectTransform>().position;
+                : avatarsAndCollectionsPanel.GetComponent<RectTransform>().position;
 
             Vector3 hiddenPos = LoginPanelOn
-                ? avatarsPanel.GetComponent<RectTransform>().position
+                ? avatarsAndCollectionsPanel.GetComponent<RectTransform>().position
                 : loginPanel.GetComponent<RectTransform>().position;
 
-            avatarsPanel.GetComponent<RectTransform>().position = LoginPanelOn ? screenPos : hiddenPos;
+            avatarsAndCollectionsPanel.GetComponent<RectTransform>().position = LoginPanelOn ? screenPos : hiddenPos;
             loginPanel.GetComponent<RectTransform>().position = LoginPanelOn ? hiddenPos : screenPos;
 
             LoginPanelOn = !LoginPanelOn;
@@ -168,13 +163,13 @@ namespace VIPE_SDK
             }
             Vector3 screenPos = LoginPanelOn
                 ? loginPanel.GetComponent<RectTransform>().position
-                : avatarsPanel.GetComponent<RectTransform>().position;
+                : avatarsAndCollectionsPanel.GetComponent<RectTransform>().position;
 
             Vector3 hiddenPos = LoginPanelOn
-                ? avatarsPanel.GetComponent<RectTransform>().position
+                ? avatarsAndCollectionsPanel.GetComponent<RectTransform>().position
                 : loginPanel.GetComponent<RectTransform>().position;
 
-            avatarsPanel.GetComponent<RectTransform>().position = LoginPanelOn ? screenPos : hiddenPos;
+            avatarsAndCollectionsPanel.GetComponent<RectTransform>().position = LoginPanelOn ? screenPos : hiddenPos;
             loginPanel.GetComponent<RectTransform>().position = LoginPanelOn ? hiddenPos : screenPos;
 
             LoginPanelOn = false;
@@ -295,19 +290,19 @@ namespace VIPE_SDK
         /// <param name="onAvatarsResult">The data containing avatars to display.</param>
         private void ReplaceVRMModel(GameObject model)
         {
-            Vector3 avatarPos = vrm.transform.position;
-            Quaternion avatarRot = vrm.transform.rotation;
-            Destroy(vrm);
-            vrm = model;
-            vrm.name = "AVATAR";
-            vrm.transform.SetPositionAndRotation(avatarPos, avatarRot);
-            vrm.GetComponent<Animator>().runtimeAnimatorController =
+            Vector3 avatarPos = Avatar.transform.position;
+            Quaternion avatarRot = Avatar.transform.rotation;
+            Destroy(Avatar);
+            Avatar = model;
+            Avatar.name = "AVATAR";
+            Avatar.transform.SetPositionAndRotation(avatarPos, avatarRot);
+            Avatar.GetComponent<Animator>().runtimeAnimatorController =
                 Resources.Load<RuntimeAnimatorController>(
                     "Anims/Animator/ThirdPersonAnimatorController"
                 );
-            vrm.AddComponent<ResizeCapsuleCollider>();
-            vrm.AddComponent<ThirdPersonUserControl>();
-            Camera.main.GetComponent<OrbitCamera>().targetPosition = vrm.transform;
+            Avatar.AddComponent<ResizeCapsuleCollider>();
+            Avatar.AddComponent<ThirdPersonUserControl>();
+            Camera.main.GetComponent<OrbitCamera>().targetPosition = Avatar.transform;
         }
 
         /// <summary>
@@ -397,11 +392,18 @@ namespace VIPE_SDK
         private void ClearCollection()
         {
             if (scrollViewCollections)
+            {
                 foreach (Transform child in scrollViewCollections.content.transform)
                 {
-                    DestroyImmediate(child.gameObject);
+                    if (child.gameObject.name != "AllCollectionsCard")
+                    {
+                        DestroyImmediate(child.gameObject);
+                    }
                 }
+            }
         }
+
+
         /// <summary>
         /// Loads NFT collections and their associated avatars.
         /// </summary>
