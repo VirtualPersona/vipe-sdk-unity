@@ -18,17 +18,11 @@ namespace VIPE_SDK
         private LoginManager login;
 
         [SerializeField]
-        private Canvas canvas;
-
-        [SerializeField]
         private RectTransform loginPanel;
 
         [SerializeField]
         private RectTransform avatarsAndCollectionsPanel;
         private VIPE VIPE;
-
-        [SerializeField]
-        private Button loadVRM;
 
         [SerializeField]
         private Button nextPageBtn;
@@ -49,12 +43,6 @@ namespace VIPE_SDK
         private GameObject loadingSpinner;
 
         [SerializeField]
-        private ScrollRect scrollViewAvatars;
-
-        [SerializeField]
-        private ScrollRect scrollViewCollections;
-
-        [SerializeField]
         private TMP_InputField searchField;
 
 
@@ -72,8 +60,17 @@ namespace VIPE_SDK
         [SerializeField]
         private CustomToggleController ownerButton;
 
-        private ToggleGroup avatarToggleGroup;
-        private ToggleGroup collectionToggleGroup;
+
+        [SerializeField]
+        private GameObject avatarsScrollObject;
+
+        [SerializeField]
+        private GameObject collectionsScrollObject;
+
+        private ScrollRect avatarsGallery => avatarsScrollObject.GetComponent<ScrollRect>();
+        private ScrollRect collectionsGallery => collectionsScrollObject.GetComponent<ScrollRect>();
+        private ToggleGroup avatarToggleGroup => avatarsGallery.GetComponent<ToggleGroup>();
+        private ToggleGroup collectionToggleGroup => collectionsGallery.GetComponent<ToggleGroup>();
 
         private void Awake()
         {
@@ -90,8 +87,7 @@ namespace VIPE_SDK
             VIPE = new VIPE();
             login = GetComponent<LoginManager>();
 
-            avatarToggleGroup = new GameObject("ToggleGroup").AddComponent<ToggleGroup>();
-            collectionToggleGroup = new GameObject("ToggleGroup").AddComponent<ToggleGroup>();
+
         }
         private void Start()
         {
@@ -104,7 +100,7 @@ namespace VIPE_SDK
                     await VIPE.PrevPage(avatarsResult => DisplayAvatars(avatarsResult))
             );
             SetSearchField();
-            LoadCollections();
+            DisplayCollections();
         }
         private void Update()
         {
@@ -277,8 +273,8 @@ namespace VIPE_SDK
         /// </summary>        
         private void ClearScrollView()
         {
-            if (scrollViewAvatars)
-                foreach (Transform child in scrollViewAvatars.content)
+            if (avatarsGallery)
+                foreach (Transform child in avatarsGallery.content)
                 {
                     Destroy(child.gameObject);
                 }
@@ -326,7 +322,7 @@ namespace VIPE_SDK
 
                     GameObject avatarCard = Instantiate(
                         avatarCardPrefab,
-                        scrollViewAvatars.content.transform
+                        avatarsGallery.content.transform
                     );
 
                     CardManager cardManager =
@@ -389,11 +385,11 @@ namespace VIPE_SDK
         /// <summary>
         /// Clears the collection scroll view by destroying its child objects.
         /// </summary>
-        private void ClearCollection()
+        private void ClearCollectionsDisplay()
         {
-            if (scrollViewCollections)
+            if (collectionsGallery)
             {
-                foreach (Transform child in scrollViewCollections.content.transform)
+                foreach (Transform child in collectionsGallery.content.transform)
                 {
                     if (child.gameObject.name != "AllCollectionsCard")
                     {
@@ -407,7 +403,7 @@ namespace VIPE_SDK
         /// <summary>
         /// Loads NFT collections and their associated avatars.
         /// </summary>
-        public async void LoadCollections()
+        public async void DisplayCollections()
         {
             try
             {
@@ -431,24 +427,24 @@ namespace VIPE_SDK
 
                         GameObject avatarCard = Instantiate(
                             collectionCardPrefab,
-                            scrollViewCollections.content.transform
+                            collectionsGallery.content.transform
                         );
 
-                        avatarCard
-                            .GetComponent<CardManager>()
-                            .SetCardData(
-                                collections.nftCollections[i].slug,
-                                collections.nftCollections[i].logoImage,
-                                (Action<string>)(async collectionName =>
-                                    await VIPE.GetAvatars((Action<Models.NftsArray>)this.DisplayAvatars, parameters))
-                            );
+                        CardManager cardManager =
+                            avatarCard.GetComponent<CardManager>();
+
+                        cardManager.SetCardData(
+                                 collections.nftCollections[i].slug,
+                                 collections.nftCollections[i].logoImage,
+                                 (Action<string>)(async collectionName =>
+                                     await VIPE.GetAvatars((Action<Models.NftsArray>)this.DisplayAvatars, parameters))
+                             );
+
+                        cardManager.SetToggleGroup(collectionToggleGroup);
 
                         Task task = VIPE.GetAvatarPreviewImage(
                             collections.nftCollections[i].logoImage,
-                            texture =>
-                                avatarCard
-                                    .GetComponent<CardManager>()
-                                    .LoadCardImage(texture)
+                            texture => cardManager.LoadCardImage(texture)
                         );
                     }
                 }));
@@ -462,13 +458,13 @@ namespace VIPE_SDK
         {
             cts = new CancellationTokenSource();
             ClearScrollView();
-            ClearCollection();
+            ClearCollectionsDisplay();
         }
         private void OnDisable()
         {
             CancelExistingTasks();
             ClearScrollView();
-            ClearCollection();
+            ClearCollectionsDisplay();
             cts.Cancel();
         }
 

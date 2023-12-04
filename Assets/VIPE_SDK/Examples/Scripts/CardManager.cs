@@ -26,11 +26,11 @@ namespace VIPE_SDK
             cardToggle = GetComponent<Toggle>();
             cardBackground.gameObject.SetActive(false);
 
-            parentToggle = GetComponentInParent<Toggle>(); // Get the parent's Toggle
-            if (parentToggle != null)
-            {
-                parentToggle.isOn = false; // Set the Toggle's initial state to false
-            }
+            // parentToggle = GetComponentInParent<Toggle>(); // Get the parent's Toggle
+            // if (parentToggle != null)
+            // {
+            //     parentToggle.isOn = false; // Set the Toggle's initial state to false
+            // }
         }
 
 
