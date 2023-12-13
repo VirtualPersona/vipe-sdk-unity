@@ -22,7 +22,8 @@ namespace VIPE_SDK
         public VIPE()
         {
             HttpService.apiKey = SecureDataHandler.LoadAPIKey();
-            HttpService.baseUri = "https://api.cryptoavatars.io/v1";
+            // HttpService.baseUri = "https://api.cryptoavatars.io/v1";
+            HttpService.baseUri = "http://localhost:3000/v1";
         }
 
         private GameObject ImportVRM(string path)
@@ -167,6 +168,7 @@ namespace VIPE_SDK
             }
 
             pageUrl = HttpService.instance.AddOrUpdateParametersInUrl(pageUrl, queryParams);
+            Debug.Log("pageUrl:" + pageUrl);
 
             string result = await HttpService.Instance().Get(pageUrl);
 

@@ -67,10 +67,10 @@ namespace VIPE_SDK
         [SerializeField]
         private GameObject collectionsScrollObject;
 
-        private ScrollRect avatarsGallery => avatarsScrollObject.GetComponent<ScrollRect>();
-        private ScrollRect collectionsGallery => collectionsScrollObject.GetComponent<ScrollRect>();
-        private ToggleGroup avatarToggleGroup => avatarsGallery.GetComponent<ToggleGroup>();
-        private ToggleGroup collectionToggleGroup => collectionsGallery.GetComponent<ToggleGroup>();
+        private ScrollRect avatarsScroll => avatarsScrollObject.GetComponent<ScrollRect>();
+        private ScrollRect collectionsScroll => collectionsScrollObject.GetComponent<ScrollRect>();
+        private ToggleGroup avatarToggleGroup => avatarsScroll.GetComponent<ToggleGroup>();
+        private ToggleGroup collectionToggleGroup => collectionsScroll.GetComponent<ToggleGroup>();
 
         private void Awake()
         {
@@ -241,31 +241,25 @@ namespace VIPE_SDK
         /// <summary>
         /// Loads open-source VRM models asynchronously.
         /// </summary>
-        public async Task LoadOpenSourceAsync()
+        public void LoadOpenSourceAsync()
         {
             CancelExistingTasks();
-            // ClearScrollView();
 
             var parameters = new Dictionary<string, string>
-        {
-            { "license", "CC0" },
-            {"limit","6" }
-        };
-
-            //Action wrapperAction = async () => await VIPE.GetAvatars(LoadAndDisplayAvatars, parameters);
-
-            //await Task.Run(() => MainThreadDispatcher.RunOnMainThread(wrapperAction));
-
-            await VIPE.GetAvatars(DisplayAvatars, parameters);
+            {
+                { "license", "CC0" },
+                {"limit","6" }
+            };
+            VIPE.GetAvatars(DisplayAvatars, parameters);
         }
         /// <summary>
         /// Wrapper for loading open-source VRM models.
         /// </summary>
-        public void LoadOpenSourceButtonWrapper()
-        {
-            //_ = LoadOpenSourceAsync();
-            LoadOpenSourceAsync();
-        }
+        // public void LoadOpenSourceButtonWrapper()
+        // {
+        //     //_ = LoadOpenSourceAsync();
+        //     LoadOpenSourceAsync();
+        // }
 
 
         /// <summary>
@@ -273,8 +267,8 @@ namespace VIPE_SDK
         /// </summary>        
         private void ClearScrollView()
         {
-            if (avatarsGallery)
-                foreach (Transform child in avatarsGallery.content)
+            if (avatarsScroll)
+                foreach (Transform child in avatarsScroll.content)
                 {
                     Destroy(child.gameObject);
                 }
@@ -322,7 +316,7 @@ namespace VIPE_SDK
 
                     GameObject avatarCard = Instantiate(
                         avatarCardPrefab,
-                        avatarsGallery.content.transform
+                        avatarsScroll.content.transform
                     );
 
                     CardManager cardManager =
@@ -387,9 +381,9 @@ namespace VIPE_SDK
         /// </summary>
         private void ClearCollectionsDisplay()
         {
-            if (collectionsGallery)
+            if (collectionsScroll)
             {
-                foreach (Transform child in collectionsGallery.content.transform)
+                foreach (Transform child in collectionsScroll.content.transform)
                 {
                     if (child.gameObject.name != "AllCollectionsCard")
                     {
@@ -427,7 +421,7 @@ namespace VIPE_SDK
 
                         GameObject avatarCard = Instantiate(
                             collectionCardPrefab,
-                            collectionsGallery.content.transform
+                            collectionsScroll.content.transform
                         );
 
                         CardManager cardManager =

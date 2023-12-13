@@ -151,5 +151,12 @@
         {
             public NftsCollection[] nftsCollections;
         }
+
+        [System.Serializable]
+        public struct User
+        {
+            public string wallet;
+            public string integrationToken;
+        }
     }
 }

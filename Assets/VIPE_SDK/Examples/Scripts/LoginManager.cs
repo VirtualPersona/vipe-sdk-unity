@@ -1,13 +1,21 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
+using static VIPE_SDK.Models;
 
 namespace VIPE_SDK
 {
     public class LoginManager : MonoBehaviour
     {
-        private const string LOGIN_URL = "https://vipe.io/connect?integrationLogin=true";
-        private const string POST_URL = "https://api.cryptoavatars.io/v1/login/vipe";
+        // private const string LOGIN_URL = "https://vipe.io/connect?integrationLogin=true";
+        private const string LOGIN_URL = "http://localhost:4200/connect?integrationToken=julian";
+
+        // private const string USER_INTEGRATION_TOKEN_URL = "https://api.cryptoavatars.io/v1/users";
+        private const string USER_INTEGRATION_TOKEN_URL = "/users";
+
         private string walletAddress;
         private string signature;
 
@@ -38,72 +46,83 @@ namespace VIPE_SDK
                 OnLoginStart();
                 Application.OpenURL(LOGIN_URL);
 
-#if UNITY_WEBGL && !UNITY_EDITOR
-                CallJavaScriptFunction();
-#else
-                StartCoroutine(GetClipboardMessage());
-#endif
+                StartCoroutine(CheckForUserToken());
             }
         }
 
-        // M�todo para llamar a una funci�n JavaScript en WebGL
-        [System.Runtime.InteropServices.DllImport("__Internal")]
-        private static extern void CallJavaScriptFunction();
-
-        public void OnWebGLLogin(string data)
+        private IEnumerator CheckForUserToken()
         {
-            print("Received wallet and signature " + data);
-            messageObtained = true;
-            ProcessMessage(data);
-            OnLoginEnd();
-        }
-
-
-        private void CancelLogin()
-        {
-            StopCoroutine(GetClipboardMessage());
-            isLoginProcessActive = false;
-            LoadingSpinner.SetActive(false);
-        }
-
-        public void ProcessMessage(string message)
-        {
-            string[] parts = message.Split(';');
-            if (parts.Length == 2)
-            {
-                walletAddress = parts[0];
-                signature = parts[1];
-            }
-            else
-            {
-                Debug.LogWarning("Message is not in the expected format. Expected Wallet;Signature");
-            }
-        }
-
-        private IEnumerator GetClipboardMessage()
-        {
-            float timeout = 60f;
+            float checkInterval = 2f; // Interval in seconds between each API check
+            float timeout = 60f; // Timeout in seconds
             float elapsedTime = 0f;
 
-            while (!messageObtained && elapsedTime < timeout)
-            {
-                string copiedMessage = GUIUtility.systemCopyBuffer;
+            var queryParams = new Dictionary<string, string>
+    {
+        { "integrationToken", "julian"}
+    };
 
-                if (!string.IsNullOrEmpty(copiedMessage) && copiedMessage.StartsWith("0x"))
+            string pageUrl = HttpService.instance.AddOrUpdateParametersInUrl(USER_INTEGRATION_TOKEN_URL, queryParams);
+
+            Debug.Log("pageUrl:" + pageUrl);
+
+            while (elapsedTime < timeout)
+            {
+                string result = null;
+                Exception exception = null;
+
+                // Nested function to handle async call
+                async Task RequestAsync()
                 {
-                    messageObtained = true;
-                    ProcessMessage(copiedMessage);
-                    GUIUtility.systemCopyBuffer = string.Empty;
+                    try
+                    {
+                        result = await HttpService.Instance().Get(pageUrl);
+                        Debug.Log("result:" + result);
+                    }
+                    catch (Exception ex)
+                    {
+                        exception = ex;
+                    }
+                }
+
+                // Start the async request
+                Task requestTask = RequestAsync();
+
+                // Wait for the task to complete
+                yield return new WaitUntil(() => requestTask.IsCompleted);
+
+                if (exception != null)
+                {
+                    CancelLogin();
+                    Debug.LogError("Error while checking for user: " + exception.Message);
                 }
                 else
                 {
-                    yield return new WaitForSeconds(1f);
-                    elapsedTime += 1f;
+                    User user = JsonUtility.FromJson<User>(result);
+                    if (!string.IsNullOrEmpty(result) && !ReferenceEquals(user, null) && !string.IsNullOrEmpty(user.wallet))
+                    {
+                        walletAddress = user.wallet;
+                        Debug.Log("User found: " + user.wallet);
+                        OnLoginSuccess();
+                        yield break; // Exit the coroutine if user is found
+                    }
+                    else
+                    {
+                        CancelLogin();
+                        Debug.Log("User not found. Checking again...");
+                    }
                 }
+
+                yield return new WaitForSeconds(checkInterval);
+                elapsedTime += checkInterval;
             }
 
-            OnLoginEnd();
+            if (elapsedTime >= timeout)
+            {
+                Debug.LogWarning("Timeout reached. User check failed.");
+                // Handle timeout scenario
+            }
         }
+
 
         private void OnLoginStart()
         {
@@ -111,60 +130,28 @@ namespace VIPE_SDK
             LoadingSpinner.SetActive(true);
         }
 
-        private void OnLoginEnd()
+        public void OnLoginSuccess()
         {
-            if (!IsLoggedIn && messageObtained)
-            {
-                StartCoroutine(SendLoginData());
-            }
-            else
-                Debug.LogWarning("Login process completed without obtaining a valid message.");
 
+            Debug.Log("Login successful");
+            isLoginProcessActive = false;
+
+            LoadingSpinner.SetActive(false);
+
+            if (MenuManager.Instance)
+            {
+                MenuManager.Instance.LoadAvatarUI();
+                IsLoggedIn = true;
+                MenuManager.Instance.SetOwnerButtonToggleToTrue();
+            }
+        }
+
+        private void CancelLogin()
+        {
+            StopCoroutine(CheckForUserToken());
+            isLoginProcessActive = false;
             LoadingSpinner.SetActive(false);
         }
 
-        private IEnumerator SendLoginData()
-        {
-            if (signature == null || walletAddress == null)
-            {
-                Debug.LogWarning("Signature or WalletAddress is null");
-                yield break;
-            }
-            WWWForm form = new WWWForm();
-            form.AddField("wallet", walletAddress);
-            form.AddField("signature", signature);
-
-            using (UnityWebRequest www = UnityWebRequest.Post(POST_URL, form))
-            {
-                yield return www.SendWebRequest();
-
-                if (www.result == UnityWebRequest.Result.ConnectionError)
-                {
-                    Debug.LogError("Error while sending: " + www.error);
-                    CancelLogin();
-                }
-                else
-                {
-                    if (www.responseCode == 200)
-                    {
-                        Debug.Log("Login successful");
-                        isLoginProcessActive = false;
-
-                        if (MenuManager.Instance)
-                        {
-                            MenuManager.Instance.LoadAvatarUI();
-                            IsLoggedIn = true;
-                            MenuManager.Instance.SetOwnerButtonToggleToTrue();
-                        }
-                    }
-                    else
-                    {
-                        Debug.LogWarning("Failed to log in, HTTP status: " + www.responseCode);
-                        IsLoggedIn = false;
-                        CancelLogin();
-                    }
-                }
-            }
-        }
     }
 }

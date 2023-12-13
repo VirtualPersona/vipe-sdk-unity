@@ -15,6 +15,9 @@ namespace VIPE_SDK
         private Toggle cardToggle;
         private Toggle parentToggle;
 
+        [Header("Text Colors")]
+        public Color activeColor = Color.white;
+        public Color inactiveColor = Color.black;
 
         private void Awake()
         {
@@ -75,6 +78,16 @@ namespace VIPE_SDK
         private void OnToggleValueChanged(bool isOn)
         {
             cardBackground.gameObject.SetActive(isOn);
+
+            setToggleColor(isOn);
+        }
+
+        private void setToggleColor(bool isOn)
+        {
+            if (cardText != null)
+            {
+                cardText.color = isOn ? activeColor : inactiveColor;
+            }
         }
     }
 }
