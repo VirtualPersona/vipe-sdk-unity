@@ -110,8 +110,6 @@ namespace VIPE_SDK
             else
                 request.SetRequestHeader("Authorization", "Bearer " + accessToken);
             var operation = request.SendWebRequest();
-            Debug.Log("resource:" + resource);
-            Debug.Log("operation:" + operation);
             operation.completed += op =>
             {
                 if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)

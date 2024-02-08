@@ -57,7 +57,7 @@ namespace VIPE_SDK
             return Utility.IsPng(imageBytes) || Utility.IsJpg(imageBytes);
         }
 
-        public async Task GetAvatars(Action<Models.NftsArray> onAvatarsResult, Dictionary<string, string> queryParams = null, string wallet = null)
+        public async Task GetAvatars(Action<VIPE_SDK.Models.NftsArray> onAvatarsResult, Dictionary<string, string> queryParams = null, string wallet = null)
         {
             if (wallet != null)
                 wallet = "/" + wallet;
@@ -168,7 +168,6 @@ namespace VIPE_SDK
             }
 
             pageUrl = HttpService.instance.AddOrUpdateParametersInUrl(pageUrl, queryParams);
-            Debug.Log("pageUrl:" + pageUrl);
 
             string result = await HttpService.Instance().Get(pageUrl);
 

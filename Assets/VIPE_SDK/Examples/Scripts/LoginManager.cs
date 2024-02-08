@@ -11,7 +11,7 @@ namespace VIPE_SDK
     public class LoginManager : MonoBehaviour
     {
         // private const string LOGIN_URL = "https://vipe.io/connect?integrationLogin=true";
-        private const string LOGIN_URL = "http://localhost:4200/connect?integrationToken=julian";
+        private const string LOGIN_URL = "http://localhost:4200/connect?integrationToken=";
 
         // private const string USER_INTEGRATION_TOKEN_URL = "https://api.cryptoavatars.io/v1/users";
         private const string USER_INTEGRATION_TOKEN_URL = "/users";
@@ -43,27 +43,32 @@ namespace VIPE_SDK
         {
             if (!IsLoggedIn)
             {
-                OnLoginStart();
-                Application.OpenURL(LOGIN_URL);
+                isLoginProcessActive = true;
+                LoadingSpinner.SetActive(true);
 
-                StartCoroutine(CheckForUserToken());
+                (string integrationToken, bool isExistingToken) = GetIntegrationToken();
+
+                if (!isExistingToken)
+                {
+                    string modifiedUrl = LOGIN_URL + integrationToken;
+                    Application.OpenURL(modifiedUrl);
+                }
+
+                StartCoroutine(CheckForUserToken(integrationToken));
             }
         }
 
-        private IEnumerator CheckForUserToken()
+        private IEnumerator CheckForUserToken(string integrationToken)
         {
             float checkInterval = 2f; // Interval in seconds between each API check
             float timeout = 60f; // Timeout in seconds
             float elapsedTime = 0f;
 
-            var queryParams = new Dictionary<string, string>
-    {
-        { "integrationToken", "julian"}
-    };
+            var queryParams = new Dictionary<string, string> { { "integrationToken", integrationToken } };
+
+            // Continue with the login process...
 
             string pageUrl = HttpService.instance.AddOrUpdateParametersInUrl(USER_INTEGRATION_TOKEN_URL, queryParams);
-
-            Debug.Log("pageUrl:" + pageUrl);
 
             while (elapsedTime < timeout)
             {
@@ -76,7 +81,6 @@ namespace VIPE_SDK
                     try
                     {
                         result = await HttpService.Instance().Get(pageUrl);
-                        Debug.Log("result:" + result);
                     }
                     catch (Exception ex)
                     {
@@ -101,7 +105,6 @@ namespace VIPE_SDK
                     if (!string.IsNullOrEmpty(result) && !ReferenceEquals(user, null) && !string.IsNullOrEmpty(user.wallet))
                     {
                         walletAddress = user.wallet;
-                        Debug.Log("User found: " + user.wallet);
                         OnLoginSuccess();
                         yield break; // Exit the coroutine if user is found
                     }
@@ -123,13 +126,6 @@ namespace VIPE_SDK
             }
         }
 
-
-        private void OnLoginStart()
-        {
-            isLoginProcessActive = true;
-            LoadingSpinner.SetActive(true);
-        }
-
         public void OnLoginSuccess()
         {
 
@@ -138,19 +134,44 @@ namespace VIPE_SDK
 
             LoadingSpinner.SetActive(false);
 
-            if (MenuManager.Instance)
+            if (MainManager.Instance)
             {
-                MenuManager.Instance.LoadAvatarUI();
+                MainManager.Instance.LoadAvatarUI();
                 IsLoggedIn = true;
-                MenuManager.Instance.SetOwnerButtonToggleToTrue();
+                MainManager.Instance.SetOwnerButtonToggleToTrue();
             }
         }
 
         private void CancelLogin()
         {
-            StopCoroutine(CheckForUserToken());
+            string integrationToken = GetIntegrationToken().Item1;
+            StopCoroutine(CheckForUserToken(integrationToken));
             isLoginProcessActive = false;
             LoadingSpinner.SetActive(false);
+        }
+
+        private (string, bool) GetIntegrationToken()
+        {
+            string integrationToken;
+            bool isExistingToken = false;
+
+            if (PlayerPrefs.HasKey("integrationToken"))
+            {
+                // If an integration token exists, fetch it
+                integrationToken = PlayerPrefs.GetString("integrationToken");
+                isExistingToken = true;
+            }
+            else
+            {
+                // If no integration token exists, create a new one
+                integrationToken = Guid.NewGuid().ToString();
+
+                // Save the new integration token
+                PlayerPrefs.SetString("integrationToken", integrationToken);
+                PlayerPrefs.Save();
+            }
+
+            return (integrationToken, isExistingToken);
         }
 
     }

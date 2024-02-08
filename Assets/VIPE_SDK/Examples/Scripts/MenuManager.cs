@@ -302,7 +302,7 @@ namespace VIPE_SDK
         private async void DisplayAvatars(Models.NftsArray onAvatarsResult)
         {
             ClearScrollView();
-            await Task.Delay(1);
+            // await Task.Delay(1); //TODO: this might be necessary, removed for webgl
             //timeout
 
             try

@@ -77,6 +77,7 @@ namespace VIPE_SDK
 
         private void OnToggleValueChanged(bool isOn)
         {
+            // Debug.Log("isOn:" + "in cardmanager" + isOn + " " + gameObject.name);
             cardBackground.gameObject.SetActive(isOn);
 
             setToggleColor(isOn);

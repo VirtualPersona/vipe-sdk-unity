@@ -28,15 +28,16 @@ namespace VIPE_SDK
 
             textComponent = transform.GetComponentInChildren<TextMeshProUGUI>();
 
-            ToggleGroup toggleGroup = GetComponentInParent<ToggleGroup>();
-            if (toggleGroup)
-            {
-                toggle.group = toggleGroup;
-            }
+            // ToggleGroup toggleGroup = GetComponentInParent<ToggleGroup>();
+            // if (toggleGroup)
+            // {
+            //     toggle.group = toggleGroup;
+            // }
         }
 
         public void OnToggleValueChanged(bool isOn)
         {
+            // Debug.Log("isOn:" + "in customtogglecontroller " + isOn + " " + gameObject.name);
             if (isOn && onToggleActivated != null)
             {
                 onToggleActivated.Invoke();
